@@ -66,5 +66,5 @@ target/
 www/logs
 
 # Temp DB
-www/db.sqlites3
+www/db.sqlite3
 
