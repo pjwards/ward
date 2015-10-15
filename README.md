@@ -1,3 +1,5 @@
+[![Stories in Ready](https://badge.waffle.io/egaoneko/fb_archive.png?label=ready&title=Ready)](https://waffle.io/egaoneko/fb_archive)
+
 # Facebook Archive
 
 ## Requirements
