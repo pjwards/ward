@@ -1,0 +1,19 @@
+{% if error %}
+{{ error }}
+{% endif %}
+
+{% if latest_group_list %}
+    <ul>
+    {% for group in latest_group_list %}
+        <li><a href="{{ group.url }}">{{ group.name }}</a> | {{ group.id }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No groups are available.</p>
+{% endif %}
+
+<form method="post" action="{% url 'archive:groups' %}">
+    {% csrf_token %}
+    <input type="text" name="id" />
+    <input type="submit" value="Submit" />
+</form>

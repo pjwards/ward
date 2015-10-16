@@ -1,11 +1,17 @@
 from django.contrib import admin
 
-from .models import User, Post, Comment, Media, Attachment
+from .models import User, Group, Post, Comment, Media, Attachment
 
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
     list_filter = ['name']
+    search_fields = ['name']
+
+
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'updated_time', 'privacy', 'is_stored')
+    list_filter = ['updated_time']
     search_fields = ['name']
 
 
@@ -45,6 +51,7 @@ class AttachmentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, UserAdmin)
+admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Media, MediaAdmin)

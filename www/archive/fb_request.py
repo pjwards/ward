@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class FBRequest:
+    """
+    FBRequest gets data from facebook by using graph api and facebook-sdk.
+    """
     def __init__(self):
 
         app_id = settings.FB_APP_ID
@@ -21,6 +24,14 @@ class FBRequest:
         )
 
     def feed(self, group_id, query, feeds):
+        """
+        This method gets feeds.
+
+        :param group_id: group id to find feeds
+        :param query: details to find feeds
+        :param feeds: list of feed data
+        :return:
+        """
         re = self.graph.request(group_id + query)
 
         if re.get('feed') is not None:
@@ -37,6 +48,13 @@ class FBRequest:
         return next_query
 
     def comment(self, query, comments):
+        """
+        This method gets comments
+
+        :param query: details to find comments
+        :param comments: list of comment data
+        :return:
+        """
         re = self.graph.request(query)
 
         len_data = len(re.get('data'))
@@ -55,9 +73,31 @@ class FBRequest:
 
     @staticmethod
     def get_comment_next_query(url):
+        """
+        This method gets a next query for comments.
+
+        :param url: next url
+        :return:
+        """
         url_parse = urlparse(unquote(url))
         url_path_list = url_parse.path.split('/')
         url_path = "/" + url_path_list[2] + "/" + url_path_list[3] + "?"
         url_query = url_parse.query
         return url_path + url_query
 
+    def group(self, group_id):
+        """
+        This method gets a group.
+
+        :param group_id: group id to find group
+        :return: group data
+        """
+        try:
+            re = self.graph.request(group_id, args={'fields': 'id,name,description,updated_time,privacy'})
+        except facebook.GraphAPIError as e:
+            logger.info('Fail to get group')
+            return None
+
+        logger.info('Get Group: %s', group_id)
+
+        return re

@@ -13,6 +13,18 @@ class User(models.Model):
         return self.name
 
 
+class Group(models.Model):
+    id = models.CharField(max_length=20, primary_key=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    updated_time = models.DateTimeField()
+    privacy = models.CharField(max_length=30)
+    is_stored = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+
 class Post(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     user = models.ForeignKey(User)

@@ -64,3 +64,13 @@ brew install redis-server
 
 [django-celery install](http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html#using-the-django-orm-cache-as-a-result-backend)
 
+
+## Tip
+
+### Pycharm
+
+If you face unresolved reference issue in pycharm, you should make 'www' Source root. And you set 'add source roots to PYTHONPATH' in pycharm preference.
+
+[This site](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm) help you to set.
+
+And set 'Django Support' in pycharm preference, such as 'Django project root', 'Settings' and 'manage.py'.
