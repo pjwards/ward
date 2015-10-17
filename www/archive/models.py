@@ -24,6 +24,15 @@ class Group(models.Model):
     def __str__(self):
         return self.name
 
+    def is_updated(self, new_updated_time):
+        """
+        Check group is updated.
+
+        :param new_updated_time: json datetime
+        :return: True is updated and False is not updated
+        """
+        return self.updated_time.strftime('%Y-%m-%dT%H:%M:%S') != new_updated_time.split('+')[0]
+
 
 class Post(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
@@ -38,6 +47,15 @@ class Post(models.Model):
 
     def __str__(self):
         return self.message
+
+    def is_updated(self, new_updated_time):
+        """
+        Check post is updated.
+
+        :param new_updated_time: json datetime
+        :return: True is updated and False is not updated
+        """
+        return self.updated_time.strftime('%Y-%m-%dT%H:%M:%S') != new_updated_time.split('+')[0]
 
 
 class Comment(models.Model):

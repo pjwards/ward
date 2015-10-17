@@ -5,14 +5,18 @@
 {% if latest_group_list %}
     <ul>
     {% for group in latest_group_list %}
-        <li><a href="{{ group.url }}">{{ group.name }}</a> | {{ group.id }}</li>
+        <li><a href="{{ group.url }}">{{ group.name }}</a> | {{ group.id }} | {{ group.is_stored }} |
+            <form action="{% url 'archive:group_update' group.id %}" method="get" style="display: inline;">
+                {% csrf_token %}
+                <input type="submit" value="Update" >
+            </form></li>
     {% endfor %}
     </ul>
 {% else %}
     <p>No groups are available.</p>
 {% endif %}
 
-<form method="post" action="{% url 'archive:groups' %}">
+<form action="{% url 'archive:groups' %}" method="post">
     {% csrf_token %}
     <input type="text" name="id" />
     <input type="submit" value="Submit" />

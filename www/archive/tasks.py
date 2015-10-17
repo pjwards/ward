@@ -6,7 +6,7 @@ from celery import shared_task
 from .fb_request import FBRequest
 
 import logging
-from .models import User, Post, Comment, Media, Attachment
+from .models import User, Group, Post, Comment, Media, Attachment
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -70,40 +70,50 @@ def store_comment(comment_data, post, parent=None):
     :param parent: comment model for parent
     :return:
     """
-    comment = Comment()
-    comment.id = comment_data.get('id')
-    comment.post = post
+    comment_id = comment_data.get('id')
+    if not Comment.objects.filter(id=comment_id).exists():
+        comment = Comment(id=comment_id)
+        comment.post = post
 
-    # save user
-    comment_from = comment_data.get('from')
-    user = User.objects.filter(id=comment_from.get('id'))
-    if not user:
-        user = User(id=comment_from.get('id'), name=comment_from.get('name'))
-        user.save()
-        logger.info('Saved user: %s', user.id)
+        # save user
+        comment_from = comment_data.get('from')
+        user = User.objects.filter(id=comment_from.get('id'))
+        if not user:
+            user = User(id=comment_from.get('id'), name=comment_from.get('name'))
+            user.save()
+            logger.info('Saved user: %s', user.id)
+        else:
+            user = user[0]
+        comment.user = user
+
+        comment.created_time = comment_data.get('created_time')
+        comment.like_count = comment_data.get('like_count')
+
+        if 'message' in comment_data:
+            comment.message = comment_data.get('message')
+
+        if parent is not None:
+            comment.parent = parent
+
+        comment.save()
+        logger.info('Saved comment: %s', comment.id)
+
+        if 'attachment' in comment_data:
+            store_attachment(attachment_data=comment_data.get('attachment'), comment=comment)
     else:
-        user = user[0]
-    comment.user = user
+        comment = Comment.objects.filter(id=comment_id)[0]
+        comment.like_count = comment_data.get('like_count')
 
-    comment.created_time = comment_data.get('created_time')
-    comment.like_count = comment_data.get('like_count')
+        if 'message' in comment_data:
+            comment.message = comment_data.get('message')
 
-    if 'message' in comment_data:
-        comment.message = comment_data.get('message')
-
-    if parent is not None:
-        comment.parent = parent
-
-    comment.save()
-    logger.info('Saved comment: %s', comment.id)
+        comment.save()
+        logger.info('Updated comment: %s', comment.id)
 
     # store reply comments
     if 'comments' in comment_data:
         for reply_comment_data in comment_data.get('comments').get('data'):
             store_comment(comment_data=reply_comment_data, post=post, parent=parent)
-
-    if 'attachment' in comment_data:
-        store_attachment(attachment_data=comment_data.get('attachment'), comment=comment)
 
 
 @shared_task
@@ -152,19 +162,42 @@ def store_feed(fb_request, feed_data):
         if post_attachments:
             for attachment_data in post_attachments.get('data'):
                 store_attachment(attachment_data=attachment_data, post=post)
+    else:
+        post = Post.objects.filter(id=post_id)[0]
 
-        # get all comments by using graph api and roup
-        post_comments_data = post_comments.get('data')
-        if 'paging' in post_comments:
-            comment_paging = post_comments.get('paging')
-            if 'next' in comment_paging:
-                comments_query = fb_request.get_comment_next_query(comment_paging.get('next'))
-                while comments_query is not None:
-                    comments_query = fb_request.comment(comments_query, post_comments_data)
+        if post.is_updated(feed_data.get('updated_time')):
 
-        # save comments
-        for comment_data in post_comments_data:
-            store_comment(comment_data=comment_data, post=post)
+            post.message = feed_data.get('message')
+            post.updated_time = feed_data.get('updated_time')
+            post.picture = feed_data.get('picture')
+            post_comments = feed_data.get('comments')
+            post.comment_count = post_comments.get('summary').get('total_count')
+            post.like_count = feed_data.get('likes').get('summary').get('total_count')
+
+            if 'shares' in feed_data:
+                post.share_count = feed_data.get('shares').get('count')
+            else:
+                post.share_count = 0
+
+            post.save()
+            logger.info('Updated post: %s', post.id)
+        else:
+            return False
+
+    # get all comments by using graph api and loop
+    post_comments_data = post_comments.get('data')
+    if 'paging' in post_comments:
+        comment_paging = post_comments.get('paging')
+        if 'next' in comment_paging:
+            comments_query = fb_request.get_comment_next_query(comment_paging.get('next'))
+            while comments_query is not None:
+                comments_query = fb_request.comment(comments_query, post_comments_data)
+
+    # save comments
+    for comment_data in post_comments_data:
+        store_comment(comment_data=comment_data, post=post)
+
+    return True
 
 
 @shared_task
@@ -178,7 +211,6 @@ def store_group_feed(group_id, query, is_whole=False):
     :param is_whole: whole or parts
     :return:
     """
-
     logger.info('Saving %s feed', group_id)
 
     fb_request = FBRequest()
@@ -193,3 +225,38 @@ def store_group_feed(group_id, query, is_whole=False):
 
     for feed in feeds:
         store_feed(fb_request, feed)
+
+    group = Group.objects.filter(id=group_id)[0]
+    group.is_stored = True
+    group.save()
+
+
+@shared_task
+def update_group_feed(group_id, query, is_whole=False):
+    """
+    This method is updating group's feeds by using facebook group api.
+    If you want to get whole data, put that 'is_whole' is true.
+
+    :param group_id: param group_id: group id for getting feeds
+    :param query: query for facebook graph api
+    :param is_whole: whole or parts
+    :return:
+    """
+    logger.info('Updating %s feed', group_id)
+
+    fb_request = FBRequest()
+
+    feeds = []
+
+    if is_whole:
+        while query is not None:
+            query = fb_request.feed(group_id, query, feeds)
+            for feed in feeds:
+                if not store_feed(fb_request, feed):
+                    return
+            feeds = []
+    else:
+        fb_request.feed(group_id, query, feeds)
+        for feed in feeds:
+            if not store_feed(fb_request, feed):
+                return
