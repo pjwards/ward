@@ -260,3 +260,18 @@ def update_group_feed(group_id, query, is_whole=False):
         for feed in feeds:
             if not store_feed(fb_request, feed):
                 return
+
+@shared_task
+def update_groups_feed(query, is_whole=False):
+    """
+    This method is updating group's feeds by using facebook group api for celery schedule.
+    If you want to get whole data, put that 'is_whole' is true.
+
+    :param query: query for facebook graph api
+    :param is_whole: whole or parts
+    :return:
+    """
+    groups = Group.objects.values('id')
+
+    for group in groups:
+        update_group_feed(group.get('id'), query, is_whole)

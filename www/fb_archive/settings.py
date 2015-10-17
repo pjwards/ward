@@ -123,6 +123,17 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Seoul'
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+from datetime import timedelta
+from archive.local_settings import get_feed_query
+CELERYBEAT_SCHEDULE = {
+    'add-every-300-seconds': {
+        'task': 'archive.tasks.update_groups_feed',
+        'schedule': timedelta(seconds=300),
+        'args': (get_feed_query(10, 100), False)
+    },
+}
 
 # LOGGING Settings
 LOGGING = {
