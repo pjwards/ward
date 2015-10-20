@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 import logging
 
 from . import tasks
-from .local_settings import get_feed_query
+from .fb_query import get_feed_query
 from .models import Group
 from .fb_request import FBRequest
 

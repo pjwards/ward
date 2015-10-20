@@ -66,5 +66,7 @@ target/
 www/logs
 
 # Temp DB
-www/db.sqlite3
+*.db
 
+# Local Settings
+# local_settings.py

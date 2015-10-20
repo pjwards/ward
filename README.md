@@ -9,6 +9,7 @@
 * celery (tested with version 3.1.18)
 * django-celery (tested with version 3.1.17)
 * facebook-sdk (tested with version 1.0.0a0)
+* mezzanine (tested with version 4.0.1)
 
 #### Optional dependencies:
 
@@ -74,3 +75,13 @@ If you face unresolved reference issue in pycharm, you should make 'www' Source 
 [This site](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm) help you to set.
 
 And set 'Django Support' in pycharm preference, such as 'Django project root', 'Settings' and 'manage.py'.
+
+
+### DB
+
+```bash
+python manage.py migrate archive
+python manage.py migrate djcelery
+python manage.py migrate createdb --noinput
+python manage.py migrate createsuperuser
+```

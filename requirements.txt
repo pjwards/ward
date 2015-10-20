@@ -2,4 +2,5 @@ django==1.8.5
 celery==3.1.18
 django-celery==3.1.17
 git+https://github.com/pythonforfacebook/facebook-sdk.git
+mezzanine==4.0.1
 redis==2.10.3

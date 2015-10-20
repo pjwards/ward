@@ -11,6 +11,8 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fb_archive.settings")
+from mezzanine.utils.conf import real_project_name
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE",
+                      "%s.settings" % real_project_name("fb_archive"))
 application = get_wsgi_application()
