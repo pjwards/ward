@@ -69,4 +69,4 @@ www/logs
 *.db
 
 # Local Settings
-# local_settings.py
+local_settings.py
