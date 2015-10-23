@@ -113,7 +113,7 @@ LANGUAGES = (
 )
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '9+fc$$ob)ox2if2l#w+wawq5w1&6*bd8vk(p%y(j%^3#fw92x%'
+SECRET_KEY = ''
 
 # A boolean that turns on/off debug mode. When set to ``True``, stack traces
 # are displayed for error pages. Should always be set to ``False`` in

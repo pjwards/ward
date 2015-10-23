@@ -67,6 +67,7 @@ www/logs
 
 # Temp DB
 *.db
+*.sqlite3
 
 # Local Settings
 local_settings.py

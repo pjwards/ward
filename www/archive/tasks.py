@@ -13,6 +13,23 @@ __copyright__ = "Copyright ⓒ 2015, All rights reserved."
 __email__ = "egaoneko@naver.com"
 
 logger = logging.getLogger(__name__)
+fb_request = FBRequest()
+
+
+@shared_task
+def store_user(user_id, user_name):
+    """
+    This method stores a user.
+
+    :param user_id: user id
+    :param user_name:  user name
+    :return: user model
+    """
+    user = User(id=user_id, name=user_name)
+    user.picture = fb_request.user_picture(user_id)
+    user.save()
+    logger.info('Saved user: %s', user.id)
+    return user
 
 
 @shared_task
@@ -79,9 +96,7 @@ def store_comment(comment_data, post, parent=None):
         comment_from = comment_data.get('from')
         user = User.objects.filter(id=comment_from.get('id'))
         if not user:
-            user = User(id=comment_from.get('id'), name=comment_from.get('name'))
-            user.save()
-            logger.info('Saved user: %s', user.id)
+            user = store_user(comment_from.get('id'), comment_from.get('name'))
         else:
             user = user[0]
         comment.user = user
@@ -117,11 +132,10 @@ def store_comment(comment_data, post, parent=None):
 
 
 @shared_task
-def store_feed(fb_request, feed_data):
+def store_feed(feed_data):
     """
     This method stores a feed.
 
-    :param fb_request: fb_request instance for comment
     :param feed_data: feed data(dictionary)
     :return:
     """
@@ -134,9 +148,7 @@ def store_feed(fb_request, feed_data):
         # save user
         user = User.objects.filter(id=post_from.get('id'))
         if not user:
-            user = User(id=post_from.get('id'), name=post_from.get('name'))
-            user.save()
-            logger.info('Saved user: %s', user.id)
+            user = store_user(post_from.get('id'), post_from.get('name'))
         else:
             user = user[0]
         post.user = user
@@ -213,8 +225,6 @@ def store_group_feed(group_id, query, is_whole=False):
     """
     logger.info('Saving %s feed', group_id)
 
-    fb_request = FBRequest()
-
     feeds = []
 
     if is_whole:
@@ -224,7 +234,7 @@ def store_group_feed(group_id, query, is_whole=False):
         fb_request.feed(group_id, query, feeds)
 
     for feed in feeds:
-        store_feed(fb_request, feed)
+        store_feed(feed)
 
     group = Group.objects.filter(id=group_id)[0]
     group.is_stored = True
@@ -244,22 +254,21 @@ def update_group_feed(group_id, query, is_whole=False):
     """
     logger.info('Updating %s feed', group_id)
 
-    fb_request = FBRequest()
-
     feeds = []
 
     if is_whole:
         while query is not None:
             query = fb_request.feed(group_id, query, feeds)
             for feed in feeds:
-                if not store_feed(fb_request, feed):
+                if not store_feed(feed):
                     return
             feeds = []
     else:
         fb_request.feed(group_id, query, feeds)
         for feed in feeds:
-            if not store_feed(fb_request, feed):
+            if not store_feed(feed):
                 return
+
 
 @shared_task
 def update_groups_feed(query, is_whole=False):

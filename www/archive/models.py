@@ -8,6 +8,7 @@ __email__ = "egaoneko@naver.com"
 class User(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=50)
+    picture = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.name

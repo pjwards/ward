@@ -3,7 +3,9 @@ from django.conf import settings
 from urllib.parse import urlparse, unquote
 import logging
 
-__author__ = 'seodonghyeon'
+__author__ = "Donghyun Seo"
+__copyright__ = "Copyright ⓒ 2015, All rights reserved."
+__email__ = "egaoneko@naver.com"
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +63,7 @@ class FBRequest:
         if len_data == 0:
             return None
 
-        logger.info('Get Feeds: %d', len_data)
+        logger.info('Get Comments: %d', len_data)
         comments += re.get('data')
 
         if 'next' in re.get('paging'):
@@ -101,3 +103,16 @@ class FBRequest:
         logger.info('Get Group: %s', group_id)
 
         return re
+
+    def user_picture(self, user_id):
+        """
+        This method gets a user picture.
+
+        :param user_id: user id to get picture
+        :return: picture url
+        """
+
+        re = self.graph.request(user_id + "/picture")
+
+        logger.info('Get user picture: %s', user_id)
+        return re.get('url')

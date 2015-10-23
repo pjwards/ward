@@ -4,7 +4,7 @@ from .models import User, Group, Post, Comment, Media, Attachment
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
+    list_display = ('id', 'name', 'picture')
     list_filter = ['name']
     search_fields = ['name']
 
