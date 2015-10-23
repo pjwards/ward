@@ -154,20 +154,34 @@ CACHE_MIDDLEWARE_KEY_PREFIX = PROJECT_APP
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = "/static/"
 
+# Put strings here, like "/home/html/django_static"
+# or "C:/www/django/static".
+# Always use forward slashes, even on Windows.
+# Don't forget to use absolute paths, not relative paths.
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_ROOT, "static"),
+
+    os.path.join(PROJECT_ROOT, 'static/libraries'), # Commercial libraries not available on GitHub or via Bower
+    os.path.join(PROJECT_ROOT, 'static/custom'), # Custom frontend assets in css/js subfolders
+    os.path.join(PROJECT_ROOT, 'static/bower_components'), # Bower controlled assets
+)
+
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PROJECT_ROOT, STATIC_URL.strip("/"))
+# STATIC_ROOT = os.path.join(PROJECT_ROOT, STATIC_URL.strip("/"))
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'collected_statics')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = STATIC_URL + "media/"
+MEDIA_URL = "/uploads/"
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, *MEDIA_URL.strip("/").split("/"))
+# MEDIA_ROOT = os.path.join(PROJECT_ROOT, *MEDIA_URL.strip("/").split("/"))
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'uploaded_files')
 
 # Package/module name to import the root urlpatterns from for the project.
 ROOT_URLCONF = "%s.urls" % PROJECT_APP
@@ -176,7 +190,9 @@ ROOT_URLCONF = "%s.urls" % PROJECT_APP
 # or "C:/www/django/templates".
 # Always use forward slashes, even on Windows.
 # Don't forget to use absolute paths, not relative paths.
-TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, "templates"),)
+TEMPLATE_DIRS = (
+    os.path.join(PROJECT_ROOT, "templates"),
+)
 
 
 #############
@@ -227,6 +243,7 @@ INSTALLED_APPS = (
     # "mezzanine.mobile",
 
     'djcelery',
+    'djangobower',
     'archive',
 )
 
@@ -345,6 +362,25 @@ CELERYBEAT_SCHEDULE = {
         'args': (get_feed_query(10, 100), False)
     },
 }
+
+
+################
+# DJANGO BOWER #
+################
+
+# BOWER_COMPONENTS_ROOT = STATIC_ROOT
+# BOWER_PATH = '/usr/local/bin/bower'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
+)
+
+BOWER_INSTALLED_APPS = (
+    'jquery',
+    'jui',
+)
 
 
 ####################

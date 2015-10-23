@@ -1,23 +1,30 @@
-{% if error %}
-{{ error }}
-{% endif %}
+{% extends "archive/base.html" %}
 
-{% if latest_group_list %}
-    <ul>
-    {% for group in latest_group_list %}
-        <li><a href="{{ group.url }}">{{ group.name }}</a> | {{ group.id }} | {{ group.is_stored }} |
-            <form action="{% url 'archive:group_update' group.id %}" method="get" style="display: inline;">
-                {% csrf_token %}
-                <input type="submit" value="Update" >
-            </form></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No groups are available.</p>
-{% endif %}
+{% block content %}
 
-<form action="{% url 'archive:groups' %}" method="post">
-    {% csrf_token %}
-    <input type="text" name="id" />
-    <input type="submit" value="Submit" />
-</form>
+    <a class="btn">Default</a>
+
+    {% if error %}
+    {{ error }}
+    {% endif %}
+
+    {% if latest_group_list %}
+        <ul>
+        {% for group in latest_group_list %}
+            <li><a href="{{ group.url }}">{{ group.name }}</a> | {{ group.id }} | {{ group.is_stored }} |
+                <form action="{% url 'archive:group_update' group.id %}" method="get" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="submit" value="Update" >
+                </form></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No groups are available.</p>
+    {% endif %}
+
+    <form action="{% url 'archive:groups' %}" method="post">
+        {% csrf_token %}
+        <input type="text" name="id" />
+        <input type="submit" value="Submit" />
+    </form>
+{% endblock content %}

@@ -71,3 +71,6 @@ www/logs
 
 # Local Settings
 local_settings.py
+
+#bower
+bower_components

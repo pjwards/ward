@@ -57,8 +57,8 @@ DATABASES = {
 ####################
 
 # Facebook Graph API
-FB_APP_ID = ''
-FB_APP_SECRET = ''
+FB_APP_ID = '1621617961401149'
+FB_APP_SECRET = 'bdc8380f61ba92b08e2d03bf9993303f'
 
 
 ###################

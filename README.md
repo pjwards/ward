@@ -10,6 +10,7 @@
 * django-celery (tested with version 3.1.17)
 * facebook-sdk (tested with version 1.0.0a0)
 * mezzanine (tested with version 4.0.1)
+* django-bower (tested with version 5.0.4)
 
 #### Optional dependencies:
 
@@ -65,6 +66,14 @@ brew install redis-server
 
 [django-celery install](http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html#using-the-django-orm-cache-as-a-result-backend)
 
+
+#### django-bower
+
+[django-bower install](https://django-bower.readthedocs.org/en/latest/installation.html)
+
+```bash
+npm install bower
+```
 
 ## Tip
 

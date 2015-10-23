@@ -1,0 +1,16 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Facebook Archive</title>
+        <link rel="stylesheet" href="{% static 'jui/dist/jui.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'jui/dist/jennifer.theme.min.css' %}" />
+
+        <script type="text/javascript" src='{% static 'jquery/dist/jquery.js' %}'></script>
+        <script src="{% static 'jui/dist/jui.min.js' %}"></script>
+    </head>
+    <body class="jui">
+        {% block content %}
+        {% endblock %}
+    </body>
+</html>
