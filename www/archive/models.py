@@ -45,6 +45,7 @@ class Post(models.Model):
     comment_count = models.IntegerField(default=0)
     like_count = models.IntegerField(default=0)
     share_count = models.IntegerField(default=0)
+    group = models.ForeignKey(Group)
 
     def __str__(self):
         return self.message
@@ -67,6 +68,7 @@ class Comment(models.Model):
     like_count = models.IntegerField(default=0)
     post = models.ForeignKey(Post)
     parent = models.ForeignKey('Comment', null=True)
+    group = models.ForeignKey(Group)
 
     def __str__(self):
         return self.message

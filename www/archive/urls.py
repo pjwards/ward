@@ -9,6 +9,8 @@ __email__ = "egaoneko@naver.com"
 
 urlpatterns = [
     url(r'^groups/$', views.groups, name='groups'),
-    url(r'^groups/(?P<group_id>[0-9]+)/store/$', views.group_store, name='group_store'),
-    url(r'^groups/(?P<group_id>[0-9]+)/update/$', views.group_update, name='group_update'),
+
+    url(r'^group/(?P<group_id>[0-9]+)/$', views.group, name='group'),
+    url(r'^group/(?P<group_id>[0-9]+)/store/$', views.group_store, name='group_store'),
+    url(r'^group/(?P<group_id>[0-9]+)/update/$', views.group_update, name='group_update'),
 ]

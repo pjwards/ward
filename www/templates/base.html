@@ -1,0 +1,27 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ward :: {% block title %}main{% endblock %}</title>
+
+        <!-- JUI for Bootstrap -->
+        <link rel="stylesheet" href="{% static 'jui/dist/jui.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'jui/dist/jennifer.theme.min.css' %}" />
+
+        <!-- Custom CSS -->
+        {% block css %}{% endblock %}
+    </head>
+    <body class="jui">
+        {% block content %}
+        {% endblock %}
+
+        <!-- jQuery -->
+        <script type="text/javascript" src='{% static 'jquery/dist/jquery.js' %}'></script>
+
+        <!-- JUI for Bootstrap -->
+        <script src="{% static 'jui/dist/jui.min.js' %}"></script>
+
+        <!-- Custom Script -->
+        {% block script %}{% endblock %}
+    </body>
+</html>

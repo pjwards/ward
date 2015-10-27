@@ -78,12 +78,13 @@ def store_attachment(attachment_data, post=None, comment=None):
 
 
 @shared_task
-def store_comment(comment_data, post, parent=None):
+def store_comment(comment_data, post, group, parent=None):
     """
     This method stores a comment. If you want to store reply, put parent.
 
     :param comment_data: comment data(dictionary)
     :param post: post model for foreign key
+    :param group: comment's group
     :param parent: comment model for parent
     :return:
     """
@@ -103,6 +104,7 @@ def store_comment(comment_data, post, parent=None):
 
         comment.created_time = comment_data.get('created_time')
         comment.like_count = comment_data.get('like_count')
+        comment.group = group
 
         if 'message' in comment_data:
             comment.message = comment_data.get('message')
@@ -128,15 +130,16 @@ def store_comment(comment_data, post, parent=None):
     # store reply comments
     if 'comments' in comment_data:
         for reply_comment_data in comment_data.get('comments').get('data'):
-            store_comment(comment_data=reply_comment_data, post=post, parent=parent)
+            store_comment(comment_data=reply_comment_data, post=post, group=group, parent=parent)
 
 
 @shared_task
-def store_feed(feed_data):
+def store_feed(feed_data, group):
     """
     This method stores a feed.
 
     :param feed_data: feed data(dictionary)
+    :param group: post's group
     :return:
     """
     # save post from feeds
@@ -160,6 +163,7 @@ def store_feed(feed_data):
         post_comments = feed_data.get('comments')
         post.comment_count = post_comments.get('summary').get('total_count')
         post.like_count = feed_data.get('likes').get('summary').get('total_count')
+        post.group = group
 
         if 'shares' in feed_data:
             post.share_count = feed_data.get('shares').get('count')
@@ -207,7 +211,7 @@ def store_feed(feed_data):
 
     # save comments
     for comment_data in post_comments_data:
-        store_comment(comment_data=comment_data, post=post)
+        store_comment(comment_data=comment_data, post=post, group=group)
 
     return True
 
@@ -224,19 +228,19 @@ def store_group_feed(group_id, query, is_whole=False):
     :return:
     """
     logger.info('Saving %s feed', group_id)
+    group = Group.objects.filter(id=group_id)[0]
 
     feeds = []
 
     if is_whole:
         while query is not None:
-            query = fb_request.feed(group_id, query, feeds)
+            query = fb_request.feed(group, query, feeds)
     else:
-        fb_request.feed(group_id, query, feeds)
+        fb_request.feed(group, query, feeds)
 
     for feed in feeds:
-        store_feed(feed)
+        store_feed(feed, group)
 
-    group = Group.objects.filter(id=group_id)[0]
     group.is_stored = True
     group.save()
 
@@ -253,20 +257,21 @@ def update_group_feed(group_id, query, is_whole=False):
     :return:
     """
     logger.info('Updating %s feed', group_id)
+    group = Group.objects.filter(id=group_id)[0]
 
     feeds = []
 
     if is_whole:
         while query is not None:
-            query = fb_request.feed(group_id, query, feeds)
+            query = fb_request.feed(group, query, feeds)
             for feed in feeds:
-                if not store_feed(feed):
+                if not store_feed(feed, group):
                     return
             feeds = []
     else:
-        fb_request.feed(group_id, query, feeds)
+        fb_request.feed(group, query, feeds)
         for feed in feeds:
-            if not store_feed(feed):
+            if not store_feed(feed, group):
                 return
 
 

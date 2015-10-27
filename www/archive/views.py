@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.db.models import Count
 
 import logging
+import datetime
 
 from . import tasks
 from .fb_query import get_feed_query
-from .models import Group
+from .models import Group, Post
 from .fb_request import FBRequest
 
 logger = logging.getLogger(__name__)
@@ -31,17 +33,17 @@ def groups(request):
         if Group.objects.filter(id=group_data.get('id')).exists():
             return redirect(reverse('archive:groups') + '?error=error2')
 
-        group = Group()
-        group.id = group_data.get('id')
-        group.name = group_data.get('name')
-        group.description = group_data.get('description')
-        group.updated_time = group_data.get('updated_time')
-        group.privacy = group_data.get('privacy')
+        _group = Group()
+        _group.id = group_data.get('id')
+        _group.name = group_data.get('name')
+        _group.description = group_data.get('description')
+        _group.updated_time = group_data.get('updated_time')
+        _group.privacy = group_data.get('privacy')
 
-        group.save()
-        logger.info('Saved group: %s', group.id)
+        _group.save()
+        logger.info('Saved group: %s', _group)
 
-        store_group_feed(group.id)
+        store_group_feed(_group.id)
 
         return HttpResponseRedirect(reverse('archive:groups'))
 
@@ -56,21 +58,45 @@ def groups(request):
 
 
 def group_store(request, group_id):
-    store_group_feed(group_id)
+    _group = Group.objects.filter(id=group_id)[0]
+    store_group_feed(_group.id)
     return HttpResponse("Send")
 
 
 def group_update(request, group_id):
     updated_time = fb_request.group(group_id).get('updated_time')
-    group = Group.objects.filter(id=group_id)[0]
+    _group = Group.objects.filter(id=group_id)[0]
 
-    if group.is_updated(updated_time):
-        group.updated_time = updated_time
-        group.save()
-        logger.info('Update group updated_time: %s', group.id)
+    if _group.is_updated(updated_time):
+        _group.updated_time = updated_time
+        _group.save()
+        logger.info('Update group updated_time: %s', _group.id)
 
-        update_group_feed(group_id)
+        update_group_feed(_group.id)
         return HttpResponseRedirect(reverse('archive:groups'))
     else:
         return redirect(reverse('archive:groups') + '?error=error3')
 
+
+def group(request, group_id):
+    if request.method == "GET":
+        _group = Group.objects.filter(id=group_id)
+
+        from_date = datetime.datetime.now() - datetime.timedelta(days=1)
+        posts = Post.objects.filter(group=_group, created_time__range=[from_date, datetime.datetime.now()])\
+            .extra(
+            select={'field_sum': 'like_count + comment_count'},
+            order_by=('-field_sum', )
+        )
+
+        print(_group)
+
+        for post in posts:
+            print(post.like_count + post.comment_count)
+    elif request.method == "POST":
+        pass
+
+    return render(
+        request,
+        'archive/admin.html'
+    )
