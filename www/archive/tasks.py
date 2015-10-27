@@ -113,6 +113,8 @@ def store_comment(comment_data, post, group, parent=None):
             comment.parent = parent
 
         comment.save()
+        group.comment_count += 1
+        group.save()
         logger.info('Saved comment: %s', comment.id)
 
         if 'attachment' in comment_data:
@@ -171,6 +173,8 @@ def store_feed(feed_data, group):
             post.share_count = 0
 
         post.save()
+        group.post_count += 1
+        group.save()
         logger.info('Saved post: %s', post.id)
 
         # save attachments

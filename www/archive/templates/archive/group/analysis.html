@@ -1,7 +1,7 @@
-{% load staticfiles %}
-<!DOCTYPE HTML>
-<html>
-<head>
+{% extends "base.html" %}
+
+{% block title %}{% endblock %}
+
 <title>JENNIFER UI: AdminTool Sample </title>
     <link rel="stylesheet" href="{% static 'jui/dist/jui.min.css' %}" />
     <link rel="stylesheet" href="{% static 'jui/dist/jennifer.theme.min.css' %}" />
@@ -101,7 +101,7 @@ body {
     <div class="vmenu ">
       <a class="active"><i class="icon-monitoring"></i> Dashboard</a>
       <a href="realtime.html"><i class="icon-realtime"></i> Realtime</a>
-      <a href="group/analysis.html"><i class="icon-profile"></i> Analysis</a>
+      <a href="analysis.html"><i class="icon-profile"></i> Analysis</a>
       <a><i class="icon-chart"></i> Statistics</a>
       <a><i class="icon-document"></i> Document</a>
       <a><i class="icon-gear"></i> Management</a>

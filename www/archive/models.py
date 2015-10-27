@@ -21,6 +21,8 @@ class Group(models.Model):
     updated_time = models.DateTimeField()
     privacy = models.CharField(max_length=30)
     is_stored = models.BooleanField(default=False)
+    post_count = models.IntegerField(default=0)
+    comment_count = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

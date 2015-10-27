@@ -98,5 +98,9 @@ def group(request, group_id):
 
     return render(
         request,
-        'archive/admin.html'
+        'archive/group/analysis.html',
+        {
+            'group': _group,
+            'posts': posts,
+        }
     )
