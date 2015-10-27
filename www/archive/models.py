@@ -1,8 +1,34 @@
 from django.db import models
 
+from django.utils import timezone
+
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
 __email__ = "egaoneko@naver.com"
+
+
+def get_different_time(time):
+    """
+    Get different time from input time
+
+    :param time: time for compare
+    :return: days or hours or minutes or seconds ago
+    """
+    now = timezone.now()
+
+    diff = now - time
+    s = diff.total_seconds()
+    hours, remainder = divmod(s, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    if diff.days > 0:
+        return str(int(diff.days)) + " days ago"
+    elif hours > 0:
+        return str(int(hours)) + " hours ago"
+    elif minutes > 0:
+        return str(int(minutes)) + " minutes ago"
+    else:
+        return str(int(seconds)) + " seconds ago"
 
 
 class User(models.Model):
@@ -36,6 +62,14 @@ class Group(models.Model):
         """
         return self.updated_time.strftime('%Y-%m-%dT%H:%M:%S') != new_updated_time.split('+')[0]
 
+    def get_diff_time(self):
+        """
+        Get different time from updated time
+
+        :return: different time
+        """
+        return get_different_time(self.updated_time)
+
 
 class Post(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
@@ -61,6 +95,22 @@ class Post(models.Model):
         """
         return self.updated_time.strftime('%Y-%m-%dT%H:%M:%S') != new_updated_time.split('+')[0]
 
+    def get_diff_cre_time(self):
+        """
+        Get different time from created time
+
+        :return: different time
+        """
+        return get_different_time(self.created_time)
+
+    def get_diff_upe_time(self):
+        """
+        Get different time from updated time
+
+        :return: different time
+        """
+        return get_different_time(self.updated_time)
+
 
 class Comment(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
@@ -74,6 +124,14 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.message
+
+    def get_diff_cre_time(self):
+        """
+        Get different time from created time
+
+        :return: different time
+        """
+        return get_different_time(self.created_time)
 
 
 class Media(models.Model):

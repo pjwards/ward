@@ -221,7 +221,7 @@ def store_feed(feed_data, group):
 
 
 @shared_task
-def store_group_feed(group_id, query, is_whole=False):
+def store_group_feed(group, query, is_whole=False):
     """
     This method is storing group's feeds by using facebook group api.
     If you want to get whole data, put that 'is_whole' is true.
@@ -231,8 +231,8 @@ def store_group_feed(group_id, query, is_whole=False):
     :param is_whole: whole or parts
     :return:
     """
-    logger.info('Saving %s feed', group_id)
-    group = Group.objects.filter(id=group_id)[0]
+    logger.info('Saving %s feed', group.id)
+    # group = Group.objects.filter(id=group_id)[0]
 
     feeds = []
 
@@ -258,10 +258,18 @@ def update_group_feed(group_id, query, is_whole=False):
     :param group_id: param group_id: group id for getting feeds
     :param query: query for facebook graph api
     :param is_whole: whole or parts
-    :return:
+    :return: success?
     """
     logger.info('Updating %s feed', group_id)
+    updated_time = fb_request.group(group_id).get('updated_time')
     group = Group.objects.filter(id=group_id)[0]
+
+    if not group.is_updated(updated_time):
+        return False
+
+    group.updated_time = updated_time
+    group.save()
+    logger.info('Update group updated_time: %s', group.id)
 
     feeds = []
 
@@ -270,13 +278,15 @@ def update_group_feed(group_id, query, is_whole=False):
             query = fb_request.feed(group, query, feeds)
             for feed in feeds:
                 if not store_feed(feed, group):
-                    return
+                    return True
             feeds = []
     else:
         fb_request.feed(group, query, feeds)
         for feed in feeds:
             if not store_feed(feed, group):
-                return
+                return True
+
+    return True
 
 
 @shared_task

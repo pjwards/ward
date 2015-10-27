@@ -43,7 +43,7 @@ def groups(request):
         _group.save()
         logger.info('Saved group: %s', _group)
 
-        store_group_feed(_group.id)
+        tasks.store_group_feed.delay(_group.id, get_feed_query(10, 100))
 
         return HttpResponseRedirect(reverse('archive:groups'))
 
@@ -58,31 +58,27 @@ def groups(request):
 
 
 def group_store(request, group_id):
-    _group = Group.objects.filter(id=group_id)[0]
-    store_group_feed(_group.id)
+    if not Group.objects.filter(id=group_id).exists():
+            return redirect(reverse('archive:groups') + '?error=error2')
+
+    tasks.store_group_feed.delay(group_id, get_feed_query(10, 100))
     return HttpResponse("Send")
 
 
 def group_update(request, group_id):
-    updated_time = fb_request.group(group_id).get('updated_time')
-    _group = Group.objects.filter(id=group_id)[0]
+    if not Group.objects.filter(id=group_id).exists():
+            return redirect(reverse('archive:groups') + '?error=error2')
 
-    if _group.is_updated(updated_time):
-        _group.updated_time = updated_time
-        _group.save()
-        logger.info('Update group updated_time: %s', _group.id)
-
-        update_group_feed(_group.id)
+    if tasks.update_group_feed.delay(group_id, get_feed_query(10, 100)):
         return HttpResponseRedirect(reverse('archive:groups'))
-    else:
-        return redirect(reverse('archive:groups') + '?error=error3')
 
 
 def group(request, group_id):
     if request.method == "GET":
-        _group = Group.objects.filter(id=group_id)
+        _groups = Group.objects.all()
+        _group = Group.objects.filter(id=group_id)[0]
 
-        from_date = datetime.datetime.now() - datetime.timedelta(days=1)
+        from_date = datetime.datetime.now() - datetime.timedelta(days=7)
         posts = Post.objects.filter(group=_group, created_time__range=[from_date, datetime.datetime.now()])\
             .extra(
             select={'field_sum': 'like_count + comment_count'},
@@ -100,6 +96,7 @@ def group(request, group_id):
         request,
         'archive/group/analysis.html',
         {
+            'groups': _groups,
             'group': _group,
             'posts': posts,
         }
