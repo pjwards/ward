@@ -72,6 +72,7 @@ brew install redis-server
 [django-bower install](https://django-bower.readthedocs.org/en/latest/installation.html)
 
 ```bash
+brew install nodejs
 npm install bower
 ```
 
@@ -89,8 +90,24 @@ And set 'Django Support' in pycharm preference, such as 'Django project root', '
 ### DB
 
 ```bash
-python manage.py migrate archive
-python manage.py migrate djcelery
-python manage.py migrate createdb --noinput
-python manage.py migrate createsuperuser
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+
+## How to install?
+
+### Mac
+
+```bash
+pip install -r requirements.txt
+brew install redis-server
+brew install nodejs
+
+cd product_folder/www
+python manage.py migrate
+python manage.py createsuperuser
+
+sudo redis-server
+. run_celery.sh
 ```

@@ -211,66 +211,44 @@
                 Recent Order List
               </div>
               <table class="table simple hover">
+               <colgroup>
+                    <col style="width: 15%;">
+                    <col style="width: 10%;">
+                    <col style="width: 10%;">
+                    <col style="width: 40%;">
+                    <col style="width: 5%;">
+                    <col style="width: 5%;">
+                    <col style="width: 5%;">
+                    <col style="width: 10%;">
+                </colgroup>
                 <thead>
                 <tr>
                   <th>From</th>
-                  <th>Contact</th>
-                  <th>Amount</th>
-                  <th>Status</th>
+                  <th>Created Time</th>
+                  <th>Updated Time</th>
+                  <th>Message</th>
+                  <th>Like Count</th>
+                  <th>Comment Count</th>
+                  <th>Share Count</th>
                   <th><a class="btn btn-base">All Orders</a></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                  <td>
-                    <i class="icon-stop" style="font-size:8.5px;color:red;"></i>
-                    Lion KC
-                  </td>
-                  <td>Robin Van Persie</td>
-                  <td>$245.00</td>
-                  <td><span>Paid</span></td>
-                  <td><i class="icon-search"></i> View</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i class="icon-stop" style="font-size:8.5px;color:#fff860;"></i>
-                    Lion KC
-                  </td>
-                  <td>Robin Van Persie</td>
-                  <td>$245.00</td>
-                  <td><span>Paid</span></td>
-                  <td><i class="icon-search"></i> View</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i class="icon-stop" style="font-size:8.5px;color:#fb32ff;"></i>
-                    Lion KC
-                  </td>
-                  <td>Robin Van Persie</td>
-                  <td>$245.00</td>
-                  <td><span>Paid</span></td>
-                  <td><i class="icon-search"></i> View</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i class="icon-stop" style="font-size:8.5px;color:#68ff41;"></i>
-                    Lion KC
-                  </td>
-                  <td>Robin Van Persie</td>
-                  <td>$245.00</td>
-                  <td><span>Paid</span></td>
-                  <td><i class="icon-search"></i> View</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i class="icon-stop" style="font-size:8.5px;color:#5d9cff;"></i>
-                    Lion KC
-                  </td>
-                  <td>Robin Van Persie</td>
-                  <td>$245.00</td>
-                  <td><span>Paid</span></td>
-                  <td><i class="icon-search"></i> View</td>
-                </tr>
+                {% for post in posts %}
+                    <tr>
+                      <td>
+                        <i class="icon-stop" style="font-size:8.5px;color:red;"></i>
+                        {{ post.user.name }}
+                      </td>
+                      <td>{{ post.get_diff_cre_time }}</td>
+                      <td>{{ post.get_diff_upe_time }}</td>
+                      <td>{{ post.message|truncatechars:80 }}</td>
+                      <td>{{ post.like_count }}</td>
+                      <td>{{ post.comment_count }}</td>
+                      <td>{{ post.share_count }}</td>
+                      <td><i class="icon-search"></i> View</td>
+                    </tr>
+                {% endfor %}
                 </tbody>
               </table>
             </div>
