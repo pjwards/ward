@@ -25,16 +25,16 @@ class FBRequest:
             version=app_version
         )
 
-    def feed(self, group_id, query, feeds):
+    def feed(self, group, query, feeds):
         """
         This method gets feeds.
 
-        :param group_id: group id to find feeds
+        :param group: group to find feeds
         :param query: details to find feeds
         :param feeds: list of feed data
         :return:
         """
-        re = self.graph.request(group_id + query)
+        re = self.graph.request(group.id + query)
 
         if re.get('feed') is not None:
             re = re.get('feed')

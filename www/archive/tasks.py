@@ -232,18 +232,18 @@ def store_group_feed(group_id, query, is_whole=False):
     :return:
     """
     logger.info('Saving %s feed', group_id)
-    # group = Group.objects.filter(id=group_id)[0]
+    group = Group.objects.filter(id=group_id)[0]
 
     feeds = []
 
     if is_whole:
         while query is not None:
-            query = fb_request.feed(group_id, query, feeds)
+            query = fb_request.feed(group, query, feeds)
     else:
-        fb_request.feed(group_id, query, feeds)
+        fb_request.feed(group, query, feeds)
 
     for feed in feeds:
-        store_feed(feed, group_id)
+        store_feed(feed, group)
 
     group_id.is_stored = True
     group_id.save()
