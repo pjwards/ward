@@ -221,7 +221,7 @@ def store_feed(feed_data, group):
 
 
 @shared_task
-def store_group_feed(group, query, is_whole=False):
+def store_group_feed(group_id, query, is_whole=False):
     """
     This method is storing group's feeds by using facebook group api.
     If you want to get whole data, put that 'is_whole' is true.
@@ -231,22 +231,22 @@ def store_group_feed(group, query, is_whole=False):
     :param is_whole: whole or parts
     :return:
     """
-    logger.info('Saving %s feed', group.id)
+    logger.info('Saving %s feed', group_id)
     # group = Group.objects.filter(id=group_id)[0]
 
     feeds = []
 
     if is_whole:
         while query is not None:
-            query = fb_request.feed(group, query, feeds)
+            query = fb_request.feed(group_id, query, feeds)
     else:
-        fb_request.feed(group, query, feeds)
+        fb_request.feed(group_id, query, feeds)
 
     for feed in feeds:
-        store_feed(feed, group)
+        store_feed(feed, group_id)
 
-    group.is_stored = True
-    group.save()
+    group_id.is_stored = True
+    group_id.save()
 
 
 @shared_task

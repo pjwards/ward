@@ -103,10 +103,12 @@ python manage.py createsuperuser
 pip install -r requirements.txt
 brew install redis
 brew install node
+npm install bower
 
 cd product_folder/www
 mkdir logs
 python manage.py migrate
+python manage.py bower install
 python manage.py createsuperuser
 
 sudo redis-server
