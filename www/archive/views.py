@@ -1,21 +1,19 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.db.models import Count
+from django.db import connections
+from django.db.models import Count, Sum
 
 import logging
 import datetime
 
 from . import tasks
 from .fb_query import get_feed_query
-from .models import Group, Post
+from .models import Group, Post, Comment
 from .fb_request import FBRequest
 
 logger = logging.getLogger(__name__)
 fb_request = FBRequest()
-
-store_group_feed = lambda group_id: tasks.store_group_feed.delay(group_id, get_feed_query(10, 100))
-update_group_feed = lambda group_id: tasks.update_group_feed.delay(group_id, get_feed_query(10, 100))
 
 
 def groups(request):
@@ -59,7 +57,7 @@ def groups(request):
 
 def group_store(request, group_id):
     if not Group.objects.filter(id=group_id).exists():
-            return redirect(reverse('archive:groups') + '?error=error2')
+        return redirect(reverse('archive:groups') + '?error=error2')
 
     tasks.store_group_feed.delay(group_id, get_feed_query(10, 100))
     return HttpResponse("Send")
@@ -67,7 +65,7 @@ def group_store(request, group_id):
 
 def group_update(request, group_id):
     if not Group.objects.filter(id=group_id).exists():
-            return redirect(reverse('archive:groups') + '?error=error2')
+        return redirect(reverse('archive:groups') + '?error=error2')
 
     if tasks.update_group_feed.delay(group_id, get_feed_query(10, 100)):
         return HttpResponseRedirect(reverse('archive:groups'))
@@ -79,16 +77,28 @@ def group(request, group_id):
         _group = Group.objects.filter(id=group_id)[0]
 
         from_date = datetime.datetime.now() - datetime.timedelta(days=7)
-        posts = Post.objects.filter(group=_group, created_time__range=[from_date, datetime.datetime.now()])\
+        posts = Post.objects.filter(group=_group, created_time__range=[from_date, datetime.datetime.now()]) \
             .extra(
             select={'field_sum': 'like_count + comment_count'},
-            order_by=('-field_sum', )
+            order_by=('-field_sum',)
         )
 
-        print(_group)
+        all_posts = Post.objects.filter(group=_group) \
+            .extra(select={'date': connections[Post.objects.db].ops.date_trunc_sql('month', 'created_time')}) \
+            .values('date') \
+            .annotate(p_count=Count('created_time'))
 
-        for post in posts:
-            print(post.like_count + post.comment_count)
+        all_comments = Comment.objects.filter(group=_group) \
+            .extra(select={'date': connections[Comment.objects.db].ops.date_trunc_sql('month', 'created_time')}) \
+            .values('date') \
+            .annotate(c_count=Count('created_time'))
+
+        raw_data_source = list(zip(all_posts, all_comments))
+        data_source = [{'date': x.get('date')[:7], 'profit1': x.get('p_count'), 'profit2': y.get('c_count')} for x, y in
+                       raw_data_source]
+
+        print(data_source)
+
     elif request.method == "POST":
         pass
 
@@ -99,5 +109,6 @@ def group(request, group_id):
             'groups': _groups,
             'group': _group,
             'posts': posts,
+            'data_source': data_source,
         }
     )

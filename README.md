@@ -58,7 +58,7 @@ sudo apt-get install redis-server
 ##### Mac
 
 ```bash
-brew install redis-server
+brew install redis
 ```
 
 
@@ -101,10 +101,11 @@ python manage.py createsuperuser
 
 ```bash
 pip install -r requirements.txt
-brew install redis-server
-brew install nodejs
+brew install redis
+brew install node
 
 cd product_folder/www
+mkdir logs
 python manage.py migrate
 python manage.py createsuperuser
 
