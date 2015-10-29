@@ -245,8 +245,8 @@ def store_group_feed(group_id, query, is_whole=False):
     for feed in feeds:
         store_feed(feed, group)
 
-    group_id.is_stored = True
-    group_id.save()
+    group.is_stored = True
+    group.save()
 
 
 @shared_task
