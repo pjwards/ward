@@ -3,7 +3,7 @@
 
 {% block css %}
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <link href="{% static 'css/admin.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'css/base.css' %}" rel="stylesheet" type="text/css"/>
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 
@@ -87,7 +87,7 @@
             <div class="vmenu ">
                 <a class="active"><i class="icon-monitoring"></i> Dashboard</a>
                 <a href="realtime.html"><i class="icon-realtime"></i> Realtime</a>
-                <a href="analysis.html"><i class="icon-profile"></i> Analysis</a>
+                <a href="base.html"><i class="icon-profile"></i> Analysis</a>
                 <a><i class="icon-chart"></i> Statistics</a>
                 <a><i class="icon-document"></i> Document</a>
                 <a><i class="icon-gear"></i> Management</a>
@@ -157,8 +157,13 @@
                                 <strong>Recent Post List</strong>
 
                                 <div class="group" style="float: right">
-                                    <input type="text" class="input" id="issue_from" placeholder="from"/>
-                                    <input type="text" class="input" id="issue_to" placeholder="to"/>
+                                    <div id="issue_radio" class="group">
+                                        <a class="btn " value="20">20</a>
+                                        <a class="btn " value="50">50</a>
+                                        <a class="btn" value="100">100</a>
+                                        <input type="text" class="input" id="issue_from" placeholder="from"/>
+                                        <input type="text" class="input" id="issue_to" placeholder="to"/>
+                                    </div>
                                     <button class="btn" value="run" id="issue_run"><i class="icon-play"></i> Run
                                     </button>
                                 </div>
@@ -169,10 +174,9 @@
                                     <col style="width: 10%;">
                                     <col style="width: 10%;">
                                     <col style="width: 40%;">
-                                    <col style="width: 5%;">
-                                    <col style="width: 5%;">
-                                    <col style="width: 5%;">
                                     <col style="width: 10%;">
+                                    <col style="width: 10%;">
+                                    <col style="width: 5%;">
                                 </colgroup>
                                 <thead>
                                 <tr>
@@ -183,44 +187,29 @@
                                     <th>Like Count</th>
                                     <th>Comment Count</th>
                                     <th>Share Count</th>
-                                    <th><a class="btn btn-base">All Posts</a></th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                {% for post in posts %}
-                                    <tr>
-                                        <td>
-                                            <i class="icon-stop" style="font-size:8.5px;color:red;"></i>
-                                            {{ post.user.name }}
-                                        </td>
-                                        <td>{{ post.get_diff_cre_time }}</td>
-                                        <td>{{ post.get_diff_upe_time }}</td>
-                                        <td>{{ post.message|truncatechars:80 }}</td>
-                                        <td>{{ post.like_count }}</td>
-                                        <td>{{ post.comment_count }}</td>
-                                        <td>{{ post.share_count }}</td>
-                                        <td><i class="icon-search"></i> View</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
+                                <tbody id="issue_table"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+
             </div>
-
-
         </div>
     </div>
     </div>
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/admin.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/base.js' %}" type="text/javascript"></script>
     <script>
         var chart = jui.include("chart.builder");
         var statistics;
         var statistics_method = 'month';
+        var issue;
+        var issue_len = 20;
+
 
         function getStatistics(method, from, to) {
             $.ajax({
@@ -235,7 +224,6 @@
                 dataType: "JSON",
                 success: function (source) {
                     statistics = source['statistics'];
-                    return source;
                 },
                 error: function (request, status, error) {
                     alert(status);
@@ -325,15 +313,32 @@
                     if (typeof(v) == "number") {
                         return ((v > 1000) ? Math.floor(v / 1000) + "k" : v);
                     }
-
                     return v;
                 }
             });
         }
 
-        jui.ready(["ui.button"], function (button) {
-            getStatistics(statistics_method);
+        function getIssue(len, from, to) {
+            $.ajax({
+                url: "{% url 'archive:group_issue' group.id %}",
+                type: "get",
+                async: false,
+                data: {
+                    len: len,
+                    from: from,
+                    to: to
+                },
+                success: function (source) {
+                    $('#issue_table').empty();
+                    $('#issue_table').append(source);
+                },
+                error: function (request, status, error) {
+                    alert(status);
+                }
+            });
+        }
 
+        jui.ready(["ui.button"], function (button) {
             statistics_radio = button("#statistics_radio", {
                 type: "radio",
                 index: 1,
@@ -343,16 +348,30 @@
                     }
                 }
             });
+
+            issue_radio = button("#issue_radio", {
+                type: "radio",
+                index: 0,
+                event: {
+                    change: function (data) {
+                        issue_len = data.value;
+                    }
+                }
+            });
         });
 
         $(function () {
+            getStatistics(statistics_method);
+            getIssue(issue_len);
+
             $("#statistics_run").on("click", function () {
                 alert(statistics_method + "/" + $("#statistics_from").val() + "/" + $("#statistics_to").val());
                 getStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
             });
 
             $("#issue_run").on("click", function () {
-                alert($("#issue_from").val() + "/" + $("#issue_to").val());
+                alert(issue_len + "/" +$("#issue_from").val() + "/" + $("#issue_to").val());
+                getIssue(issue_len, $("#issue_from").val(), $("#issue_to").val());
             });
         })
 

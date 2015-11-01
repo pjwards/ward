@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db import connections
 from django.db.models import Count, Sum
+from django.forms.models import model_to_dict
 from django.utils import timezone
 
 import logging
@@ -87,7 +88,7 @@ def group(request, group_id):
 
     return render(
         request,
-        'archive/group/analysis.html',
+        'archive/group/base.html',
         {
             'groups': _groups,
             'group': _group,
@@ -126,30 +127,103 @@ def group_update(request, group_id):
         return HttpResponseRedirect(reverse('archive:groups'))
 
 
-def group_issue(request, group_id):
-    pass
+def get_issue(request, group_id):
+    """
+    Get hot issue posts from group.
 
+    length : 20(default) | 50 | 100 from HTTP Request
+    from_date : start day from HTTP Request
+    to_date : to day from HTTP Request
 
-def group_statistics(reqeust, group_id):
+    :param request: request
+    :param group_id: group_id
+    :return: (group, issue posts)
+    """
     _group = Group.objects.filter(id=group_id)[0]
 
-    method = reqeust.GET.get('method', 'month')
-    from_date = reqeust.GET.get('from', None)
-    to_date = reqeust.GET.get('to', None)
+    length = int(request.GET.get('len', 20))
+    from_date = request.GET.get('from', None)
+    to_date = request.GET.get('to', None)
 
-    # if from_date:
-    #     if to_date:
-    #         all_posts = Post.objects.filter(group=_group, created_time__gt=from_date, created_time__lt=to_date)
-    #         all_comments = Comment.objects.filter(group=_group, created_time__gt=from_date, created_time__lt=to_date)
-    #     else:
-    #         all_posts = Post.objects.filter(group=_group, created_time__gt=from_date)
-    #         all_comments = Comment.objects.filter(group=_group, created_time__gt=from_date)
-    # elif to_date:
-    #     all_posts = Post.objects.filter(group=_group, created_time__lt=to_date)
-    #     all_comments = Comment.objects.filter(group=_group, created_time__lt=to_date)
-    # else:
-    #     all_posts = Post.objects.filter(group=_group)
-    #     all_comments = Comment.objects.filter(group=_group)
+    # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
+    if from_date is None and to_date is None:
+        from_date, to_date = date_utils.week_delta()
+
+    posts = get_objects_by_time(_group, Post, from_date, to_date)
+
+    posts = posts.extra(
+        select={'field_sum': 'like_count + comment_count'},
+        order_by=('-field_sum',)
+    )
+
+    posts_len = len(posts)
+    if posts_len < length:
+        length = posts_len
+
+    return _group, posts[:length]
+
+
+def group_issue(request, group_id):
+    """
+    Get hot issue posts by using 'get_issue' method.
+    It returns rendered template.
+
+    :param request: request
+    :param group_id: group_id
+    :return: rendered template
+    """
+    _group, posts = get_issue(request, group_id)
+
+    return render(
+        request,
+        'archive/group/issue.html',
+        {
+            'group': _group,
+            'posts': posts,
+        }
+    )
+
+
+def group_issue_json(request, group_id):
+    """
+    Get hot issue posts by using 'get_issue' method.
+    It returns json.
+
+    :param request: request
+    :param group_id: group_id
+    :return: json
+    """
+    _group, posts = get_issue(request, group_id)
+
+    group_dict = model_to_dict(_group)
+    posts_dict = [model_to_dict(post) for post in posts]
+
+    return JsonResponse({
+        'group': group_dict,
+        'posts': posts_dict,
+    })
+
+
+def group_statistics(request, group_id):
+    """
+    Get statistics from group.
+
+    method : year | month | day from HTTP Request
+    from_date : start day from HTTP Request
+    to_date : to day from HTTP Request
+
+    :param request: request
+    :param group_id: group_id
+    :return: json
+    """
+    _group = Group.objects.filter(id=group_id)[0]
+
+    method = request.GET.get('method', 'month')
+    from_date = request.GET.get('from', None)
+    to_date = request.GET.get('to', None)
+
+    if method != 'year' and method != 'month' and method != 'day':
+        raise ValueError("Method can be used 'year' or 'month' or 'day'. Input method:" + method)
 
     all_posts = get_objects_by_time(_group, Post, from_date, to_date)
     all_comments = get_objects_by_time(_group, Comment, from_date, to_date)
@@ -180,6 +254,15 @@ def group_statistics(reqeust, group_id):
 
 
 def get_objects_by_time(_group, model, from_date=None, to_date=None):
+    """
+    Get objects between from_date and to_date.
+
+    :param _group: _group
+    :param model: model
+    :param from_date: start_date
+    :param to_date: end_date
+    :return: objects
+    """
     if from_date:
         if to_date:
             return model.objects.filter(group=_group, created_time__gt=from_date, created_time__lt=to_date)

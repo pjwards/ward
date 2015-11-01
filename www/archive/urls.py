@@ -14,5 +14,6 @@ urlpatterns = [
     url(r'^group/(?P<group_id>[0-9]+)/store/$', views.group_store, name='group_store'),
     url(r'^group/(?P<group_id>[0-9]+)/update/$', views.group_update, name='group_update'),
     url(r'^group/(?P<group_id>[0-9]+)/issue/$', views.group_issue, name='group_issue'),
+    url(r'^group/(?P<group_id>[0-9]+)/issue/json/$', views.group_issue_json, name='group_issue_json'),
     url(r'^group/(?P<group_id>[0-9]+)/statistics/$', views.group_statistics, name='group_statistics'),
 ]
