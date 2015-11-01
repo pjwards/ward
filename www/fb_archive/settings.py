@@ -101,7 +101,7 @@ ALLOWED_HOSTS = []
 TIME_ZONE = 'Asia/Seoul'
 
 # If you set this to True, Django will use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -368,6 +368,7 @@ CELERYBEAT_SCHEDULE = {
 # DJANGO BOWER #
 ################
 
+BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'static')
 # BOWER_COMPONENTS_ROOT = STATIC_ROOT
 # BOWER_PATH = '/usr/local/bin/bower'
 
@@ -379,6 +380,7 @@ STATICFILES_FINDERS = (
 
 BOWER_INSTALLED_APPS = (
     'jquery',
+    'jquery-ui',
     'jui',
 )
 
