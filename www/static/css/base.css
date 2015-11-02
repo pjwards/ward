@@ -8,6 +8,12 @@ html, body {
     font-family: Open Sans;
 }
 
+body {
+    font-size: 14px;
+    margin: 0px;
+    overflow-x: hidden;
+}
+
 .header {
     margin: 0 auto;
     height: 58px;
@@ -28,8 +34,8 @@ html, body {
 
 .header .toolbar {
     position: relative;
-    padding:20px;
-    padding-left:120px;
+    padding: 20px;
+    padding-left: 120px;
 }
 
 .container {
@@ -161,12 +167,12 @@ html, body {
     border: 0px !important;
 }
 
-
 .container.hidden-menu {
 
 }
-.container.hidden-menu .menu{
-    display:none;
+
+.container.hidden-menu .menu {
+    display: none;
 }
 
 .container.hidden-menu .content {

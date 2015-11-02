@@ -2,19 +2,8 @@
 {% load staticfiles %}
 
 {% block css %}
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <link href="{% static 'css/base.css' %}" rel="stylesheet" type="text/css"/>
-
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-
     <style type="text/css">
         /* Base */
-        body {
-            font-size: 14px;
-            margin: 0px;
-            overflow-x: hidden;
-        }
-
         .visit_total {
             font-size: 15px;
         }
@@ -58,29 +47,11 @@
     </style>
 {% endblock %}
 
+{% block header %}
+    {% include 'archive/group/header.html' %}
+{% endblock %}
+
 {% block content %}
-    <div class="header">
-        <div class="logo">
-            <i class="icon-menu"></i>
-        </div>
-        <div class="toolbar">
-
-            <span>{% block title %}{{ group.name }}{% endblock %}</span>
-
-            <span>
-                <select id="dynamic_select">
-                    {% for grp in groups %}
-                        <option id="{{ grp.id }}" value="{% url 'archive:group' grp.id %}"
-                                {% if group.id == grp.id %}selected="selected"{% endif %}>{{ grp.name }}</option>
-                    {% endfor %}
-                </select>
-            </span>
-            <span style="float:right">
-                  Sample <i class="icon-check"></i>
-            </span>
-
-        </div>
-    </div>
     <div class="container">
         <div class="menu">
 
@@ -170,27 +141,48 @@
                             </div>
                             <table class="table simple hover">
                                 <colgroup>
-                                    <col style="width: 15%;">
                                     <col style="width: 10%;">
-                                    <col style="width: 10%;">
-                                    <col style="width: 40%;">
-                                    <col style="width: 10%;">
-                                    <col style="width: 10%;">
-                                    <col style="width: 5%;">
+                                    <col style="width: 8%;">
+                                    <col style="width: 8%;">
+                                    <col style="width: 45%;">
+                                    <col style="width: 7%;">
+                                    <col style="width: 7%;">
+                                    <col style="width: 7%;">
+                                    <col style="width: 8%;">
                                 </colgroup>
                                 <thead>
                                 <tr>
-                                    <th>From</th>
-                                    <th>Created Time</th>
-                                    <th>Updated Time</th>
-                                    <th>Message</th>
-                                    <th>Like Count</th>
-                                    <th>Comment Count</th>
-                                    <th>Share Count</th>
+                                    <th><i class="icon-user"></i> From</th>
+                                    <th><i class="icon-realtime"></i> Created Time</th>
+                                    <th><i class="icon-realtime"></i> Updated Time</th>
+                                    <th><i class="icon-report"></i> Message</th>
+                                    <th><i class="icon-like"></i> Like</th>
+                                    <th><i class="icon-message"></i> Comment</th>
+                                    <th><i class="icon-share"></i> Share</th>
+                                    <th><i class="icon-search"></i> View</th>
                                 </tr>
                                 </thead>
                                 <tbody id="issue_table"></tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel dashed">
+                    <div class="body">
+                        <h1 class="title"><i class="icon-realtime"></i> <strong>Timeline</strong></h1>
+
+                        <div style="position: relative; height: 150px;">
+                            <div class="msgbox detail" style="width: 350px; height: 150px;">
+                                <div class="head">
+                                    [Title] Detail Message
+
+                                    <div class="subtext">2014.02.25 17:18:38</div>
+                                </div>
+                                <div class="body">
+                                    Contents...<br/>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,7 +194,6 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/base.js' %}" type="text/javascript"></script>
     <script>
         var chart = jui.include("chart.builder");
         var statistics;
@@ -370,7 +361,7 @@
             });
 
             $("#issue_run").on("click", function () {
-                alert(issue_len + "/" +$("#issue_from").val() + "/" + $("#issue_to").val());
+                alert(issue_len + "/" + $("#issue_from").val() + "/" + $("#issue_to").val());
                 getIssue(issue_len, $("#issue_from").val(), $("#issue_to").val());
             });
         })

@@ -1,0 +1,21 @@
+<div class="header">
+    <div class="logo">
+        <i class="icon-menu"></i>
+    </div>
+    <div class="toolbar">
+
+        <span>{% block title %}{{ group.name }}{% endblock %}</span>
+
+            <span>
+                <select id="dynamic_select">
+                    {% for grp in groups %}
+                        <option id="{{ grp.id }}" value="{% url 'archive:group' grp.id %}"
+                                {% if group.id == grp.id %}selected="selected"{% endif %}>{{ grp.name }}</option>
+                    {% endfor %}
+                </select>
+            </span>
+            <span style="float:right">
+                  Sample <i class="icon-check"></i>
+            </span>
+    </div>
+</div>
