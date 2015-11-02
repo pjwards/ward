@@ -20,6 +20,8 @@ from django.contrib import admin
 from mezzanine.core.views import direct_to_template
 from mezzanine.conf import settings
 
+from rest_framework import routers
+from archive import views
 
 admin.autodiscover()
 
@@ -33,6 +35,29 @@ urlpatterns = i18n_patterns("",
     ("^admin/", include(admin.site.urls)),
     url(r'^archive/', include('archive.urls', namespace="archive"))
 )
+
+
+# #########################
+# # DJANGO REST FRAMEWORK #
+# #########################
+
+# Routers provide an easy way of automatically determining the URL conf.
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'groups', views.GroupViewSet)
+router.register(r'posts', views.PostViewSet)
+
+# Wire up our API using automatic URL routing.
+# Additionally, we include login URLs for the browsable API.
+urlpatterns += patterns('',
+    url(r'^rest/', include(router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+)
+
+
+#############
+# MEZZANINE #
+#############
 
 if settings.USE_MODELTRANSLATION:
     urlpatterns += patterns('',

@@ -6,13 +6,16 @@ from django.db.models import Count, Sum
 from django.forms.models import model_to_dict
 from django.utils import timezone
 
+from rest_framework import viewsets
+from .serializer import *
+
 import logging
 import datetime
 
 from . import tasks
 from .utils import date_utils
 from .fb_query import get_feed_query
-from .models import Group, Post, Comment
+from .models import User, Group, Post, Comment
 from .fb_request import FBRequest
 
 logger = logging.getLogger(__name__)
@@ -272,3 +275,19 @@ def get_objects_by_time(_group, model, from_date=None, to_date=None):
         return model.objects.filter(group=_group, created_time__lt=to_date)
     else:
         return model.objects.filter(group=_group)
+
+
+# ViewSets define the view behavior.
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer

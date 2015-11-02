@@ -11,6 +11,9 @@
 * facebook-sdk (tested with version 1.0.0a0)
 * mezzanine (tested with version 4.0.1)
 * django-bower (tested with version 5.0.4)
+* django-rest-framework (tested with version 3.3.0)
+* markdown (tested with version 2.6.3)
+* django-filter (tested with version 0.11.0)
 
 #### Optional dependencies:
 

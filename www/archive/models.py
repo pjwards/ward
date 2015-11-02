@@ -37,7 +37,7 @@ class User(models.Model):
     picture = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.id
 
 
 class Group(models.Model):
@@ -51,7 +51,7 @@ class Group(models.Model):
     comment_count = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.name
+        return self.id
 
     def is_updated(self, new_updated_time):
         """
@@ -84,7 +84,7 @@ class Post(models.Model):
     group = models.ForeignKey(Group)
 
     def __str__(self):
-        return self.message
+        return self.id
 
     def is_updated(self, new_updated_time):
         """
@@ -123,7 +123,7 @@ class Comment(models.Model):
     group = models.ForeignKey(Group)
 
     def __str__(self):
-        return self.message
+        return self.id
 
     def get_diff_cre_time(self):
         """
