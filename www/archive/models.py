@@ -139,9 +139,6 @@ class Media(models.Model):
     width = models.IntegerField(null=True)
     src = models.CharField(max_length=255, null=True, blank=True)
 
-    def __str__(self):
-        return self.src
-
 
 class Attachment(models.Model):
     post = models.ForeignKey(Post, null=True)
@@ -152,6 +149,3 @@ class Attachment(models.Model):
     type = models.CharField(max_length=30, null=True, blank=True)
     # photo, share, unavailable, album(sub), video_autoplay, multi_share(sub), video_share_youtube, note
     media = models.ForeignKey(Media, null=True)
-
-    def __str__(self):
-        return self.url

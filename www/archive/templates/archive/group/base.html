@@ -139,7 +139,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <table class="table simple hover">
+                            <table id="issue_table" class="table simple hover">
                                 <colgroup>
                                     <col style="width: 10%;">
                                     <col style="width: 8%;">
@@ -162,11 +162,24 @@
                                     <th><i class="icon-search"></i> View</th>
                                 </tr>
                                 </thead>
-                                <tbody id="issue_table"></tbody>
+                                <tbody id="issue_tbody"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+
+                <script id="tpl_row" type="text/template">
+                    <tr>
+                        <td><i class="icon-stop" style="font-size:8.5px;color:red;"></i><!= from !></td>
+                        <td><!= created_time !></td>
+                        <td><!= updated_time !></td>
+                        <td><!= message !></td>
+                        <td><!= like_count !></td>
+                        <td><!= comment_count !></td>
+                        <td><!= share_count !></td>
+                        <td><i class="icon-search"></i> View</td>
+                    </tr>
+                </script>
 
                 <div class="panel dashed">
                     <div class="body">
@@ -311,7 +324,7 @@
 
         function getIssue(len, from, to) {
             $.ajax({
-                url: "{% url 'archive:group_issue' group.id %}",
+                url: "/api/groups/{{ group.id }}/issue",
                 type: "get",
                 async: false,
                 data: {
@@ -319,15 +332,36 @@
                     from: from,
                     to: to
                 },
+                dataType: "JSON",
                 success: function (source) {
-                    $('#issue_table').empty();
-                    $('#issue_table').append(source);
+                    $('#issue_tbody').empty();
+                    var rows = []
+                    for (var i in source) {
+                        var post = source[i]
+                        rows.push({from: post["user"].name, "created_time": timeSince(post["created_time"]),
+                            "updated_time": timeSince(post["updated_time"]), "message": post["message"].substring(0, 80),
+                            "like_count": post["like_count"], "comment_count": post["comment_count"],
+                            "share_count": post["share_count"]});
+                    };
+                    console.dir(rows)
+                    issue_table.append(rows);
                 },
                 error: function (request, status, error) {
                     alert(status);
                 }
             });
         }
+
+        jui.ready(["uix.table"], function (table) {
+            issue_table = table("#issue_table", {
+                fields: ["from", "created_time", "updated_time", "message", "like_count", "comment_count", "share_count", null],
+                scroll: true,
+                scrollHeight: 300,
+                tpl: {
+                    row: $("#tpl_row").html()
+                }
+            });
+        });
 
         jui.ready(["ui.button"], function (button) {
             statistics_radio = button("#statistics_radio", {
@@ -356,12 +390,10 @@
             getIssue(issue_len);
 
             $("#statistics_run").on("click", function () {
-                alert(statistics_method + "/" + $("#statistics_from").val() + "/" + $("#statistics_to").val());
                 getStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
             });
 
             $("#issue_run").on("click", function () {
-                alert(issue_len + "/" + $("#issue_from").val() + "/" + $("#issue_to").val());
                 getIssue(issue_len, $("#issue_from").val(), $("#issue_to").val());
             });
         })

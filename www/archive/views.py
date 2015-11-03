@@ -1,16 +1,17 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db import connections
 from django.db.models import Count, Sum
 from django.forms.models import model_to_dict
-from django.utils import timezone
 
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
+from rest_framework.decorators import list_route, detail_route
+from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
 from .serializer import *
 
 import logging
-import datetime
 
 from . import tasks
 from .utils import date_utils
@@ -20,6 +21,16 @@ from .fb_request import FBRequest
 
 logger = logging.getLogger(__name__)
 fb_request = FBRequest()
+
+
+class JSONResponse(HttpResponse):
+    """
+    An HttpResponse that renders its content into JSON.
+    """
+    def __init__(self, data, **kwargs):
+        content = JSONRenderer().render(data)
+        kwargs['content_type'] = 'application/json'
+        super(JSONResponse, self).__init__(content, **kwargs)
 
 
 def groups(request):
@@ -130,83 +141,6 @@ def group_update(request, group_id):
         return HttpResponseRedirect(reverse('archive:groups'))
 
 
-def get_issue(request, group_id):
-    """
-    Get hot issue posts from group.
-
-    length : 20(default) | 50 | 100 from HTTP Request
-    from_date : start day from HTTP Request
-    to_date : to day from HTTP Request
-
-    :param request: request
-    :param group_id: group_id
-    :return: (group, issue posts)
-    """
-    _group = Group.objects.filter(id=group_id)[0]
-
-    length = int(request.GET.get('len', 20))
-    from_date = request.GET.get('from', None)
-    to_date = request.GET.get('to', None)
-
-    # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
-    if from_date is None and to_date is None:
-        from_date, to_date = date_utils.week_delta()
-
-    posts = get_objects_by_time(_group, Post, from_date, to_date)
-
-    posts = posts.extra(
-        select={'field_sum': 'like_count + comment_count'},
-        order_by=('-field_sum',)
-    )
-
-    posts_len = len(posts)
-    if posts_len < length:
-        length = posts_len
-
-    return _group, posts[:length]
-
-
-def group_issue(request, group_id):
-    """
-    Get hot issue posts by using 'get_issue' method.
-    It returns rendered template.
-
-    :param request: request
-    :param group_id: group_id
-    :return: rendered template
-    """
-    _group, posts = get_issue(request, group_id)
-
-    return render(
-        request,
-        'archive/group/issue.html',
-        {
-            'group': _group,
-            'posts': posts,
-        }
-    )
-
-
-def group_issue_json(request, group_id):
-    """
-    Get hot issue posts by using 'get_issue' method.
-    It returns json.
-
-    :param request: request
-    :param group_id: group_id
-    :return: json
-    """
-    _group, posts = get_issue(request, group_id)
-
-    group_dict = model_to_dict(_group)
-    posts_dict = [model_to_dict(post) for post in posts]
-
-    return JsonResponse({
-        'group': group_dict,
-        'posts': posts_dict,
-    })
-
-
 def group_statistics(request, group_id):
     """
     Get statistics from group.
@@ -278,16 +212,87 @@ def get_objects_by_time(_group, model, from_date=None, to_date=None):
 
 
 # ViewSets define the view behavior.
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    User View Set
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+def get_issue_rest(request, _group):
+    """
+    Get hot issue posts from group.
+
+    length : 20(default) | 50 | 100 from HTTP Request
+    from_date : start day from HTTP Request
+    to_date : to day from HTTP Request
+
+    :param request: request
+    :return: (group, issue posts)
+    """
+
+    length = int(request.GET.get('len', 20))
+    from_date = request.GET.get('from', None)
+    to_date = request.GET.get('to', None)
+
+    # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
+    if from_date is None and to_date is None:
+        from_date, to_date = date_utils.week_delta()
+
+    posts = get_objects_by_time(_group, Post, from_date, to_date)
+
+    posts = posts.extra(
+        select={'field_sum': 'like_count + comment_count'},
+        order_by=('-field_sum',)
+    )
+
+    return posts[:length]
+
+
+class GroupViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Group View Set
+    """
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
+    @detail_route()
+    def issue(self, request, pk=None):
+        group = self.get_object()
+        posts = get_issue_rest(request, group)
+        serializers = PostSerializer(posts, many=True, context={'request': request})
+        return Response(serializers.data)
 
-class PostViewSet(viewsets.ModelViewSet):
+
+class PostViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Post View Set
+    """
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+
+class CommentViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Comment View Set
+    """
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+
+class MediaViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Media View Set
+    """
+    queryset = Media.objects.all()
+    serializer_class = MediaSerializer
+
+
+class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Attachment View Set
+    """
+    queryset = Attachment.objects.all()
+    serializer_class = AttachmentSerializer
+

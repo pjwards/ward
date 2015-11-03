@@ -22,18 +22,19 @@ class CommentInline(admin.TabularInline):
 
 class PostAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,               {'fields': ['user', 'message', 'picture']}),
+        (None, {'fields': ['user', 'message', 'picture']}),
         ('Date information', {'fields': ['created_time', 'updated_time'], 'classes': ['collapse']}),
     ]
     inlines = [CommentInline]
-    list_display = ('id', 'user', 'created_time', 'updated_time', 'message', 'comment_count', 'like_count', 'share_count')
+    list_display = (
+    'id', 'user', 'created_time', 'updated_time', 'message', 'comment_count', 'like_count', 'share_count')
     list_filter = ['created_time', 'updated_time']
     search_fields = ['user']
 
 
 class CommentAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,               {'fields': ['user', 'message']}),
+        (None, {'fields': ['user', 'message']}),
         ('Date information', {'fields': ['created_time'], 'classes': ['collapse']}),
     ]
     inlines = [CommentInline]

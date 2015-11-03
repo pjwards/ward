@@ -46,11 +46,14 @@ router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
 router.register(r'posts', views.PostViewSet)
+router.register(r'comments', views.CommentViewSet)
+router.register(r'medium', views.MediaViewSet)
+router.register(r'attachments', views.AttachmentViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns += patterns('',
-    url(r'^rest/', include(router.urls)),
+    url(r'^api/', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 )
 
