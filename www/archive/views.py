@@ -3,7 +3,6 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db import connections
 from django.db.models import Count, Sum
-from django.forms.models import model_to_dict
 
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import list_route, detail_route
