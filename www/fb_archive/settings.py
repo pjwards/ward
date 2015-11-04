@@ -383,6 +383,7 @@ BOWER_INSTALLED_APPS = (
     'jquery',
     'jquery-ui',
     'jui',
+    'startbootstrap-sb-admin-2',
 )
 
 

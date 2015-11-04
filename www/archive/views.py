@@ -219,7 +219,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
 
-def get_issue_rest(request, _group):
+def get_issue(request, _group):
     """
     Get hot issue posts from group.
 
@@ -246,6 +246,10 @@ def get_issue_rest(request, _group):
         order_by=('-field_sum',)
     )
 
+    posts_len = len(posts)
+    if posts_len < length:
+        length = posts_len
+
     return posts[:length]
 
 
@@ -259,7 +263,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     @detail_route()
     def issue(self, request, pk=None):
         group = self.get_object()
-        posts = get_issue_rest(request, group)
+        posts = get_issue(request, group)
         serializers = PostSerializer(posts, many=True, context={'request': request})
         return Response(serializers.data)
 
