@@ -338,11 +338,17 @@
                     var rows = []
                     for (var i in source) {
                         var post = source[i]
-                        rows.push({from: post["user"].name, "created_time": timeSince(post["created_time"]),
-                            "updated_time": timeSince(post["updated_time"]), "message": post["message"].substring(0, 80),
-                            "like_count": post["like_count"], "comment_count": post["comment_count"],
-                            "share_count": post["share_count"]});
-                    };
+                        rows.push({
+                            from: post["user"].name,
+                            "created_time": timeSince(post["created_time"]),
+                            "updated_time": timeSince(post["updated_time"]),
+                            "message": post["message"].length > 80 ? post["message"].substring(0, 80) + "..." : post["message"],
+                            "like_count": post["like_count"],
+                            "comment_count": post["comment_count"],
+                            "share_count": post["share_count"]
+                        });
+                    }
+                    ;
                     console.dir(rows)
                     issue_table.append(rows);
                 },
