@@ -1,4 +1,4 @@
-from .models import User, Group, Post, Comment, Media, Attachment
+from archive.models import User, Group, Post, Comment, Media, Attachment
 from rest_framework import serializers
 
 __author__ = "Donghyun Seo"

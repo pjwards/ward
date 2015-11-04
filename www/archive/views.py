@@ -1,17 +1,18 @@
-from django.shortcuts import render, redirect
+import logging
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db import connections
-from django.db.models import Count, Sum
+from django.db.models import Count
 
-from rest_framework import viewsets, mixins
-from rest_framework.decorators import list_route, detail_route
+from rest_framework import viewsets
+from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from .serializer import *
 
-import logging
-
+from .rest.serializer import *
+from .rest.pagination import *
 from . import tasks
 from .utils import date_utils
 from .fb_query import get_feed_query
@@ -87,7 +88,7 @@ def group(request, group_id):
     """
     if request.method == "GET":
         _groups = Group.objects.all()
-        _group = Group.objects.filter(id=group_id)[0]
+        _group = get_object_or_404(Group, pk=group_id)
 
         from_date, to_date = date_utils.week_delta()
         posts = Post.objects.filter(group=_group, created_time__range=[from_date, to_date]) \
@@ -152,7 +153,7 @@ def group_statistics(request, group_id):
     :param group_id: group_id
     :return: json
     """
-    _group = Group.objects.filter(id=group_id)[0]
+    _group = get_object_or_404(Group, pk=group_id)
 
     method = request.GET.get('method', 'month')
     from_date = request.GET.get('from', None)
@@ -262,8 +263,21 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
     @detail_route()
     def issue(self, request, pk=None):
+        """
+        Return Hot Issue for group
+        """
         group = self.get_object()
         posts = get_issue(request, group)
+        serializers = PostSerializer(posts, many=True, context={'request': request})
+        return Response(serializers.data)
+
+    @detail_route()
+    def timeline(self, request, pk=None):
+        """
+        Return posts for group
+        """
+        group = self.get_object()
+        posts = Post.objects.filter(group=group).order_by('-updated_time')
         serializers = PostSerializer(posts, many=True, context={'request': request})
         return Response(serializers.data)
 
