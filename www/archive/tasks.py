@@ -17,7 +17,7 @@ fb_request = FBRequest()
 
 
 @shared_task
-def store_user(user_id, user_name):
+def store_user(user_id, user_name, group):
     """
     This method stores a user.
 
@@ -25,10 +25,18 @@ def store_user(user_id, user_name):
     :param user_name:  user name
     :return: user model
     """
-    user = User(id=user_id, name=user_name)
-    user.picture = fb_request.user_picture(user_id)
-    user.save()
-    logger.info('Saved user: %s', user.id)
+    user = User.objects.filter(id=user_id)
+    if not user:
+        # save user
+        user = User(id=user_id, name=user_name)
+        user.picture = fb_request.user_picture(user_id)
+        user.save()
+        logger.info('Saved user: %s', user.id)
+    else:
+        user = user[0]
+
+    user.groups.add(group)
+
     return user
 
 
@@ -95,12 +103,7 @@ def store_comment(comment_data, post, group, parent=None):
 
         # save user
         comment_from = comment_data.get('from')
-        user = User.objects.filter(id=comment_from.get('id'))
-        if not user:
-            user = store_user(comment_from.get('id'), comment_from.get('name'))
-        else:
-            user = user[0]
-        comment.user = user
+        comment.user = store_user(comment_from.get('id'), comment_from.get('name'), group)
 
         comment.created_time = comment_data.get('created_time')
         comment.like_count = comment_data.get('like_count')
@@ -148,15 +151,10 @@ def store_feed(feed_data, group):
     post_id = feed_data.get('id')
     if not Post.objects.filter(id=post_id).exists():
         post = Post(id=post_id)
-        post_from = feed_data.get('from')
 
         # save user
-        user = User.objects.filter(id=post_from.get('id'))
-        if not user:
-            user = store_user(post_from.get('id'), post_from.get('name'))
-        else:
-            user = user[0]
-        post.user = user
+        post_from = feed_data.get('from')
+        post.user = store_user(post_from.get('id'), post_from.get('name'), group)
 
         post.message = feed_data.get('message')
         post.created_time = feed_data.get('created_time')

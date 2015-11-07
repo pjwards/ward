@@ -31,15 +31,6 @@ def get_different_time(time):
         return str(int(seconds)) + " seconds ago"
 
 
-class User(models.Model):
-    id = models.CharField(max_length=20, primary_key=True)
-    name = models.CharField(max_length=50)
-    picture = models.CharField(max_length=255, null=True, blank=True)
-
-    def __str__(self):
-        return self.id
-
-
 class Group(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=100)
@@ -69,6 +60,16 @@ class Group(models.Model):
         :return: different time
         """
         return get_different_time(self.updated_time)
+
+
+class User(models.Model):
+    id = models.CharField(max_length=20, primary_key=True)
+    name = models.CharField(max_length=50)
+    picture = models.CharField(max_length=255, null=True, blank=True)
+    groups = models.ManyToManyField(Group)
+
+    def __str__(self):
+        return self.id
 
 
 class Post(models.Model):
