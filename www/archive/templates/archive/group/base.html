@@ -375,6 +375,12 @@
                                 + ' | <i class="icon-like"></i> ' + post["comment_count"] + '</small></p></div>'
                                 + '<div class="timeline-body"><p><code>' + String(post["message"]).replace(/</gi, "&lt;") + '</code>'
                                 + '<br/><br/><img src="' + post["picture"] + '" </p></div></div>';
+
+                        var attachments = post["attachments"];
+                        if(attachments){
+                            console.dir(attachments);
+                        }
+
                         timeline.append('<li>' + html + '</li>');
 
                         timeline_last_li = $('#timeline li:last');

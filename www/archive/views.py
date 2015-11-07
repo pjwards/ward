@@ -277,7 +277,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         Return posts for group
         """
         group = self.get_object()
-        posts = Post.objects.filter(group=group).order_by('-updated_time')
+        posts = Post.objects.filter(group=group).order_by('-updated_time')[:10]
         serializers = PostSerializer(posts, many=True, context={'request': request})
         return Response(serializers.data)
 

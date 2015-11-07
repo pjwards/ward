@@ -56,9 +56,9 @@ def store_attachment(attachment_data, post=None, comment=None):
     if 'type' in attachment_data:
         attachment.type = attachment_data.get('type')
     if 'media' in attachment_data:
-        media = Media(height=attachment_data.get('media').get('height'),
-                      width=attachment_data.get('media').get('width'),
-                      src=attachment_data.get('media').get('src'))
+        media = Media(height=attachment_data.get('media').get('image').get('height'),
+                      width=attachment_data.get('media').get('image').get('width'),
+                      src=attachment_data.get('media').get('image').get('src'))
         media.save()
         logger.info('Saved media: %s', media.id)
         attachment.media = media

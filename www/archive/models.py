@@ -73,7 +73,7 @@ class Group(models.Model):
 
 class Post(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='posts')
     created_time = models.DateTimeField()
     updated_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
@@ -114,12 +114,12 @@ class Post(models.Model):
 
 class Comment(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='comments')
     created_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
     like_count = models.IntegerField(default=0)
-    post = models.ForeignKey(Post)
-    parent = models.ForeignKey('Comment', null=True)
+    post = models.ForeignKey(Post, related_name='comments')
+    parent = models.ForeignKey('Comment', null=True, related_name='comments')
     group = models.ForeignKey(Group)
 
     def __str__(self):
@@ -141,11 +141,11 @@ class Media(models.Model):
 
 
 class Attachment(models.Model):
-    post = models.ForeignKey(Post, null=True)
-    comment = models.ForeignKey(Comment, null=True)
+    post = models.ForeignKey(Post, null=True, related_name='attachments')
+    comment = models.ForeignKey(Comment, null=True, related_name='attachments')
     url = models.CharField(max_length=255, null=True, blank=True)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=30, null=True, blank=True)
     # photo, share, unavailable, album(sub), video_autoplay, multi_share(sub), video_share_youtube, note
-    media = models.ForeignKey(Media, null=True)
+    media = models.ForeignKey(Media, null=True, related_name='media')

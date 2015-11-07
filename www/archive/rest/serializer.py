@@ -8,6 +8,10 @@ __email__ = "egaoneko@naver.com"
 
 # Serializers define the API representation.
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+    posts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='post-detail')
+
     class Meta:
         model = User
         fields = '__all__'
@@ -15,26 +19,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
     class Meta:
         model = Group
         fields = '__all__'
         read_only_fields = '__all__'
-
-
-class PostSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Post
-        fields = '__all__'
-        read_only_fields = '__all__'
-        depth = 1
-
-
-class CommentSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Comment
-        fields = '__all__'
-        read_only_fields = '__all__'
-        depth = 1
 
 
 class MediaSerializer(serializers.HyperlinkedModelSerializer):
@@ -47,6 +37,32 @@ class MediaSerializer(serializers.HyperlinkedModelSerializer):
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Attachment
+        # fields = '__all__'
+        exclude = ('post', 'comment')
+        read_only_fields = '__all__'
+        depth = 1
+
+
+class CommentSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        read_only_fields = '__all__'
+        depth = 1
+
+
+class PostSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    # attachments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='attachment-detail')
+    comments = serializers.HyperlinkedIdentityField(many=True, read_only=True, view_name='comment-detail')
+    # comments = CommentSerializer(many=True, read_only=True)
+    attachments = AttachmentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Post
         fields = '__all__'
         read_only_fields = '__all__'
         depth = 1
