@@ -374,10 +374,14 @@
                                 + ' | <i class="icon-like"></i> ' + post["like_count"]
                                 + ' | <i class="icon-like"></i> ' + post["comment_count"] + '</small></p></div>'
                                 + '<div class="timeline-body"><p><code>' + String(post["message"]).replace(/</gi, "&lt;") + '</code>'
-                                + '<br/><br/><img src="' + post["picture"] + '" </p></div></div>';
+                                + '<br/><br/>';
+
+                        html += post["picture"]?'<img src="' + post["picture"]  + '">':'';
+
+                        html += '</p></div></div>';
 
                         var attachments = post["attachments"];
-                        if(attachments){
+                        if(attachments.length > 0){
                             console.dir(attachments);
                         }
 
