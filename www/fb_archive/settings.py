@@ -101,7 +101,7 @@ ALLOWED_HOSTS = []
 TIME_ZONE = 'Asia/Seoul'
 
 # If you set this to True, Django will use timezone-aware datetimes.
-USE_TZ = False
+USE_TZ = True
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -383,6 +383,7 @@ BOWER_INSTALLED_APPS = (
     'jquery',
     'jquery-ui',
     'jui',
+    'font-awesome',
 )
 
 
@@ -436,8 +437,8 @@ LOGGING = {
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
-    'PAGE_SIZE': 10
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
+    'PAGE_SIZE': 20,
 }
 
 
