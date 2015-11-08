@@ -367,23 +367,19 @@
 
                     for (var i in source) {
                         var post = source[i];
+                        var message = post["message"]? String(post["message"]).replace(/</gi, "&lt;"):"";
                         var html = '<div class="timeline-badge"><img src="' + post["user"]["picture"] + '" style="border-radius: 10px;"></div>'
                                 + '<div class="timeline-panel">'
-                                + '<div class="timeline-heading"><h4 class="timeline-title">' + post["user"]["name"] + '</h4>'
-                                + '<p><small class="text-muted"><i class="icon-realtime"></i> ' + timeSince(post["updated_time"])
+                                + '<div class="timeline-heading"><h4 class="timeline-title h4">' + post["user"]["name"] + '</h4>'
+                                + '<p><small class="text-muted h4"><i class="icon-realtime"></i> ' + timeSince(post["updated_time"])
                                 + ' | <i class="icon-like"></i> ' + post["like_count"]
-                                + ' | <i class="icon-like"></i> ' + post["comment_count"] + '</small></p></div>'
-                                + '<div class="timeline-body"><p><code>' + String(post["message"]).replace(/</gi, "&lt;") + '</code>'
+                                + ' | <i class="icon-message"></i> ' + post["comment_count"] + '</small></p></div>'
+                                + '<div class="timeline-body h5"><p><code>' + message + '</code>'
                                 + '<br/><br/>';
 
-                        html += post["picture"]?'<img src="' + post["picture"]  + '">':'';
-
-                        html += '</p></div></div>';
-
                         var attachments = post["attachments"];
-                        if(attachments.length > 0){
-                            console.dir(attachments);
-                        }
+                        html += generate_attachment(attachments, post["picture"]);
+                        html += '</p></div></div>';
 
                         timeline.append('<li>' + html + '</li>');
 

@@ -4,6 +4,8 @@
 
 ## Requirements
 
+#### Back-End
+
 * python >= 3.5 (tested with version 3.5)
 * django >= 1.8.5 (tested with version 1.8.5)
 * celery (tested with version 3.1.18)
@@ -14,6 +16,13 @@
 * django-rest-framework (tested with version 3.3.0)
 * markdown (tested with version 2.6.3)
 * django-filter (tested with version 0.11.0)
+
+#### Front-End
+
+* jQuery
+* jQuery UI
+* Font Awesome
+* JUI
 
 #### Optional dependencies:
 
