@@ -119,6 +119,7 @@ class Comment(models.Model):
     created_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
     like_count = models.IntegerField(default=0)
+    comment_count = models.IntegerField(default=0)
     post = models.ForeignKey(Post, related_name='comments')
     parent = models.ForeignKey('Comment', null=True, related_name='comments')
     group = models.ForeignKey(Group)

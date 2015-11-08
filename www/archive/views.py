@@ -220,16 +220,16 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
 
-def get_issue(request, _group):
+def get_issue(request, _group, model):
     """
-    Get hot issue posts from group.
+    Get hot issue models from group.
 
     length : 20(default) | 50 | 100 from HTTP Request
     from_date : start day from HTTP Request
     to_date : to day from HTTP Request
 
     :param request: request
-    :return: (group, issue posts)
+    :return: (group, issue models)
     """
 
     length = int(request.GET.get('len', 20))
@@ -240,18 +240,18 @@ def get_issue(request, _group):
     if from_date is None and to_date is None:
         from_date, to_date = date_utils.week_delta()
 
-    posts = get_objects_by_time(_group, Post, from_date, to_date)
+    models = get_objects_by_time(_group, model, from_date, to_date)
 
-    posts = posts.extra(
+    models = models.extra(
         select={'field_sum': 'like_count + comment_count'},
         order_by=('-field_sum',)
     )
 
-    posts_len = len(posts)
-    if posts_len < length:
-        length = posts_len
+    models_len = len(models)
+    if models_len < length:
+        length = models_len
 
-    return posts[:length]
+    return models[:length]
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -262,13 +262,23 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = GroupSerializer
 
     @detail_route()
-    def issue(self, request, pk=None):
+    def posts(self, request, pk=None):
         """
-        Return Hot Issue for group
+        Return Hot Comment Issue for group
         """
         group = self.get_object()
-        posts = get_issue(request, group)
+        posts = get_issue(request, group, Post)
         serializers = PostSerializer(posts, many=True, context={'request': request})
+        return Response(serializers.data)
+
+    @detail_route()
+    def comments(self, request, pk=None):
+        """
+        Return Hot Comment Issue for group
+        """
+        group = self.get_object()
+        comments = get_issue(request, group, Comment)
+        serializers = CommentSerializer(comments, many=True, context={'request': request})
         return Response(serializers.data)
 
     @detail_route()

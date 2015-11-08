@@ -38,7 +38,7 @@ class CommentAdmin(admin.ModelAdmin):
         ('Date information', {'fields': ['created_time'], 'classes': ['collapse']}),
     ]
     inlines = [CommentInline]
-    list_display = ('id', 'user', 'created_time', 'message', 'like_count')
+    list_display = ('id', 'user', 'created_time', 'message', 'comment_count', 'like_count')
     list_filter = ['created_time']
     search_fields = ['user']
 

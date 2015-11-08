@@ -126,47 +126,85 @@
                     <div class="body">
                         <h1 class="title"><i class="icon-bell"></i> <strong>Hot Issue</strong></h1>
 
-                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                            <div class="head">
-                                <strong>Recent Post List</strong>
+                        <div class="col col-6">
+                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                                <div class="head">
+                                    <strong>Recent Post List</strong>
 
-                                <div class="group" style="float: right">
-                                    <div id="issue_radio" class="group">
-                                        <a class="btn " value="20">20</a>
-                                        <a class="btn " value="50">50</a>
-                                        <a class="btn" value="100">100</a>
-                                        <input type="text" class="input" id="issue_from" placeholder="from"/>
-                                        <input type="text" class="input" id="issue_to" placeholder="to"/>
+                                    <div class="group" style="float: right">
+                                        <div id="post_issue_radio" class="group">
+                                            <a class="btn " value="20">20</a>
+                                            <a class="btn " value="50">50</a>
+                                            <a class="btn" value="100">100</a>
+                                            <input type="text" class="input" id="post_issue_from" placeholder="from"/>
+                                            <input type="text" class="input" id="post_issue_to" placeholder="to"/>
+                                        </div>
+                                        <button class="btn" value="run" id="post_issue_run"><i class="icon-play"></i>
+                                            Run
+                                        </button>
                                     </div>
-                                    <button class="btn" value="run" id="issue_run"><i class="icon-play"></i> Run
-                                    </button>
                                 </div>
+                                <table id="post_issue_table" class="table simple hover">
+                                    <colgroup>
+                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
+                                        <col style="width: 55%;">
+                                        <col style="width: 10%;">
+                                        <col style="width: 10%;">
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <th><i class="icon-user"></i> From</th>
+                                        <th><i class="icon-realtime"></i> Created Time</th>
+                                        <th><i class="icon-report"></i> Message</th>
+                                        <th><i class="icon-like"></i> Like</th>
+                                        <th><i class="icon-message"></i> Comment</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
-                            <table id="issue_table" class="table simple hover">
-                                <colgroup>
-                                    <col style="width: 10%;">
-                                    <col style="width: 8%;">
-                                    <col style="width: 8%;">
-                                    <col style="width: 45%;">
-                                    <col style="width: 7%;">
-                                    <col style="width: 7%;">
-                                    <col style="width: 7%;">
-                                    <col style="width: 8%;">
-                                </colgroup>
-                                <thead>
-                                <tr>
-                                    <th><i class="icon-user"></i> From</th>
-                                    <th><i class="icon-realtime"></i> Created Time</th>
-                                    <th><i class="icon-realtime"></i> Updated Time</th>
-                                    <th><i class="icon-report"></i> Message</th>
-                                    <th><i class="icon-like"></i> Like</th>
-                                    <th><i class="icon-message"></i> Comment</th>
-                                    <th><i class="icon-share"></i> Share</th>
-                                    <th><i class="icon-search"></i> View</th>
-                                </tr>
-                                </thead>
-                                <tbody id="issue_tbody"></tbody>
-                            </table>
+                        </div>
+
+                        <div class="col col-6">
+                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                                <div class="head">
+                                    <strong>Recent Comment List</strong>
+
+                                    <div class="group" style="float: right">
+                                        <div id="comment_issue_radio" class="group">
+                                            <a class="btn " value="20">20</a>
+                                            <a class="btn " value="50">50</a>
+                                            <a class="btn" value="100">100</a>
+                                            <input type="text" class="input" id="comment_issue_from"
+                                                   placeholder="from"/>
+                                            <input type="text" class="input" id="comment_issue_to" placeholder="to"/>
+                                        </div>
+                                        <button class="btn" value="run" id="comment_issue_run"><i class="icon-play"></i>
+                                            Run
+                                        </button>
+                                    </div>
+                                </div>
+                                <table id="comment_issue_table" class="table simple hover">
+                                    <colgroup>
+                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
+                                        <col style="width: 55%;">
+                                        <col style="width: 10%;">
+                                        <col style="width: 10%;">
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <th><i class="icon-user"></i> From</th>
+                                        <th><i class="icon-realtime"></i> Created Time</th>
+                                        <th><i class="icon-report"></i> Message</th>
+                                        <th><i class="icon-like"></i> Like</th>
+                                        <th><i class="icon-message"></i> Comment</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -175,12 +213,9 @@
                     <tr>
                         <td><i class="icon-stop" style="font-size:8.5px;color:red;"></i><!= from !></td>
                         <td><!= created_time !></td>
-                        <td><!= updated_time !></td>
                         <td><!= message !></td>
                         <td><!= like_count !></td>
                         <td><!= comment_count !></td>
-                        <td><!= share_count !></td>
-                        <td><i class="icon-search"></i> View</td>
                     </tr>
                 </script>
 
@@ -207,7 +242,6 @@
         var chart = jui.include("chart.builder");
         var statistics;
         var statistics_method = 'month';
-        var issue;
         var issue_len = 20;
 
 
@@ -318,9 +352,9 @@
             });
         }
 
-        function getIssue(len, from, to) {
+        function getIssue(model, len, from, to) {
             $.ajax({
-                url: "/api/groups/{{ group.id }}/issue",
+                url: "/api/groups/{{ group.id }}/" + model + "/",
                 type: "get",
                 async: false,
                 data: {
@@ -330,22 +364,26 @@
                 },
                 dataType: "JSON",
                 success: function (source) {
-                    issue_table.reset()
                     var rows = []
                     for (var i in source) {
                         var post = source[i]
                         rows.push({
                             from: post["user"].name,
                             "created_time": timeSince(post["created_time"]),
-                            "updated_time": timeSince(post["updated_time"]),
                             "message": !post["message"] || post["message"].length < 80 ? post["message"] : post["message"].substring(0, 80) + "...",
                             "like_count": post["like_count"],
                             "comment_count": post["comment_count"],
-                            "share_count": post["share_count"]
                         });
                     }
                     ;
-                    issue_table.append(rows);
+                    if (model == "posts") {
+                        post_issue_table.reset()
+                        post_issue_table.append(rows);
+                    } else if (model == "comments") {
+                        comment_issue_table.reset()
+                        comment_issue_table.append(rows);
+                    }
+
                 },
                 error: function (request, status, error) {
                     alert(status);
@@ -367,7 +405,7 @@
 
                     for (var i in source) {
                         var post = source[i];
-                        var message = post["message"]? String(post["message"]).replace(/</gi, "&lt;"):"";
+                        var message = post["message"] ? String(post["message"]).replace(/</gi, "&lt;") : "";
                         var html = '<div class="timeline-badge"><img src="' + post["user"]["picture"] + '" style="border-radius: 10px;"></div>'
                                 + '<div class="timeline-panel">'
                                 + '<div class="timeline-heading"><h4 class="timeline-title h4">' + post["user"]["name"] + '</h4>'
@@ -398,6 +436,7 @@
 
                         before_user = post["user"]["url"];
                     }
+                    timeline.append('<div class="galleria" style="display:none;"></div>');
                 },
                 error: function (request, status, error) {
                     alert(status);
@@ -406,10 +445,19 @@
         }
 
         jui.ready(["uix.table"], function (table) {
-            issue_table = table("#issue_table", {
-                fields: ["from", "created_time", "updated_time", "message", "like_count", "comment_count", "share_count", null],
+            post_issue_table = table("#post_issue_table", {
+                fields: ["from", "created_time", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 300,
+                scrollHeight: 500,
+                tpl: {
+                    row: $("#tpl_row").html()
+                }
+            });
+
+            comment_issue_table = table("#comment_issue_table", {
+                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
                 tpl: {
                     row: $("#tpl_row").html()
                 }
@@ -427,7 +475,17 @@
                 }
             });
 
-            issue_radio = button("#issue_radio", {
+            post_issue_radio = button("#post_issue_radio", {
+                type: "radio",
+                index: 0,
+                event: {
+                    change: function (data) {
+                        issue_len = data.value;
+                    }
+                }
+            });
+
+            comment_issue_radio = button("#comment_issue_radio", {
                 type: "radio",
                 index: 0,
                 event: {
@@ -440,20 +498,25 @@
 
         $(function () {
             getStatistics(statistics_method);
-            getIssue(issue_len);
+            getIssue("posts", issue_len);
+            getIssue("comments", issue_len);
             getTimeline();
 
             $("#statistics_run").on("click", function () {
                 getStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
             });
 
-            $("#issue_run").on("click", function () {
-                getIssue(issue_len, $("#issue_from").val(), $("#issue_to").val());
+            $("#post_issue_run").on("click", function () {
+                getIssue("posts", issue_len, $("#post_issue_from").val(), $("#post_issue_to").val());
+            });
+
+            $("#comment_issue_run").on("click", function () {
+                getIssue("comments", issue_len, $("#comment_issue_from").val(), $("#comment_issue_to").val());
             });
         })
 
         $(function () {
-            $("#statistics_from, #issue_from").datepicker({
+            $("#statistics_from, #post_issue_from, #comment_issue_from").datepicker({
                 dateFormat: 'yy-mm-dd',
                 showMonthAfterYear: true,
                 autoSize: true,
@@ -467,13 +530,14 @@
                 changeYear: true,
                 onClose: function (selectedDate) {
                     $("#statistics_to").datepicker("option", "minDate", selectedDate);
-                    $("#issue_to").datepicker("option", "minDate", selectedDate);
+                    $("#post_issue_to").datepicker("option", "minDate", selectedDate);
+                    $("#comment_issue_to").datepicker("option", "minDate", selectedDate);
                 }
             });
         });
 
         $(function () {
-            $("#statistics_to, #issue_to").datepicker({
+            $("#statistics_to, #post_issue_to, #comment_issue_to").datepicker({
                 dateFormat: "yy-mm-dd",
                 showMonthAfterYear: true,
                 autoSize: true,
@@ -487,7 +551,8 @@
                 changeYear: true,
                 onClose: function (selectedDate) {
                     $("#statistics_from").datepicker("option", "maxDate", selectedDate);
-                    $("#issue_from").datepicker("option", "maxDate", selectedDate);
+                    $("#post_issue_from").datepicker("option", "maxDate", selectedDate);
+                    $("#comment_issue_from").datepicker("option", "maxDate", selectedDate);
                 }
             });
         });

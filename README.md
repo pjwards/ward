@@ -23,6 +23,7 @@
 * jQuery UI
 * Font Awesome
 * JUI
+* Galleria
 
 #### Optional dependencies:
 

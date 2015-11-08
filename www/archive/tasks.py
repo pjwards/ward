@@ -109,6 +109,9 @@ def store_comment(comment_data, post, group, parent=None):
         comment.like_count = comment_data.get('like_count')
         comment.group = group
 
+        if 'comments' in comment_data:
+            comment.comment_count = comment_data.get('comments').get('summary').get('total_count')
+
         if 'message' in comment_data:
             comment.message = comment_data.get('message')
 
@@ -125,6 +128,9 @@ def store_comment(comment_data, post, group, parent=None):
     else:
         comment = Comment.objects.filter(id=comment_id)[0]
         comment.like_count = comment_data.get('like_count')
+
+        if 'comments' in comment_data:
+            comment.comment_count = comment_data.get('comments').get('summary').get('total_count')
 
         if 'message' in comment_data:
             comment.message = comment_data.get('message')
