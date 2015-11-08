@@ -419,7 +419,14 @@
                                 + '<br/><br/>';
 
                         var attachments = post["attachments"];
-                        html += generate_attachment(attachments, post["picture"]);
+
+                        var attachment_html = generate_attachment(attachments, post["picture"]);
+                        html += attachment_html;
+
+                        if (!attachment_html) {
+                            var picture = post["picture"]? '<div class="galleria"><img src="' + post["picture"] + '"></div>':"";
+                            html += picture;
+                        }
                         html += '</p></div></div>';
 
                         timeline.append('<li>' + html + '</li>');

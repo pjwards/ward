@@ -29,7 +29,7 @@ class PostAdmin(admin.ModelAdmin):
     list_display = (
     'id', 'user', 'created_time', 'updated_time', 'message', 'comment_count', 'like_count', 'share_count')
     list_filter = ['created_time', 'updated_time']
-    search_fields = ['user']
+    search_fields = ['message']
 
 
 class CommentAdmin(admin.ModelAdmin):

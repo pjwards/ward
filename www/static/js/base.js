@@ -85,16 +85,18 @@ var generate_attachment = function (attachments, picture) {
         } else if (attachment["type"] == "note") {
             var note = picture ? '<div class="col col-4" align="middle"><img src="' + picture + '" width="80%"></div><div class="col col-8">' : '<div class="col col-12">';
             var description = attachment["description"] ? '</div><br><div class="h4">' + attachment["description"] + '</div>' : "";
-            note += '<div class="h3"><span class="icon icon-share"></span> <a href="' + attachment["url"] + '" target="_blank">' + attachment["title"] + '</a>' + description + '</div>';
+            note += '<div class="h3"><span class="icon icon-report2"></span> <a href="' + attachment["url"] + '" target="_blank">' + attachment["title"] + '</a>' + description + '</div>';
 
             return '<div class="panel" style="border:1px solid #ababab; border-radius: 10px;"><div class="body">' + note + '</div></div>';
         } else if (attachment["type"] == "unavailable") {
             var description = attachment["description"] ? '</div><br><div class="h4">' + attachment["description"] + '</div>' : "";
-            var unavailable = '<div class="h3"><span class="icon icon-save"></span>' + attachment["title"] + description + '</div>';
+            var unavailable = '<div class="h3"><span class="icon icon-save"></span> ' + attachment["title"] + description + '</div>';
 
             return '<div class="panel" style="border:1px solid #ababab; border-radius: 10px;"><div class="body">' + unavailable + '</div></div>';
         } else if (attachment["type"] == "video_inline") {
             var img = '<a href="' + attachment["url"] + '" target="_blank"><img src="' + picture + '"></a>';
+            album_title = attachment["title"]?attachment["title"]:"";
+            album_url = attachment["url"];
         } else if (attachment["type"] == "album") {
             album_title = attachment["title"];
             album_url = attachment["url"];
