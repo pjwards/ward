@@ -1,14 +1,16 @@
 import logging
+import operator
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db import connections
-from django.db.models import Count
+from django.db.models import Count, Max
 
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+
 from rest_framework.renderers import JSONRenderer
 
 from .rest.serializer import *
@@ -27,6 +29,7 @@ class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders its content into JSON.
     """
+
     def __init__(self, data, **kwargs):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json'
@@ -175,19 +178,42 @@ def group_statistics(request, group_id):
         .values('date') \
         .annotate(c_count=Count('created_time'))
 
+    post_max_cnt = all_posts.aggregate(Max('p_count'))
+    comment_max_cnt = all_comments.aggregate(Max('c_count'))
+
     if method == 'year':
-        date_len = 4
+        date_start_len = 0
+        date_end_len = 4
     elif method == 'month':
-        date_len = 7
+        date_start_len = 2
+        date_end_len = 7
     else:
-        date_len = 10
-    raw_data_source = list(zip(all_posts, all_comments))
+        date_start_len = 5
+        date_end_len = 10
 
-    if raw_data_source:
-        data_source = [{'date': x.get('date')[:date_len], 'posts': x.get('p_count'), 'comments': y.get('c_count')}
-                       for x, y in raw_data_source]
+    data_source = {}
 
-    return JsonResponse({'statistics': data_source})
+    for comment in all_comments:
+        dic = dict()
+        dic["date"] = comment.get("date")[date_start_len:date_end_len]
+        dic["posts"] = 0
+        dic["comments"] = comment.get("c_count")
+        data_source[comment.get("date")] = dic
+
+    for post in all_posts:
+        if post.get("date") in data_source:
+            data_source[post.get("date")]["posts"] = post.get("p_count")
+        else:
+            dic = dict()
+            dic["date"] = post.get("date")[date_start_len:date_end_len]
+            dic["posts"] = post.get("p_count")
+            post["comments"] = 0
+            data_source[post.get("date")] = dic
+
+    return JsonResponse({
+        'statistics': [data_source[key] for key in sorted(data_source.keys())],
+        'post_max_cnt': post_max_cnt["p_count__max"],
+        'comment_max_cnt': comment_max_cnt["c_count__max"]})
 
 
 def get_objects_by_time(_group, model, from_date=None, to_date=None):
@@ -322,4 +348,3 @@ class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
-

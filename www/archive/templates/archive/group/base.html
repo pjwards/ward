@@ -242,6 +242,8 @@
         var chart = jui.include("chart.builder");
         var statistics;
         var statistics_method = 'month';
+        var post_max_cnt;
+        var comment_max_cnt;
         var issue_len = 20;
 
 
@@ -258,6 +260,8 @@
                 dataType: "JSON",
                 success: function (source) {
                     statistics = source['statistics'];
+                    post_max_cnt = ceil(source['post_max_cnt'], 2);
+                    comment_max_cnt = ceil(source["comment_max_cnt"], 2);
                 },
                 error: function (request, status, error) {
                     alert(status);
@@ -265,7 +269,6 @@
             });
 
             $('#statistics').empty();
-
             chart("#statistics", {
                 padding: {
                     left: 60
@@ -279,7 +282,7 @@
                     },
                     y: {
                         type: "range",
-                        domain: [0, 1000],
+                        domain: [0, post_max_cnt],
                         step: 4,
                         line: true
                     },
@@ -292,7 +295,7 @@
                         hide: true
                     },
                     y: {
-                        domain: [0, 500],
+                        domain: [0, comment_max_cnt],
                         orient: "right"
                     },
                     area: {

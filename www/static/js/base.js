@@ -123,3 +123,9 @@ var generate_attachment = function (attachments, picture) {
     }
     return '';
 }
+
+//to round to n decimal places
+var ceil = function(num, places) {
+    var multiplier = Math.pow(10, places);
+    return Math.ceil(num / multiplier) * multiplier;
+}
