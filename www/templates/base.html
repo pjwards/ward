@@ -53,18 +53,6 @@
 <!-- JUI for Bootstrap -->
 <script src="{% static 'jui/dist/jui.min.js' %}"></script>
 
-<!-- Galleria -->
-<script src="{% static 'galleria/src/galleria.js' %}"></script>
-<script>
-    Galleria.loadTheme("{% static 'galleria/src/themes/classic/galleria.classic.js' %}");
-    Galleria.configure({
-        transition: 'fade',
-        imageCrop: true,
-        lightbox: true,
-    });
-    Galleria.run('.galleria');
-</script>
-
 <!-- Custom Script -->
 <script src="{% static 'js/base.js' %}" type="text/javascript"></script>
 {% block script %}{% endblock %}

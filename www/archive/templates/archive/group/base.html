@@ -219,30 +219,6 @@
                     </tr>
                 </script>
 
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-realtime"></i> <strong>Timeline</strong></h1>
-
-                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                            <div class="body">
-                                <ul id="timeline" class="timeline">
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="modal_1" class="col col-4 msgbox detail" style="display: none;">
-                    <div class="head h4">
-                        [Title] Detail Message
-
-                        <div class="subtext">2014.02.25 17:18:38</div>
-                    </div>
-                    <div class="body h5">
-                        Contents...<br/>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
@@ -406,66 +382,6 @@
             });
         }
 
-        function getTimeline() {
-            $.ajax({
-                url: "/api/groups/{{ group.id }}/timeline",
-                type: "get",
-                async: false,
-                dataType: "JSON",
-                success: function (source) {
-                    timeline = $('#timeline');
-
-                    var before_user;
-                    var toggle = false;
-
-                    for (var i in source) {
-                        var post = source[i];
-                        var message = post["message"] ? String(post["message"]).replace(/</gi, "&lt;") : "";
-                        var html = '<div class="timeline-badge"><img src="' + post["user"]["picture"] + '" style="border-radius: 10px;"></div>'
-                                + '<div class="timeline-panel">'
-                                + '<div class="timeline-heading"><h4 class="timeline-title h4">' + post["user"]["name"] + '</h4>'
-                                + '<p><small class="text-muted h4"><i class="icon-realtime"></i> ' + timeSince(post["updated_time"])
-                                + ' | <i class="icon-like"></i> ' + post["like_count"]
-                                + ' | <i class="icon-message"></i> ' + post["comment_count"] + '</small></p></div>'
-                                + '<div class="timeline-body h5"><p><code>' + message + '</code>'
-                                + '<br/><br/>';
-
-                        var attachments = post["attachments"];
-
-                        var attachment_html = generate_attachment(attachments, post["picture"]);
-                        html += attachment_html;
-
-                        if (!attachment_html) {
-                            var picture = post["picture"] ? '<div class="galleria"><img src="' + post["picture"] + '"></div>' : "";
-                            html += picture;
-                        }
-                        html += '</p></div></div>';
-
-                        timeline.append('<li>' + html + '</li>');
-
-                        timeline_last_li = $('#timeline li:last');
-
-                        if (before_user && before_user == post["user"]["url"]) {
-                            toggle = !toggle;
-                        }
-
-                        if (toggle) {
-                            timeline_last_li.addClass("timeline-inverted");
-                            toggle = !toggle;
-                        } else {
-                            toggle = !toggle;
-                        }
-
-                        before_user = post["user"]["url"];
-                    }
-                    timeline.append('<div class="galleria" style="display:none;"></div>');
-                },
-                error: function (request, status, error) {
-                    alert(status);
-                }
-            });
-        }
-
         jui.ready(["uix.table"], function (table) {
             post_issue_table = table("#post_issue_table", {
                 fields: ["from", "created_time", "message", "like_count", "comment_count"],
@@ -548,7 +464,6 @@
             getStatistics(statistics_method);
             getIssue("posts", issue_len);
             getIssue("comments", issue_len);
-            getTimeline();
 
             $("#statistics_run").on("click", function () {
                 getStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
@@ -602,14 +517,6 @@
                     $("#post_issue_from").datepicker("option", "maxDate", selectedDate);
                     $("#comment_issue_from").datepicker("option", "maxDate", selectedDate);
                 }
-            });
-        });
-
-        jui.ready(["ui.modal"], function (modal) {
-            $("#modal_1").appendTo("body");
-
-            modal_1 = modal("#modal_1", {
-                color: "black"
             });
         });
     </script>
