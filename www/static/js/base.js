@@ -95,7 +95,7 @@ var generate_attachment = function (attachments, picture) {
             return '<div class="panel" style="border:1px solid #ababab; border-radius: 10px;"><div class="body">' + unavailable + '</div></div>';
         } else if (attachment["type"] == "video_inline") {
             var img = '<a href="' + attachment["url"] + '" target="_blank"><img src="' + picture + '"></a>';
-            album_title = attachment["title"]?attachment["title"]:"";
+            album_title = attachment["title"] ? attachment["title"] : "";
             album_url = attachment["url"];
         } else if (attachment["type"] == "album") {
             album_title = attachment["title"];
@@ -127,7 +127,27 @@ var generate_attachment = function (attachments, picture) {
 }
 
 //to round to n decimal places
-var ceil = function(num, places) {
+var ceil = function (num, places) {
     var multiplier = Math.pow(10, places);
     return Math.ceil(num / multiplier) * multiplier;
+}
+
+var generate_post = function (url) {
+    get_post(url);
+    modal_1.show();
+}
+
+var get_post = function (url) {
+    $.ajax({
+        url: url,
+        type: "get",
+        async: false,
+        dataType: "JSON",
+        success: function (source) {
+            console.dir(source);
+        },
+        error: function (request, status, error) {
+            alert(status);
+        }
+    });
 }

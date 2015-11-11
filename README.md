@@ -17,6 +17,12 @@
 * markdown (tested with version 2.6.3)
 * django-filter (tested with version 0.11.0)
 
+#### Optional dependencies:
+
+* redis (tested with version 2.10.3)
+* rabbitmq-server
+* redis-server
+
 #### Front-End
 
 * jQuery
@@ -24,12 +30,6 @@
 * Font Awesome
 * JUI
 * Galleria
-
-#### Optional dependencies:
-
-* redis (tested with version 2.10.3)
-* rabbitmq-server
-* redis-server
 
 
 ## Installation

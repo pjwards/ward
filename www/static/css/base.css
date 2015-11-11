@@ -14,6 +14,20 @@ body {
     overflow-x: hidden;
 }
 
+a{
+    text-decoration:none;
+}
+a i{
+  color:#888;
+  margin-left:5px;
+}
+a:hover{
+    text-decoration:underline;
+}
+a:hover i{
+    text-decoration:none !important;
+}
+
 .header {
     margin: 0 auto;
     height: 58px;
