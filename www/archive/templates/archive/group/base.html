@@ -56,9 +56,9 @@
         <div class="menu">
 
             <div class="vmenu ">
-                <a class="active"><i class="icon-monitoring"></i> Dashboard</a>
+                <a class="active"><i class="icon-profile"></i> Analysis</a>
                 <a href="realtime.html"><i class="icon-realtime"></i> Realtime</a>
-                <a href="base.html"><i class="icon-profile"></i> Analysis</a>
+                <a href="base.html"><i class="icon-monitoring"></i> Dashboard</a>
                 <a><i class="icon-chart"></i> Statistics</a>
                 <a><i class="icon-document"></i> Document</a>
                 <a><i class="icon-gear"></i> Management</a>
@@ -217,13 +217,7 @@
                                     <strong>Recent Post List</strong>
 
                                     <div class="group" style="float: right">
-                                        <div id="post_archive_radio" class="group">
-                                            <a class="btn " value="20">20</a>
-                                            <a class="btn " value="50">50</a>
-                                            <a class="btn" value="100">100</a>
-                                            <input type="text" class="input" id="post_archive_from" placeholder="from"/>
-                                            <input type="text" class="input" id="post_archive_to" placeholder="to"/>
-                                        </div>
+                                        <input type="text" class="input" id="post_archive_from" placeholder="from"/>
                                         <button class="btn" value="run" id="post_archive_run"><i class="icon-play"></i>
                                             Run
                                         </button>
@@ -265,14 +259,7 @@
                                     <strong>Recent Comment List</strong>
 
                                     <div class="group" style="float: right">
-                                        <div id="comment_archive_radio" class="group">
-                                            <a class="btn " value="20">20</a>
-                                            <a class="btn " value="50">50</a>
-                                            <a class="btn" value="100">100</a>
-                                            <input type="text" class="input" id="comment_archive_from"
-                                                   placeholder="from"/>
-                                            <input type="text" class="input" id="comment_archive_to" placeholder="to"/>
-                                        </div>
+                                        <input type="text" class="input" id="comment_archive_from" placeholder="from"/>
                                         <button class="btn" value="run" id="comment_archive_run"><i
                                                 class="icon-play"></i>
                                             Run
@@ -460,7 +447,7 @@
             post_issue_table = table("#post_issue_table", {
                 fields: ["from", "created_time", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 300,
+                scrollHeight: 500,
                 resize: true,
                 sort: [3, 4],
                 event: {
@@ -475,35 +462,14 @@
                     }
                 },
                 tpl: {
-                    row: $("#tpl_row").html()
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
                 }
             });
 
             comment_issue_table = table("#comment_issue_table", {
                 fields: ["from", "created_time", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 300,
-                resize: true,
-                sort: [3, 4],
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
-                tpl: {
-                    row: $("#tpl_row").html()
-                }
-            });
-
-            post_archive_table = table("#post_archive_table", {
-                fields: ["from", "created_time", "message", "like_count", "comment_count"],
-                scroll: true,
                 scrollHeight: 500,
                 resize: true,
                 sort: [3, 4],
@@ -519,29 +485,8 @@
                     }
                 },
                 tpl: {
-                    row: $("#tpl_row").html()
-                }
-            });
-
-            comment_archive_table = table("#comment_archive_table", {
-                fields: ["from", "created_time", "message", "like_count", "comment_count"],
-                scroll: true,
-                scrollHeight: 500,
-                resize: true,
-                sort: [3, 4],
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
-                tpl: {
-                    row: $("#tpl_row").html()
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
                 }
             });
         });
@@ -640,26 +585,6 @@
                     }
                 }
             });
-
-            post_archive_radio = button("#post_archive_radio", {
-                type: "radio",
-                index: 0,
-                event: {
-                    change: function (data) {
-                        issue_len = data.value;
-                    }
-                }
-            })
-
-            comment_archive_radio = button("#comment_archive_radio", {
-                type: "radio",
-                index: 0,
-                event: {
-                    change: function (data) {
-                        issue_len = data.value;
-                    }
-                }
-            })
         });
 
         $(function () {
@@ -671,8 +596,8 @@
             getStatistics(statistics_method);
             getIssue(post_issue_url, post_issue_table, issue_len);
             getIssue(comment_issue_url, comment_issue_table, issue_len);
-            getArchive(post_archive_url, post_archive_xtable, post_archive_paging, issue_len);
-            getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging, issue_len);
+            getArchive(post_archive_url, post_archive_xtable, post_archive_paging);
+            getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging);
 
             $("#statistics_run").on("click", function () {
                 getStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
@@ -687,11 +612,11 @@
             });
 
             $("#post_archive_run").on("click", function () {
-                getArchive(post_archive_url, post_archive_xtable, post_archive_paging, issue_len, $("#post_archive_from").val(), $("#post_archive_to").val());
+                getArchive(post_archive_url, post_archive_xtable, post_archive_paging, $("#post_archive_from").val());
             });
 
             $("#comment_archive_run").on("click", function () {
-                getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging, issue_len, $("#comment_archive_from").val(), $("#comment_archive_to").val());
+                getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging, $("#comment_archive_from").val());
             });
         })
 
@@ -712,14 +637,12 @@
                     $("#statistics_to").datepicker("option", "minDate", selectedDate);
                     $("#post_issue_to").datepicker("option", "minDate", selectedDate);
                     $("#comment_issue_to").datepicker("option", "minDate", selectedDate);
-                    $("#post_archive_to").datepicker("option", "minDate", selectedDate);
-                    $("#comment_archive_to").datepicker("option", "minDate", selectedDate);
                 }
             });
         });
 
         $(function () {
-            $("#statistics_to, #post_issue_to, #comment_issue_to, #post_archive_to, #comment_archive_to").datepicker({
+            $("#statistics_to, #post_issue_to, #comment_issue_to").datepicker({
                 dateFormat: "yy-mm-dd",
                 showMonthAfterYear: true,
                 autoSize: true,
@@ -735,8 +658,6 @@
                     $("#statistics_from").datepicker("option", "maxDate", selectedDate);
                     $("#post_issue_from").datepicker("option", "maxDate", selectedDate);
                     $("#comment_issue_from").datepicker("option", "maxDate", selectedDate);
-                    $("#post_archive_from").datepicker("option", "maxDate", selectedDate);
-                    $("#comment_archive_from").datepicker("option", "maxDate", selectedDate);
                 }
             });
         });

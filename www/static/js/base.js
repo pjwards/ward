@@ -65,36 +65,41 @@ var ceil = function (num, places) {
 }
 
 var getIssue = function (url, table, len, from, to) {
-    var fun = function(rows) {
+    var fun = function (rows) {
         table.reset()
         table.append(rows);
     }
 
-    getAjaxResult(url, len, from, to, fun);
+    data = {
+        len: len,
+        from: from,
+        to: to
+    }
+
+    getAjaxResult(url, data, fun);
 }
 
-var getArchive = function(url, table, paging, len, from, to) {
-    var fun = function(rows) {
+var getArchive = function (url, table, paging, from) {
+    var fun = function (rows) {
         table.reset()
         table.update(rows);
         table.resize();
         paging.reload(table.count());
-
     }
 
-    getAjaxResult(url, len, from, to, fun);
+    data = {
+        from: from,
+    }
+
+    getAjaxResult(url, data, fun);
 }
 
-var getAjaxResult = function (url, len, from, to, fun) {
+var getAjaxResult = function (url, data, fun) {
     $.ajax({
         url: url,
         type: "get",
         async: false,
-        data: {
-            len: len,
-            from: from,
-            to: to
-        },
+        data: data,
         dataType: "JSON",
         success: function (source) {
             var results = source["results"];
