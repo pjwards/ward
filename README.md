@@ -29,7 +29,7 @@
 * jQuery UI
 * Font Awesome
 * JUI
-* Galleria
+* Bootstrap Social
 
 
 ## Installation

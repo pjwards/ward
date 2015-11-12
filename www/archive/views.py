@@ -246,76 +246,109 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
 
-def get_issue(request, _group, model):
-    """
-    Get hot issue models from group.
-
-    length : 20(default) | 50 | 100 from HTTP Request
-    from_date : start day from HTTP Request
-    to_date : to day from HTTP Request
-
-    :param request: request
-    :return: (group, issue models)
-    """
-
-    length = int(request.GET.get('len', 20))
-    from_date = request.GET.get('from', None)
-    to_date = request.GET.get('to', None)
-
-    # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
-    if from_date is None and to_date is None:
-        from_date, to_date = date_utils.week_delta()
-
-    models = get_objects_by_time(_group, model, from_date, to_date)
-
-    models = models.extra(
-        select={'field_sum': 'like_count + comment_count'},
-        order_by=('-field_sum',)
-    )
-
-    models_len = len(models)
-    if models_len < length:
-        length = models_len
-
-    return models[:length]
-
-
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Group View Set
     """
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    pagination_class = StandardResultsSetPagination
 
     @detail_route()
-    def posts(self, request, pk=None):
+    def post_issue(self, request, pk=None):
         """
         Return Hot Comment Issue for group
         """
-        group = self.get_object()
-        posts = get_issue(request, group, Post)
+        posts = self.get_issue(Post)
+        return self.response_posts(posts, request)
+
+    @detail_route()
+    def comment_issue(self, request, pk=None):
+        """
+        Return Hot Comment Issue for group
+        """
+        comments = self.get_issue(Comment)
+        return self.response_comments(comments, request)
+
+    @detail_route()
+    def post_archive(self, request, pk=None):
+        """
+        Return Post archive for group
+        """
+        posts = self.get_archive(Post)
+        return self.response_posts(posts, request)
+
+    @detail_route()
+    def comment_archive(self, request, pk=None):
+        """
+        Return Comment archive for group
+        """
+        comments = self.get_archive(Comment)
+        return self.response_comments(comments, request)
+
+    def response_posts(self, posts, request):
+        page = self.paginate_queryset(posts)
+        if page is not None:
+            serializers = PostSerializer(posts, many=True, context={'request': request})
+            return self.get_paginated_response(serializers.data)
+
         serializers = PostSerializer(posts, many=True, context={'request': request})
         return Response(serializers.data)
 
-    @detail_route()
-    def comments(self, request, pk=None):
-        """
-        Return Hot Comment Issue for group
-        """
-        group = self.get_object()
-        comments = get_issue(request, group, Comment)
+    def response_comments(self, comments, request):
+        page = self.paginate_queryset(comments)
+        if page is not None:
+            serializers = CommentSerializer(comments, many=True, context={'request': request})
+            return self.get_paginated_response(serializers.data)
+
         serializers = CommentSerializer(comments, many=True, context={'request': request})
         return Response(serializers.data)
 
-    @detail_route()
-    def timeline(self, request, pk=None):
+    def get_issue(self, model):
         """
-        Return posts for group
+        Get hot issue models from group.
+
+        length : 20(default) | 50 | 100 from HTTP Request
+        from_date : start day from HTTP Request
+        to_date : to day from HTTP Request
+
+        :return: (group, issue models)
         """
-        group = self.get_object()
-        posts = Post.objects.filter(group=group).order_by('-updated_time')[:10]
-        serializers = PostSerializer(posts, many=True, context={'request': request})
-        return Response(serializers.data)
+        _group = self.get_object()
+
+        length = int(self.request.query_params.get('len', 10))
+        from_date = self.request.query_params.get('from', None)
+        to_date = self.request.query_params.get('to', None)
+
+        # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
+        if from_date is None and to_date is None:
+            from_date, to_date = date_utils.week_delta()
+
+        models = get_objects_by_time(_group, model, from_date, to_date)
+
+        models = models.extra(
+            select={'field_sum': 'like_count + comment_count'},
+            order_by=('-field_sum',)
+        )
+
+        models_len = len(models)
+        if models_len < length:
+            length = models_len
+
+        return models[:length]
+
+    def get_archive(self, model):
+        _group = self.get_object()
+
+        from_date = self.request.query_params.get('from', None)
+
+        if from_date is not None:
+            from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
+        else:
+            from_date, to_date = date_utils.date_range(date_utils.get_today(), 1)
+
+        models = get_objects_by_time(_group, model, from_date, to_date).order_by('-created_time')
+        return models
 
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):

@@ -384,7 +384,7 @@ BOWER_INSTALLED_APPS = (
     'jquery-ui',
     'jui',
     'font-awesome',
-    'galleria',
+    'bootstrap-social',
 )
 
 

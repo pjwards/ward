@@ -2,9 +2,6 @@
 {% load staticfiles %}
 
 {% block css %}
-    <!-- Timeline CSS -->
-    <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
-
     <style type="text/css">
         /* Base */
         .visit_total {
@@ -122,17 +119,17 @@
                 </div>
 
                 <div class="panel dashed">
-
                     <div class="body">
                         <h1 class="title"><i class="icon-bell"></i> <strong>Hot Issue</strong></h1>
 
                         <div class="col col-6">
                             <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
                                 <div class="head">
-                                    <strong>Recent Post List</strong>
+                                    <strong>Hot Issue Posts</strong>
 
                                     <div class="group" style="float: right">
                                         <div id="post_issue_radio" class="group">
+                                            <a class="btn " value="10">10</a>
                                             <a class="btn " value="20">20</a>
                                             <a class="btn " value="50">50</a>
                                             <a class="btn" value="100">100</a>
@@ -169,10 +166,11 @@
                         <div class="col col-6">
                             <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
                                 <div class="head">
-                                    <strong>Recent Comment List</strong>
+                                    <strong>Hot Issue Comments</strong>
 
                                     <div class="group" style="float: right">
                                         <div id="comment_issue_radio" class="group">
+                                            <a class="btn " value="10">10</a>
                                             <a class="btn " value="20">20</a>
                                             <a class="btn " value="50">50</a>
                                             <a class="btn" value="100">100</a>
@@ -209,14 +207,131 @@
                     </div>
                 </div>
 
+                <div class="panel dashed">
+                    <div class="body">
+                        <h1 class="title"><i class="icon-bell"></i> <strong>Archive</strong></h1>
+
+                        <div class="col col-6">
+                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                                <div class="head">
+                                    <strong>Recent Post List</strong>
+
+                                    <div class="group" style="float: right">
+                                        <div id="post_archive_radio" class="group">
+                                            <a class="btn " value="20">20</a>
+                                            <a class="btn " value="50">50</a>
+                                            <a class="btn" value="100">100</a>
+                                            <input type="text" class="input" id="post_archive_from" placeholder="from"/>
+                                            <input type="text" class="input" id="post_archive_to" placeholder="to"/>
+                                        </div>
+                                        <button class="btn" value="run" id="post_archive_run"><i class="icon-play"></i>
+                                            Run
+                                        </button>
+                                    </div>
+                                </div>
+                                <table id="post_archive_table" class="table simple hover">
+                                    <colgroup>
+                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
+                                        <col style="width: 55%;">
+                                        <col style="width: 10%;">
+                                        <col style="width: 10%;">
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                        <th style="text-align: center;"><i class="icon-realtime"></i> Created Time</th>
+                                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <div id="post_archive_paging" class="paging" style="margin-top: 3px;">
+                                <a href="#" class="prev">Previous</a>
+
+                                <div class="list"></div>
+                                <a href="#" class="next">Next</a>
+                            </div>
+                        </div>
+
+
+                        <div class="col col-6">
+                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                                <div class="head">
+                                    <strong>Recent Comment List</strong>
+
+                                    <div class="group" style="float: right">
+                                        <div id="comment_archive_radio" class="group">
+                                            <a class="btn " value="20">20</a>
+                                            <a class="btn " value="50">50</a>
+                                            <a class="btn" value="100">100</a>
+                                            <input type="text" class="input" id="comment_archive_from"
+                                                   placeholder="from"/>
+                                            <input type="text" class="input" id="comment_archive_to" placeholder="to"/>
+                                        </div>
+                                        <button class="btn" value="run" id="comment_archive_run"><i
+                                                class="icon-play"></i>
+                                            Run
+                                        </button>
+                                    </div>
+                                </div>
+                                <table id="comment_archive_table" class="table simple hover">
+                                    <colgroup>
+                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
+                                        <col style="width: 55%;">
+                                        <col style="width: 10%;">
+                                        <col style="width: 10%;">
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                        <th style="text-align: center;"><i class="icon-realtime"></i> Created Time</th>
+                                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <div id="comment_archive_paging" class="paging" style="margin-top: 3px;">
+                                <a href="#" class="prev">Previous</a>
+
+                                <div class="list"></div>
+                                <a href="#" class="next">Next</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <script id="tpl_row" type="text/template">
                     <tr>
-                        <td style="text-align: center;"><i class="icon-stop" style="font-size:8.5px;color:red;"></i><!= from !></td>
+                        <td tyle="text-align: center;"><i class="icon-stop" style="font-size:8.5px;color:red;"></i><!=
+                            from !>
+                        </td>
                         <td style="text-align: center;"><!= created_time !></td>
                         <td><!= message !></td>
                         <td style="text-align: center;"><!= like_count !></td>
                         <td style="text-align: center;"><!= comment_count !></td>
                     </tr>
+                </script>
+
+                <script id="tpl_none" type="text/template">
+                    <tr>
+                        <td colspan="5" class="none" align="center">Data does not exist.</td>
+                    </tr>
+                </script>
+
+                <script id="tpl_pages" type="text/template">
+                    <! for(var i = 0; i < pages.length; i++) { !>
+                    <a href="#" class="page"><!= pages[i] !></a>
+                    <! } !>
                 </script>
 
             </div>
@@ -231,8 +346,7 @@
         var statistics_method = 'month';
         var post_max_cnt;
         var comment_max_cnt;
-        var issue_len = 20;
-
+        var issue_len = 10;
 
         function getStatistics(method, from, to) {
             $.ajax({
@@ -342,51 +456,11 @@
             });
         }
 
-        function getIssue(model, len, from, to) {
-            $.ajax({
-                url: "/api/groups/{{ group.id }}/" + model + "/",
-                type: "get",
-                async: false,
-                data: {
-                    len: len,
-                    from: from,
-                    to: to
-                },
-                dataType: "JSON",
-                success: function (source) {
-                    var rows = []
-                    for (var i in source) {
-                        var row = source[i]
-                        var btn = '&nbsp; &nbsp;<a href="#" onclick="generate_post(\'' + row["url"] + '\');return false;">more...</a>';
-                        rows.push({
-                            from: row["user"].name,
-                            "created_time": timeSince(row["created_time"]),
-                            "message": !row["message"] || row["message"].length < 80 ? row["message"] + btn : row["message"].substring(0, 80) + "..." + btn,
-                            "like_count": row["like_count"],
-                            "comment_count": row["comment_count"],
-                        });
-                    }
-                    ;
-                    if (model == "posts") {
-                        post_issue_table.reset()
-                        post_issue_table.append(rows);
-                    } else if (model == "comments") {
-                        comment_issue_table.reset()
-                        comment_issue_table.append(rows);
-                    }
-
-                },
-                error: function (request, status, error) {
-                    alert(status);
-                }
-            });
-        }
-
         jui.ready(["uix.table"], function (table) {
             post_issue_table = table("#post_issue_table", {
                 fields: ["from", "created_time", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 300,
                 resize: true,
                 sort: [3, 4],
                 event: {
@@ -408,6 +482,28 @@
             comment_issue_table = table("#comment_issue_table", {
                 fields: ["from", "created_time", "message", "like_count", "comment_count"],
                 scroll: true,
+                scrollHeight: 300,
+                resize: true,
+                sort: [3, 4],
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row").html()
+                }
+            });
+
+            post_archive_table = table("#post_archive_table", {
+                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                scroll: true,
                 scrollHeight: 500,
                 resize: true,
                 sort: [3, 4],
@@ -424,6 +520,92 @@
                 },
                 tpl: {
                     row: $("#tpl_row").html()
+                }
+            });
+
+            comment_archive_table = table("#comment_archive_table", {
+                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                sort: [3, 4],
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row").html()
+                }
+            });
+        });
+
+        jui.ready(["ui.paging", "uix.xtable"], function (paging, xtable) {
+            post_archive_paging = paging("#post_archive_paging", {
+                pageCount: 10,
+                event: {
+                    page: function (pNo) {
+                        post_archive_xtable.page(pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html()
+                }
+            });
+
+            post_archive_xtable = xtable("#post_archive_table", {
+                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                scrollHeight: 500,
+                resize: true,
+                sort: true,
+                sortLoading: true,
+                buffer: "s-page",
+                bufferCount: 10,
+                event: {
+                    sortend: function (data, e) {
+                        post_archive_paging.first();
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
+                }
+            });
+
+            comment_archive_paging = paging("#comment_archive_paging", {
+                pageCount: 10,
+                event: {
+                    page: function (pNo) {
+                        comment_archive_xtable.page(pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html()
+                }
+            });
+
+            comment_archive_xtable = xtable("#comment_archive_table", {
+                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                scrollHeight: 500,
+                resize: true,
+                sort: true,
+                sortLoading: true,
+                buffer: "s-page",
+                bufferCount: 10,
+                event: {
+                    sortend: function (data, e) {
+                        comment_archive_paging.first();
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
                 }
             });
         });
@@ -458,28 +640,63 @@
                     }
                 }
             });
+
+            post_archive_radio = button("#post_archive_radio", {
+                type: "radio",
+                index: 0,
+                event: {
+                    change: function (data) {
+                        issue_len = data.value;
+                    }
+                }
+            })
+
+            comment_archive_radio = button("#comment_archive_radio", {
+                type: "radio",
+                index: 0,
+                event: {
+                    change: function (data) {
+                        issue_len = data.value;
+                    }
+                }
+            })
         });
 
         $(function () {
+            var post_issue_url = "/api/groups/{{ group.id }}/post_issue/";
+            var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
+            var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";
+            var comment_archive_url = "/api/groups/{{ group.id }}/comment_archive/";
+
             getStatistics(statistics_method);
-            getIssue("posts", issue_len);
-            getIssue("comments", issue_len);
+            getIssue(post_issue_url, post_issue_table, issue_len);
+            getIssue(comment_issue_url, comment_issue_table, issue_len);
+            getArchive(post_archive_url, post_archive_xtable, post_archive_paging, issue_len);
+            getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging, issue_len);
 
             $("#statistics_run").on("click", function () {
                 getStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
             });
 
             $("#post_issue_run").on("click", function () {
-                getIssue("posts", issue_len, $("#post_issue_from").val(), $("#post_issue_to").val());
+                getIssue(post_issue_url, post_issue_table, issue_len, $("#post_issue_from").val(), $("#post_issue_to").val());
             });
 
             $("#comment_issue_run").on("click", function () {
-                getIssue("comments", issue_len, $("#comment_issue_from").val(), $("#comment_issue_to").val());
+                getIssue(comment_issue_url, comment_issue_table, issue_len, $("#comment_issue_from").val(), $("#comment_issue_to").val());
+            });
+
+            $("#post_archive_run").on("click", function () {
+                getArchive(post_archive_url, post_archive_xtable, post_archive_paging, issue_len, $("#post_archive_from").val(), $("#post_archive_to").val());
+            });
+
+            $("#comment_archive_run").on("click", function () {
+                getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging, issue_len, $("#comment_archive_from").val(), $("#comment_archive_to").val());
             });
         })
 
         $(function () {
-            $("#statistics_from, #post_issue_from, #comment_issue_from").datepicker({
+            $("#statistics_from, #post_issue_from, #comment_issue_from, #post_archive_from, #comment_archive_from").datepicker({
                 dateFormat: 'yy-mm-dd',
                 showMonthAfterYear: true,
                 autoSize: true,
@@ -495,12 +712,14 @@
                     $("#statistics_to").datepicker("option", "minDate", selectedDate);
                     $("#post_issue_to").datepicker("option", "minDate", selectedDate);
                     $("#comment_issue_to").datepicker("option", "minDate", selectedDate);
+                    $("#post_archive_to").datepicker("option", "minDate", selectedDate);
+                    $("#comment_archive_to").datepicker("option", "minDate", selectedDate);
                 }
             });
         });
 
         $(function () {
-            $("#statistics_to, #post_issue_to, #comment_issue_to").datepicker({
+            $("#statistics_to, #post_issue_to, #comment_issue_to, #post_archive_to, #comment_archive_to").datepicker({
                 dateFormat: "yy-mm-dd",
                 showMonthAfterYear: true,
                 autoSize: true,
@@ -516,6 +735,8 @@
                     $("#statistics_from").datepicker("option", "maxDate", selectedDate);
                     $("#post_issue_from").datepicker("option", "maxDate", selectedDate);
                     $("#comment_issue_from").datepicker("option", "maxDate", selectedDate);
+                    $("#post_archive_from").datepicker("option", "maxDate", selectedDate);
+                    $("#comment_archive_from").datepicker("option", "maxDate", selectedDate);
                 }
             });
         });

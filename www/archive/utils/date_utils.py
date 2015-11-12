@@ -39,3 +39,33 @@ def week_delta():
     :return: a tuple of (from_date, to_date)
     """
     return now() - timedelta(days=7), now()
+
+
+def date_range(date, days):
+    """
+    Return date after given days
+
+    :param date: origin date
+    :param days: after days
+    :return: a tuple of (from_date, to_date)
+    """
+    return date, date + timedelta(days=days)
+
+
+def get_date_from_str(str):
+    """
+    Retrun date from string
+
+    :param str: string
+    :return:
+    """
+    return datetime.strptime(str, '%Y-%m-%d').date()
+
+
+def get_today():
+    """
+    Return today
+
+    :return: today
+    """
+    return datetime.today()

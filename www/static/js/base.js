@@ -63,3 +63,60 @@ var ceil = function (num, places) {
     var multiplier = Math.pow(10, places);
     return Math.ceil(num / multiplier) * multiplier;
 }
+
+var getIssue = function (url, table, len, from, to) {
+    var fun = function(rows) {
+        table.reset()
+        table.append(rows);
+    }
+
+    getAjaxResult(url, len, from, to, fun);
+}
+
+var getArchive = function(url, table, paging, len, from, to) {
+    var fun = function(rows) {
+        table.reset()
+        table.update(rows);
+        table.resize();
+        paging.reload(table.count());
+
+    }
+
+    getAjaxResult(url, len, from, to, fun);
+}
+
+var getAjaxResult = function (url, len, from, to, fun) {
+    $.ajax({
+        url: url,
+        type: "get",
+        async: false,
+        data: {
+            len: len,
+            from: from,
+            to: to
+        },
+        dataType: "JSON",
+        success: function (source) {
+            var results = source["results"];
+            var rows = []
+            for (var i in results) {
+                var row = results[i]
+                var fb_url = "https://www.facebook.com/";
+                var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+                var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+                rows.push({
+                    "from": row["user"].name,
+                    "created_time": timeSince(row["created_time"]),
+                    "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
+                    "like_count": row["like_count"],
+                    "comment_count": row["comment_count"],
+                });
+            }
+            ;
+            fun(rows);
+        },
+        error: function (request, status, error) {
+            alert(status);
+        }
+    });
+}
