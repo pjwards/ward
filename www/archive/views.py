@@ -105,7 +105,7 @@ def group(request, group_id):
 
     return render(
         request,
-        'archive/group/base.html',
+        'archive/group/analysis.html',
         {
             'groups': _groups,
             'group': _group,
@@ -148,7 +148,7 @@ def group_statistics(request, group_id):
     """
     Get statistics from group.
 
-    method : year | month | day from HTTP Request
+    method : year | month | day | hour from HTTP Request
     from_date : start day from HTTP Request
     to_date : to day from HTTP Request
 
@@ -162,21 +162,22 @@ def group_statistics(request, group_id):
     from_date = request.GET.get('from', None)
     to_date = request.GET.get('to', None)
 
-    if method != 'year' and method != 'month' and method != 'day':
-        raise ValueError("Method can be used 'year' or 'month' or 'day'. Input method:" + method)
+    if method != 'year' and method != 'month' and method != 'day' and method != 'hour':
+        raise ValueError("Method can be used 'year' or 'month' or 'day' or 'hour'. Input method:" + method)
 
     all_posts = get_objects_by_time(_group, Post, from_date, to_date)
     all_comments = get_objects_by_time(_group, Comment, from_date, to_date)
 
-    all_posts = all_posts.extra(
-        select={'date': connections[Post.objects.db].ops.date_trunc_sql(method, 'created_time')}) \
-        .values('date') \
-        .annotate(p_count=Count('created_time'))
+    # Method Dictionary for group by time
+    dic ={
+        'year': 'strftime("%%Y", created_time)',
+        'month': 'strftime("%%Y-%%m", created_time)',
+        'day': 'strftime("%%Y-%%m-%%d", created_time)',
+        'hour': 'strftime("%%Y-%%m-%%d-%%H", created_time)',
+    }
 
-    all_comments = all_comments.extra(
-        select={'date': connections[Comment.objects.db].ops.date_trunc_sql(method, 'created_time')}) \
-        .values('date') \
-        .annotate(c_count=Count('created_time'))
+    all_posts = all_posts.extra({'date': dic[method]}).order_by().values('date').annotate(p_count=Count('created_time'))
+    all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date').annotate(c_count=Count('created_time'))
 
     post_max_cnt = all_posts.aggregate(Max('p_count'))
     comment_max_cnt = all_comments.aggregate(Max('c_count'))
@@ -187,9 +188,12 @@ def group_statistics(request, group_id):
     elif method == 'month':
         date_start_len = 2
         date_end_len = 7
-    else:
+    elif method == 'day':
         date_start_len = 5
         date_end_len = 10
+    else:
+        date_start_len = 8
+        date_end_len = 13
 
     data_source = {}
 
@@ -287,6 +291,13 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return self.response_comments(comments, request)
 
     def response_posts(self, posts, request):
+        """
+        Return response for posts with pagination
+
+        :param posts: posts
+        :param request: request
+        :return: response
+        """
         page = self.paginate_queryset(posts)
         if page is not None:
             serializers = PostSerializer(posts, many=True, context={'request': request})
@@ -296,6 +307,13 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializers.data)
 
     def response_comments(self, comments, request):
+        """
+        Return response for comments with pagination
+
+        :param comments: comments
+        :param request: request
+        :return: response
+        """
         page = self.paginate_queryset(comments)
         if page is not None:
             serializers = CommentSerializer(comments, many=True, context={'request': request})
@@ -312,6 +330,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         from_date : start day from HTTP Request
         to_date : to day from HTTP Request
 
+        :param model: model to get issue
         :return: (group, issue models)
         """
         _group = self.get_object()
@@ -338,6 +357,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return models[:length]
 
     def get_archive(self, model):
+        """
+        Get archive models from group.
+
+        from_date : day to find archives from HTTP Request
+
+        :param model: model to get archive
+        :return: (group, archive models)
+        """
         _group = self.get_object()
 
         from_date = self.request.query_params.get('from', None)
