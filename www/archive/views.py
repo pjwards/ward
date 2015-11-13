@@ -211,7 +211,7 @@ def group_statistics(request, group_id):
             dic = dict()
             dic["date"] = post.get("date")[date_start_len:date_end_len]
             dic["posts"] = post.get("p_count")
-            post["comments"] = 0
+            dic["comments"] = 0
             data_source[post.get("date")] = dic
 
     return JsonResponse({
