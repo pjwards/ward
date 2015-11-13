@@ -1,18 +1,14 @@
 import logging
 import operator
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db import connections
 from django.db.models import Count, Max
-
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
-
 from rest_framework.renderers import JSONRenderer
-
 from .rest.serializer import *
 from .rest.pagination import *
 from . import tasks
@@ -162,22 +158,25 @@ def group_statistics(request, group_id):
     from_date = request.GET.get('from', None)
     to_date = request.GET.get('to', None)
 
-    if method != 'year' and method != 'month' and method != 'day' and method != 'hour':
-        raise ValueError("Method can be used 'year' or 'month' or 'day' or 'hour'. Input method:" + method)
+    if method != 'year' and method != 'month' and method != 'day' and method != 'hour' and method != 'hour_total':
+        raise ValueError(
+            "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
 
     all_posts = get_objects_by_time(_group, Post, from_date, to_date)
     all_comments = get_objects_by_time(_group, Comment, from_date, to_date)
 
     # Method Dictionary for group by time
-    dic ={
+    dic = {
         'year': 'strftime("%%Y", created_time)',
         'month': 'strftime("%%Y-%%m", created_time)',
         'day': 'strftime("%%Y-%%m-%%d", created_time)',
         'hour': 'strftime("%%Y-%%m-%%d-%%H", created_time)',
+        'hour_total': 'strftime("%%H", created_time)',
     }
 
     all_posts = all_posts.extra({'date': dic[method]}).order_by().values('date').annotate(p_count=Count('created_time'))
-    all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date').annotate(c_count=Count('created_time'))
+    all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date').annotate(
+        c_count=Count('created_time'))
 
     post_max_cnt = all_posts.aggregate(Max('p_count'))
     comment_max_cnt = all_comments.aggregate(Max('c_count'))
@@ -191,9 +190,12 @@ def group_statistics(request, group_id):
     elif method == 'day':
         date_start_len = 5
         date_end_len = 10
-    else:
+    elif method == 'hour':
         date_start_len = 8
         date_end_len = 13
+    else:
+        date_start_len = 0
+        date_end_len = 2
 
     data_source = {}
 
@@ -232,6 +234,9 @@ def get_objects_by_time(_group, model, from_date=None, to_date=None):
     """
     if from_date:
         if to_date:
+            if from_date == to_date:
+                from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
+                return model.objects.filter(group=_group, created_time__gt=from_date, created_time__lt=to_date)
             return model.objects.filter(group=_group, created_time__gt=from_date, created_time__lt=to_date)
         else:
             return model.objects.filter(group=_group, created_time__gt=from_date)

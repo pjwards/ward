@@ -112,10 +112,17 @@
                                 <input type="text" class="input" id="statistics_from" placeholder="from"/>
                                 <input type="text" class="input" id="statistics_to" placeholder="to"/>
                             </div>
-                            <button class="btn" value="run" id="statistics_run"><i class="icon-play"></i> Run</button>
+                            <button class="btn" value="run" id="statistics_run"><i class="icon-play"></i> Run
+                            </button>
                         </div>
 
-                        <div id="statistics"></div>
+                        <div class="col col-8">
+                            <div id="statistics"></div>
+                        </div>
+
+                        <div class="col col-4">
+                            <div id="hour_statistics"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -332,6 +339,7 @@
         var chart = jui.include("chart.builder");
         var statistics;
         var statistics_method = 'month';
+        var hour_statistics;
         var post_max_cnt;
         var comment_max_cnt;
         var issue_len = 10;
@@ -351,6 +359,27 @@
                     statistics = source['statistics'];
                     post_max_cnt = ceil(source['post_max_cnt'], 2);
                     comment_max_cnt = ceil(source["comment_max_cnt"], 2);
+                },
+                error: function (request, status, error) {
+                    alert(status);
+                }
+            });
+
+            $.ajax({
+                url: "{% url 'archive:group_statistics' group.id %}",
+                type: "get",
+                async: false,
+                data: {
+                    method: "hour_total",
+                    from: from,
+                    to: to
+                },
+                dataType: "JSON",
+                success: function (source) {
+                    hour_statistics = source['statistics'];
+                    for (var i in hour_statistics) {
+                        delete hour_statistics[i].date;
+                    }
                 },
                 error: function (request, status, error) {
                     alert(status);
@@ -441,6 +470,36 @@
                     }
                     return v;
                 }
+            });
+
+            $('#hour_statistics').empty();
+            chart("#hour_statistics", {
+                height: 350,
+                axis: {
+                    x: {
+                        type: "fullblock",
+                        domain: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"],
+                        line: true
+                    },
+                    y: {
+                        type: "range",
+                        domain: function (d) {
+                            return Math.max(d.posts, d.comments);
+                        },
+                        step: 10
+                    },
+                    data: hour_statistics
+                },
+                brush: {
+                    type: "line",
+                    display: "max",
+                    active: "posts",
+                    activeEvent: "click"
+                },
+                widget: [
+                    {type: "title", text: "Time Overview"},
+                    {type: "legend"}
+                ]
             });
         }
 
