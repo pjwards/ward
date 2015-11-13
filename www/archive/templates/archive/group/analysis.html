@@ -58,7 +58,7 @@
             <div class="vmenu ">
                 <a class="active"><i class="icon-profile"></i> Analysis</a>
                 <a href="realtime.html"><i class="icon-realtime"></i> Realtime</a>
-                <a href="base.html"><i class="icon-monitoring"></i> Dashboard</a>
+                <a href="analysis.html"><i class="icon-monitoring"></i> Dashboard</a>
                 <a><i class="icon-chart"></i> Statistics</a>
                 <a><i class="icon-document"></i> Document</a>
                 <a><i class="icon-gear"></i> Management</a>
@@ -108,6 +108,7 @@
                                 <a class="btn " value="year">Year</a>
                                 <a class="btn " value="month">Month</a>
                                 <a class="btn" value="day">Day</a>
+                                <a class="btn" value="hour">Hour</a>
                                 <input type="text" class="input" id="statistics_from" placeholder="from"/>
                                 <input type="text" class="input" id="statistics_to" placeholder="to"/>
                             </div>
@@ -375,8 +376,8 @@
                         line: true
                     },
                     area: {
-                        {#                    width: "100%",#}
-                        {#                    height: "40%"#}
+                        width: "100%",
+                        height: "100%"
                     }
                 }, {
                     x: {
@@ -387,8 +388,8 @@
                         orient: "right"
                     },
                     area: {
-                        {#                    width: "100%",#}
-                        {#                    height: "40%"#}
+                        width: "100%",
+                        height: "100%"
                     },
                     extend: 0
                 }],
