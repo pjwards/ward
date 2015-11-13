@@ -64,16 +64,23 @@ var ceil = function (num, places) {
     return Math.ceil(num / multiplier) * multiplier;
 }
 
-var getIssue = function (url, table, len, from, to) {
-    var fun = function (rows) {
+var getIssue = function (url, table, limit, from, to, page, paging) {
+    var fun = function (rows, count) {
         table.reset()
         table.append(rows);
+        paging.setOption("pageCount", limit);
+        paging.reload(count);
+    }
+
+    if (!page) {
+        page = 1;
     }
 
     data = {
-        len: len,
+        limit: limit,
+        offset: (page-1)*limit,
         from: from,
-        to: to
+        to: to,
     }
 
     getAjaxResult(url, data, fun);
@@ -88,6 +95,7 @@ var getArchive = function (url, table, paging, from) {
     }
 
     data = {
+        limit:20,
         from: from,
     }
 
@@ -118,7 +126,7 @@ var getAjaxResult = function (url, data, fun) {
                 });
             }
             ;
-            fun(rows);
+            fun(rows, source["count"]);
         },
         error: function (request, status, error) {
             alert(status);

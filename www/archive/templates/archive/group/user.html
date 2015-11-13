@@ -56,8 +56,8 @@
         <div class="menu">
 
             <div class="vmenu ">
-                <a class="active"><i class="icon-profile"></i> Analysis</a>
-                <a><i class="icon-user"></i> User</a>
+                <a><i class="icon-profile"></i> Analysis</a>
+                <a class="active"><i class="icon-user"></i> User</a>
                 <a href="realtime.html"><i class="icon-realtime"></i> Realtime</a>
                 <a href="analysis.html"><i class="icon-monitoring"></i> Dashboard</a>
                 <a><i class="icon-chart"></i> Statistics</a>
@@ -169,13 +169,6 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
-
-                            <div id="post_issue_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
-                            </div>
                         </div>
 
                         <div class="col col-6">
@@ -217,13 +210,6 @@
                                     </thead>
                                     <tbody></tbody>
                                 </table>
-                            </div>
-
-                            <div id="comment_issue_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
                             </div>
                         </div>
                     </div>
@@ -356,17 +342,8 @@
         var hour_statistics;
         var post_max_cnt;
         var comment_max_cnt;
-        var post_issue_limit = 10;
-        var comment_issue_limit = 10;
+        var issue_len = 10;
 
-        var post_issue_url = "/api/groups/{{ group.id }}/post_issue/";
-        var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
-        var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";
-        var comment_archive_url = "/api/groups/{{ group.id }}/comment_archive/";
-
-        /**
-         * Generate Statistics
-         */
         function getStatistics(method, from, to) {
             $.ajax({
                 url: "{% url 'archive:group_statistics' group.id %}",
@@ -526,23 +503,7 @@
             });
         }
 
-        /**
-         * Generate Hot Issue
-         */
-        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
-            post_issue_paging = paging("#post_issue_paging", {
-                pageCount: 10,
-                screenCount: 10,
-                event: {
-                    page: function (pNo) {
-                        getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), pNo);
-                    }
-                },
-                tpl: {
-                    pages: $("#tpl_pages").html()
-                }
-            });
-
+        jui.ready(["uix.table"], function (table) {
             post_issue_table = table("#post_issue_table", {
                 fields: ["from", "created_time", "message", "like_count", "comment_count"],
                 scroll: true,
@@ -563,19 +524,6 @@
                 tpl: {
                     row: $("#tpl_row").html(),
                     none: $("#tpl_none").html()
-                }
-            });
-
-            comment_issue_paging = paging("#comment_issue_paging", {
-                pageCount: 10,
-                screenCount: 10,
-                event: {
-                    page: function (pNo) {
-                        getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), pNo);
-                    }
-                },
-                tpl: {
-                    pages: $("#tpl_pages").html()
                 }
             });
 
@@ -683,7 +631,7 @@
                 index: 0,
                 event: {
                     change: function (data) {
-                        post_issue_limit = data.value;
+                        issue_len = data.value;
                     }
                 }
             });
@@ -693,16 +641,21 @@
                 index: 0,
                 event: {
                     change: function (data) {
-                        comment_issue_limit = data.value;
+                        issue_len = data.value;
                     }
                 }
             });
         });
 
         $(function () {
+            var post_issue_url = "/api/groups/{{ group.id }}/post_issue/";
+            var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
+            var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";
+            var comment_archive_url = "/api/groups/{{ group.id }}/comment_archive/";
+
             getStatistics(statistics_method);
-            getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
-            getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
+            getIssue(post_issue_url, post_issue_table, issue_len);
+            getIssue(comment_issue_url, comment_issue_table, issue_len);
             getArchive(post_archive_url, post_archive_xtable, post_archive_paging);
             getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging);
 
@@ -711,13 +664,11 @@
             });
 
             $("#post_issue_run").on("click", function () {
-                getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
-                post_issue_paging.first();
+                getIssue(post_issue_url, post_issue_table, issue_len, $("#post_issue_from").val(), $("#post_issue_to").val());
             });
 
             $("#comment_issue_run").on("click", function () {
-                getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
-                comment_issue_paging.first();
+                getIssue(comment_issue_url, comment_issue_table, issue_len, $("#comment_issue_from").val(), $("#comment_issue_to").val());
             });
 
             $("#post_archive_run").on("click", function () {

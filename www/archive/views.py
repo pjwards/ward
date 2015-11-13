@@ -77,27 +77,16 @@ def groups(request):
     )
 
 
-def group(request, group_id):
+def group_analysis(request, group_id):
     """
-    Display a group page by HTTP GET METHOD
+    Display a group analysis page by HTTP GET METHOD
 
     :param request: request
     :param group_id: group id
     :return: render
     """
-    if request.method == "GET":
-        _groups = Group.objects.all()
-        _group = get_object_or_404(Group, pk=group_id)
-
-        from_date, to_date = date_utils.week_delta()
-        posts = Post.objects.filter(group=_group, created_time__range=[from_date, to_date]) \
-                    .extra(
-            select={'field_sum': 'like_count + comment_count'},
-            order_by=('-field_sum',)
-        )[:10]
-
-    elif request.method == "POST":
-        pass
+    _groups = Group.objects.all()
+    _group = get_object_or_404(Group, pk=group_id)
 
     return render(
         request,
@@ -105,7 +94,27 @@ def group(request, group_id):
         {
             'groups': _groups,
             'group': _group,
-            'posts': posts,
+        }
+    )
+
+
+def group_user(request, group_id):
+    """
+    Display a group user page by HTTP GET METHOD
+
+    :param request: request
+    :param group_id: group id
+    :return: render
+    """
+    _groups = Group.objects.all()
+    _group = get_object_or_404(Group, pk=group_id)
+
+    return render(
+        request,
+        'archive/group/user.html',
+        {
+            'groups': _groups,
+            'group': _group,
         }
     )
 
@@ -261,7 +270,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    pagination_class = StandardResultsSetPagination
 
     @detail_route()
     def post_issue(self, request, pk=None):
@@ -295,6 +303,19 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         comments = self.get_archive(Comment)
         return self.response_comments(comments, request)
 
+    @detail_route()
+    def user(self, request, pk=None):
+        _group = self.get_object()
+
+        users_post = _group.user_set.all()
+        page = self.paginate_queryset(users_post)
+        if page is not None:
+            serializers = UserSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializers.data)
+
+        serializers = UserSerializer(users_post, many=True, context={'request': request})
+        return Response(serializers.data)
+
     def response_posts(self, posts, request):
         """
         Return response for posts with pagination
@@ -305,7 +326,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         page = self.paginate_queryset(posts)
         if page is not None:
-            serializers = PostSerializer(posts, many=True, context={'request': request})
+            serializers = PostSerializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializers.data)
 
         serializers = PostSerializer(posts, many=True, context={'request': request})
@@ -321,7 +342,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         page = self.paginate_queryset(comments)
         if page is not None:
-            serializers = CommentSerializer(comments, many=True, context={'request': request})
+            serializers = CommentSerializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializers.data)
 
         serializers = CommentSerializer(comments, many=True, context={'request': request})
@@ -331,7 +352,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Get hot issue models from group.
 
-        length : 20(default) | 50 | 100 from HTTP Request
         from_date : start day from HTTP Request
         to_date : to day from HTTP Request
 
@@ -340,7 +360,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         _group = self.get_object()
 
-        length = int(self.request.query_params.get('len', 10))
         from_date = self.request.query_params.get('from', None)
         to_date = self.request.query_params.get('to', None)
 
@@ -355,11 +374,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             order_by=('-field_sum',)
         )
 
-        models_len = len(models)
-        if models_len < length:
-            length = models_len
-
-        return models[:length]
+        return models
 
     def get_archive(self, model):
         """
