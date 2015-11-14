@@ -68,8 +68,10 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
     var fun = function (rows, count) {
         table.reset()
         table.append(rows);
-        paging.setOption("pageCount", limit);
-        paging.reload(count);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(count);
+        }
     }
 
     if (!page) {
@@ -90,8 +92,10 @@ var getArchive = function (url, table, limit, from, page, paging) {
     var fun = function (rows, count) {
         table.reset()
         table.append(rows);
-        paging.setOption("pageCount", limit);
-        paging.reload(count);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(count);
+        }
     }
 
     if (!page) {
@@ -111,7 +115,6 @@ var getAjaxResult = function (url, data, fun) {
     $.ajax({
         url: url,
         type: "get",
-        async: false,
         data: data,
         dataType: "JSON",
         success: function (source) {
