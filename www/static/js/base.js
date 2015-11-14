@@ -15,6 +15,9 @@ $(function () {
     });
 });
 
+/**
+ * Generate Time Since
+ */
 var timeSince = function (date) {
     if (typeof date !== 'object') {
         date = new Date(date);
@@ -58,12 +61,17 @@ var timeSince = function (date) {
     return interval + ' ' + intervalType + ' ago';
 };
 
-//to round to n decimal places
+/**
+ * to round to n decimal places
+ */
 var ceil = function (num, places) {
     var multiplier = Math.pow(10, places);
     return Math.ceil(num / multiplier) * multiplier;
 }
 
+/**
+ * Get issue by using ajax
+ */
 var getIssue = function (url, table, limit, from, to, page, paging) {
     var fun = function (rows, count) {
         table.reset()
@@ -88,6 +96,9 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
     getAjaxResult(url, data, fun);
 }
 
+/**
+ * Get archive by using ajax
+ */
 var getArchive = function (url, table, limit, from, page, paging) {
     var fun = function (rows, count) {
         table.reset()
@@ -111,6 +122,9 @@ var getArchive = function (url, table, limit, from, page, paging) {
     getAjaxResult(url, data, fun);
 }
 
+/**
+ * Get Results by using ajax
+ */
 var getAjaxResult = function (url, data, fun) {
     $.ajax({
         url: url,
@@ -121,13 +135,15 @@ var getAjaxResult = function (url, data, fun) {
             var results = source["results"];
             var rows = []
             for (var i in results) {
-                var row = results[i]
+                var row = results[i];
+                var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
+                var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
                 var fb_url = "https://www.facebook.com/";
                 var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
                 var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
                 rows.push({
-                    "from": row["user"].name,
-                    "created_time": timeSince(row["created_time"]),
+                    "from": picture + from,
+                    //"created_time": timeSince(row["created_time"]),
                     "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
                     "like_count": row["like_count"],
                     "comment_count": row["comment_count"],

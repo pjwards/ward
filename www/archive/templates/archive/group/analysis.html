@@ -151,16 +151,14 @@
                                 </div>
                                 <table id="post_issue_table" class="table simple hover">
                                     <colgroup>
-                                        <col style="width: 10%;">
+                                        <col style="width: 20%;">
+                                        <col style="width: 50%;">
                                         <col style="width: 15%;">
-                                        <col style="width: 55%;">
-                                        <col style="width: 10%;">
-                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
                                     </colgroup>
                                     <thead>
                                     <tr>
                                         <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                        <th style="text-align: center;"><i class="icon-realtime"></i> Created Time</th>
                                         <th style="text-align: center;"><i class="icon-report"></i> Message</th>
                                         <th style="text-align: center;"><i class="icon-like"></i> Like</th>
                                         <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
@@ -200,16 +198,14 @@
                                 </div>
                                 <table id="comment_issue_table" class="table simple hover">
                                     <colgroup>
-                                        <col style="width: 10%;">
+                                        <col style="width: 20%;">
+                                        <col style="width: 50%;">
                                         <col style="width: 15%;">
-                                        <col style="width: 55%;">
-                                        <col style="width: 10%;">
-                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
                                     </colgroup>
                                     <thead>
                                     <tr>
                                         <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                        <th style="text-align: center;"><i class="icon-realtime"></i> Created Time</th>
                                         <th style="text-align: center;"><i class="icon-report"></i> Message</th>
                                         <th style="text-align: center;"><i class="icon-like"></i> Like</th>
                                         <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
@@ -248,16 +244,14 @@
                                 </div>
                                 <table id="post_archive_table" class="table simple hover">
                                     <colgroup>
-                                        <col style="width: 10%;">
+                                        <col style="width: 20%;">
+                                        <col style="width: 50%;">
                                         <col style="width: 15%;">
-                                        <col style="width: 55%;">
-                                        <col style="width: 10%;">
-                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
                                     </colgroup>
                                     <thead>
                                     <tr>
                                         <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                        <th style="text-align: center;"><i class="icon-realtime"></i> Created Time</th>
                                         <th style="text-align: center;"><i class="icon-report"></i> Message</th>
                                         <th style="text-align: center;"><i class="icon-like"></i> Like</th>
                                         <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
@@ -292,16 +286,14 @@
                                 </div>
                                 <table id="comment_archive_table" class="table simple hover">
                                     <colgroup>
-                                        <col style="width: 10%;">
+                                        <col style="width: 20%;">
+                                        <col style="width: 50%;">
                                         <col style="width: 15%;">
-                                        <col style="width: 55%;">
-                                        <col style="width: 10%;">
-                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
                                     </colgroup>
                                     <thead>
                                     <tr>
                                         <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                        <th style="text-align: center;"><i class="icon-realtime"></i> Created Time</th>
                                         <th style="text-align: center;"><i class="icon-report"></i> Message</th>
                                         <th style="text-align: center;"><i class="icon-like"></i> Like</th>
                                         <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
@@ -323,10 +315,7 @@
 
                 <script id="tpl_row" type="text/template">
                     <tr>
-                        <td tyle="text-align: center;"><i class="icon-stop" style="font-size:8.5px;color:red;"></i><!=
-                            from !>
-                        </td>
-                        <td style="text-align: center;"><!= created_time !></td>
+                        <td><!= from !></td>
                         <td><!= message !></td>
                         <td style="text-align: center;"><!= like_count !></td>
                         <td style="text-align: center;"><!= comment_count !></td>
@@ -548,11 +537,11 @@
             });
 
             post_issue_table = table("#post_issue_table", {
-                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                fields: ["from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [3, 4],
+                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
@@ -584,11 +573,11 @@
             });
 
             comment_issue_table = table("#comment_issue_table", {
-                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                fields: ["from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [3, 4],
+                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
@@ -625,11 +614,11 @@
             });
 
             post_archive_table = table("#post_archive_table", {
-                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                fields: ["from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [3, 4],
+                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
@@ -661,11 +650,11 @@
             });
 
             comment_archive_table = table("#comment_archive_table", {
-                fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                fields: ["from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [3, 4],
+                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
