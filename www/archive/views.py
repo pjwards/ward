@@ -277,7 +277,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         Return Hot Comment Issue for group
         """
         posts = self.get_issue(Post)
-        return self.response_posts(posts, request)
+        return self.response_models(posts, request, PostSerializer)
 
     @detail_route()
     def comment_issue(self, request, pk=None):
@@ -285,7 +285,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         Return Hot Comment Issue for group
         """
         comments = self.get_issue(Comment)
-        return self.response_comments(comments, request)
+        return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
     def post_archive(self, request, pk=None):
@@ -293,7 +293,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         Return Post archive for group
         """
         posts = self.get_archive(Post)
-        return self.response_posts(posts, request)
+        return self.response_models(posts, request, PostSerializer)
 
     @detail_route()
     def comment_archive(self, request, pk=None):
@@ -301,7 +301,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         Return Comment archive for group
         """
         comments = self.get_archive(Comment)
-        return self.response_comments(comments, request)
+        return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
     def user(self, request, pk=None):
@@ -316,36 +316,21 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         serializers = UserSerializer(users_post, many=True, context={'request': request})
         return Response(serializers.data)
 
-    def response_posts(self, posts, request):
+    def response_models(self, models, request, model_serializer):
         """
-        Return response for posts with pagination
+        Return response for models with pagination
 
-        :param posts: posts
+        :param models: models
         :param request: request
+        :param model_serializer: model_serializer
         :return: response
         """
-        page = self.paginate_queryset(posts)
+        page = self.paginate_queryset(models)
         if page is not None:
-            serializers = PostSerializer(page, many=True, context={'request': request})
+            serializers = model_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializers.data)
 
-        serializers = PostSerializer(posts, many=True, context={'request': request})
-        return Response(serializers.data)
-
-    def response_comments(self, comments, request):
-        """
-        Return response for comments with pagination
-
-        :param comments: comments
-        :param request: request
-        :return: response
-        """
-        page = self.paginate_queryset(comments)
-        if page is not None:
-            serializers = CommentSerializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializers.data)
-
-        serializers = CommentSerializer(comments, many=True, context={'request': request})
+        serializers = model_serializer(models, many=True, context={'request': request})
         return Response(serializers.data)
 
     def get_issue(self, model):

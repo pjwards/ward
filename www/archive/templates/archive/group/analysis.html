@@ -340,184 +340,23 @@
 {% endblock %}
 
 {% block script %}
+    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
     <script>
         var chart = jui.include("chart.builder");
-        var statistics;
         var statistics_method = 'month';
-        var hour_statistics;
-        var post_max_cnt;
-        var comment_max_cnt;
+        var statistics_display = '#statistics';
+        var hour_statistics_display = "#hour_statistics";
+
         var post_issue_limit = 10;
         var comment_issue_limit = 10;
         var post_archive_limit = 10;
         var comment_archive_limit = 10;
 
+        var statistics_url = "{% url 'archive:group_statistics' group.id %}";
         var post_issue_url = "/api/groups/{{ group.id }}/post_issue/";
         var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
         var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";
         var comment_archive_url = "/api/groups/{{ group.id }}/comment_archive/";
-
-        /**
-         * Generate Statistics
-         */
-        function getStatistics(method, from, to) {
-            $.ajax({
-                url: "{% url 'archive:group_statistics' group.id %}",
-                type: "get",
-                async: false,
-                data: {
-                    method: method,
-                    from: from,
-                    to: to
-                },
-                dataType: "JSON",
-                success: function (source) {
-                    statistics = source['statistics'];
-                    post_max_cnt = ceil(source['post_max_cnt'], 2);
-                    comment_max_cnt = ceil(source["comment_max_cnt"], 2);
-                },
-                error: function (request, status, error) {
-                    alert(status);
-                }
-            });
-
-            $.ajax({
-                url: "{% url 'archive:group_statistics' group.id %}",
-                type: "get",
-                async: false,
-                data: {
-                    method: "hour_total",
-                    from: from,
-                    to: to
-                },
-                dataType: "JSON",
-                success: function (source) {
-                    hour_statistics = source['statistics'];
-                    for (var i in hour_statistics) {
-                        delete hour_statistics[i].date;
-                    }
-                },
-                error: function (request, status, error) {
-                    alert(status);
-                }
-            });
-
-            $('#statistics').empty();
-            chart("#statistics", {
-                padding: {
-                    left: 60
-                },
-                height: 400,
-                axis: [{
-                    data: statistics,
-                    x: {
-                        type: "block",
-                        domain: "date"
-                    },
-                    y: {
-                        type: "range",
-                        domain: [0, post_max_cnt],
-                        step: 4,
-                        line: true
-                    },
-                    area: {
-                        width: "100%",
-                        height: "100%"
-                    }
-                }, {
-                    x: {
-                        hide: true
-                    },
-                    y: {
-                        domain: [0, comment_max_cnt],
-                        orient: "right"
-                    },
-                    area: {
-                        width: "100%",
-                        height: "100%"
-                    },
-                    extend: 0
-                }],
-                brush: [{
-                    type: "column",
-                    target: "posts",
-                    axis: 0,
-                    colors: [0],
-                    animate: true
-                }, {
-                    type: "line",
-                    target: "comments",
-                    axis: 1,
-                    colors: [2],
-                    animate: true
-                }, {
-                    type: "scatter",
-                    target: "comments",
-                    size: 10,
-                    axis: 1,
-                    colors: [2]
-                }],
-                widget: [{
-                    type: "title",
-                    text: "Group Overview",
-                    align: "start"
-                }, {
-                    type: "title",
-                    text: "Counts",
-                    align: "start",
-                    orient: "center",
-                    dx: -55,
-                    dy: -90
-                }, {
-                    type: "tooltip",
-                    format: function (k, v) {
-                        return v;
-                    },
-                    brush: [0, 2, 3, 4]
-                }],
-                style: {
-                    scatterBorderWidth: 1.5,
-                    titleFontSize: "11px",
-                    titleFontWeight: "bold"
-                },
-                format: function (v) {
-                    if (typeof(v) == "number") {
-                        return ((v > 1000) ? Math.floor(v / 1000) + "k" : v);
-                    }
-                    return v;
-                }
-            });
-
-            $('#hour_statistics').empty();
-            chart("#hour_statistics", {
-                height: 350,
-                axis: {
-                    x: {
-                        type: "fullblock",
-                        domain: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"],
-                        line: true
-                    },
-                    y: {
-                        type: "range",
-                        domain: function (d) {
-                            return Math.max(d.posts, d.comments);
-                        },
-                        step: 10
-                    },
-                    data: hour_statistics
-                },
-                brush: {
-                    type: "line",
-                    display: "max",
-                    active: "posts",
-                    activeEvent: "click"
-                },
-                widget: [
-                    {type: "title", text: "Time Overview"},
-                    {type: "legend"}
-                ]
-            });
-        }
 
         /**
          * Generate Hot Issue
@@ -761,14 +600,16 @@
          * Init Analysis.html
          */
         $(function () {
-            getStatistics(statistics_method);
+            getStatistics(statistics_url, statistics_display);
+            getHourTotalStatistics(statistics_url, hour_statistics_display);
             getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
             getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
             getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
             getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
 
             $("#statistics_run").on("click", function () {
-                getStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
+                getStatistics(statistics_url, statistics_display,statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
+                getHourTotalStatistics(statistics_url, hour_statistics_display, $("#statistics_from").val(), $("#statistics_to").val());
             });
 
             $("#post_issue_run").on("click", function () {
