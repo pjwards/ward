@@ -56,8 +56,8 @@
         <div class="menu">
 
             <div class="vmenu ">
-                <a class="active"><i class="icon-profile"></i> Analysis</a>
-                <a><i class="icon-user"></i> User</a>
+                <a href="{% url 'archive:group_analysis' group.id %}" class="active"><i class="icon-profile"></i> Analysis</a>
+                <a href="{% url 'archive:group_user' group.id %}"><i class="icon-user"></i> User</a>
                 <a href="realtime.html"><i class="icon-realtime"></i> Realtime</a>
                 <a href="analysis.html"><i class="icon-monitoring"></i> Dashboard</a>
                 <a><i class="icon-chart"></i> Statistics</a>
@@ -605,7 +605,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), pNo, post_archive_paging);
+                        getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), pNo);
                     }
                 },
                 tpl: {
@@ -641,7 +641,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getArchive(comment_archive_url, comment_archive_table, comment_archive_paging, $("#comment_archive_from").val(), pNo, comment_archive_paging);
+                        getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), pNo);
                     }
                 },
                 tpl: {
