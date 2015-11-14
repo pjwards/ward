@@ -239,6 +239,7 @@
                                     <strong>Recent Post List</strong>
 
                                     <div class="group" style="float: right">
+                                        <input type="text" class="input" id="post_archive_limit" placeholder="limit" value="10" style="width: 60px;"/>
                                         <input type="text" class="input" id="post_archive_from" placeholder="from"/>
                                         <button class="btn" value="run" id="post_archive_run"><i class="icon-play"></i>
                                             Run
@@ -281,6 +282,7 @@
                                     <strong>Recent Comment List</strong>
 
                                     <div class="group" style="float: right">
+                                        <input type="text" class="input" id="comment_archive_limit" placeholder="limit" value="10" style="width: 60px;"/>
                                         <input type="text" class="input" id="comment_archive_from" placeholder="from"/>
                                         <button class="btn" value="run" id="comment_archive_run"><i
                                                 class="icon-play"></i>
@@ -358,6 +360,8 @@
         var comment_max_cnt;
         var post_issue_limit = 10;
         var comment_issue_limit = 10;
+        var post_archive_limit = 10;
+        var comment_archive_limit = 10;
 
         var post_issue_url = "/api/groups/{{ group.id }}/post_issue/";
         var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
@@ -603,12 +607,16 @@
             });
         });
 
-        jui.ready(["ui.paging", "uix.xtable"], function (paging, xtable) {
+        /**
+         * Generate Archive
+         */
+        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             post_archive_paging = paging("#post_archive_paging", {
                 pageCount: 10,
+                screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        post_archive_xtable.page(pNo);
+                        getArchive(post_archive_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), pNo);
                     }
                 },
                 tpl: {
@@ -616,17 +624,21 @@
                 }
             });
 
-            post_archive_xtable = xtable("#post_archive_table", {
+            post_archive_table = table("#post_archive_table", {
                 fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: true,
-                sortLoading: true,
-                buffer: "s-page",
-                bufferCount: 10,
+                sort: [3, 4],
                 event: {
-                    sortend: function (data, e) {
-                        post_archive_paging.first();
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
                     }
                 },
                 tpl: {
@@ -637,9 +649,10 @@
 
             comment_archive_paging = paging("#comment_archive_paging", {
                 pageCount: 10,
+                screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        comment_archive_xtable.page(pNo);
+                        getArchive(comment_archive_url, comment_archive_table, comment_archive_paging, $("#comment_issue_from").val(), $("#comment_issue_to").val(), pNo);
                     }
                 },
                 tpl: {
@@ -647,17 +660,21 @@
                 }
             });
 
-            comment_archive_xtable = xtable("#comment_archive_table", {
+            comment_archive_table = table("#comment_archive_table", {
                 fields: ["from", "created_time", "message", "like_count", "comment_count"],
+                scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: true,
-                sortLoading: true,
-                buffer: "s-page",
-                bufferCount: 10,
+                sort: [3, 4],
                 event: {
-                    sortend: function (data, e) {
-                        comment_archive_paging.first();
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
                     }
                 },
                 tpl: {
@@ -684,6 +701,8 @@
                 event: {
                     change: function (data) {
                         post_issue_limit = data.value;
+                        getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
+                        post_issue_paging.first();
                     }
                 }
             });
@@ -694,6 +713,8 @@
                 event: {
                     change: function (data) {
                         comment_issue_limit = data.value;
+                        getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
+                        comment_issue_paging.first();
                     }
                 }
             });
@@ -703,8 +724,8 @@
             getStatistics(statistics_method);
             getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
             getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
-            getArchive(post_archive_url, post_archive_xtable, post_archive_paging);
-            getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging);
+            getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
+            getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
 
             $("#statistics_run").on("click", function () {
                 getStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
@@ -721,11 +742,25 @@
             });
 
             $("#post_archive_run").on("click", function () {
-                getArchive(post_archive_url, post_archive_xtable, post_archive_paging, $("#post_archive_from").val());
+                getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
+                post_archive_paging.first();
             });
 
             $("#comment_archive_run").on("click", function () {
-                getArchive(comment_archive_url, comment_archive_xtable, comment_archive_paging, $("#comment_archive_from").val());
+                getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
+                comment_archive_paging.first();
+            });
+
+            $("#post_archive_limit").on("change", function () {
+                post_archive_limit = $("#post_archive_limit").val();
+                getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
+                post_archive_paging.first();
+            });
+
+            $("#comment_archive_limit").on("change", function () {
+                comment_archive_limit = $("#comment_archive_limit").val();
+                getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
+                comment_archive_paging.first();
             });
         })
 

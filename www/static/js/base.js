@@ -86,16 +86,21 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
     getAjaxResult(url, data, fun);
 }
 
-var getArchive = function (url, table, paging, from) {
-    var fun = function (rows) {
+var getArchive = function (url, table, limit, from, page, paging) {
+    var fun = function (rows, count) {
         table.reset()
-        table.update(rows);
-        table.resize();
-        paging.reload(table.count());
+        table.append(rows);
+        paging.setOption("pageCount", limit);
+        paging.reload(count);
+    }
+
+    if (!page) {
+        page = 1;
     }
 
     data = {
-        limit:20,
+        limit: limit,
+        offset: (page-1)*limit,
         from: from,
     }
 

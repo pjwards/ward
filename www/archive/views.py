@@ -364,7 +364,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         to_date = self.request.query_params.get('to', None)
 
         # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
-        if from_date is None and to_date is None:
+        if not from_date and not to_date:
             from_date, to_date = date_utils.week_delta()
 
         models = get_objects_by_time(_group, model, from_date, to_date)
@@ -389,7 +389,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         from_date = self.request.query_params.get('from', None)
 
-        if from_date is not None:
+        if from_date:
             from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
         else:
             from_date, to_date = date_utils.date_range(date_utils.get_today(), 1)
