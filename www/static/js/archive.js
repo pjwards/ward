@@ -57,15 +57,51 @@ var ceil = function (num, places) {
 }
 
 /**
+ * Get Results by using ajax
+ */
+var getAjaxResult = function (url, data, fun) {
+    $.ajax({
+        url: url,
+        type: "get",
+        data: data,
+        dataType: "JSON",
+        success: function (source) {
+            fun(source);
+        },
+        error: function (request, status, error) {
+            alert(status);
+        }
+    });
+}
+
+/**
  * Get issue by using ajax
  */
 var getIssue = function (url, table, limit, from, to, page, paging) {
-    var fun = function (rows, count) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
+            var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
+            var fb_url = "https://www.facebook.com/";
+            var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+            var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+            rows.push({
+                "from": picture + from,
+                "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
+                "like_count": row["like_count"],
+                "comment_count": row["comment_count"],
+            });
+        }
+        ;
+
         table.reset()
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
-            paging.reload(count);
+            paging.reload(source["count"]);
         }
     }
 
@@ -87,12 +123,30 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
  * Get archive by using ajax
  */
 var getArchive = function (url, table, limit, from, page, paging) {
-    var fun = function (rows, count) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
+            var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
+            var fb_url = "https://www.facebook.com/";
+            var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+            var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+            rows.push({
+                "from": picture + from,
+                "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
+                "like_count": row["like_count"],
+                "comment_count": row["comment_count"],
+            });
+        }
+        ;
+
         table.reset()
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
-            paging.reload(count);
+            paging.reload(source["count"]);
         }
     }
 
@@ -107,42 +161,6 @@ var getArchive = function (url, table, limit, from, page, paging) {
     }
 
     getAjaxResult(url, data, fun);
-}
-
-/**
- * Get Results by using ajax
- */
-var getAjaxResult = function (url, data, fun) {
-    $.ajax({
-        url: url,
-        type: "get",
-        data: data,
-        dataType: "JSON",
-        success: function (source) {
-            var results = source["results"];
-            var rows = []
-            for (var i in results) {
-                var row = results[i];
-                var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
-                var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
-                var fb_url = "https://www.facebook.com/";
-                var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
-                var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
-                rows.push({
-                    "from": picture + from,
-                    //"created_time": timeSince(row["created_time"]),
-                    "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
-                    "like_count": row["like_count"],
-                    "comment_count": row["comment_count"],
-                });
-            }
-            ;
-            fun(rows, source["count"]);
-        },
-        error: function (request, status, error) {
-            alert(status);
-        }
-    });
 }
 
 /**
@@ -253,7 +271,7 @@ var getStatistics = function (url, display, method, from, to) {
         to: to
     }
 
-    getAjaxStatistics(url, data, fun);
+    getAjaxResult(url, data, fun);
 }
 
 /**
@@ -305,23 +323,40 @@ var getHourTotalStatistics = function (url, display, from, to) {
         to: to
     }
 
-    getAjaxStatistics(url, data, fun);
+    getAjaxResult(url, data, fun);
 }
 
 /**
- * Get statistics by using ajax
+ * Get active by using ajax
  */
-var getAjaxStatistics = function (url, data, fun) {
-    $.ajax({
-        url: url,
-        type: "get",
-        data: data,
-        dataType: "JSON",
-        success: function (source) {
-            fun(source);
-        },
-        error: function (request, status, error) {
-            alert(status);
+var getActivity = function (url, limit, method, model, table) {
+
+    var fun = function (source) {
+        console.dir(source);
+
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["picture"] + '" style="border-radius: 10px;"></div></div>';
+            var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["name"] + '</div></div>';
+            rows.push({
+                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
+                "from": row["name"],
+                "count": row["count"],
+            });
         }
-    });
+        ;
+
+        table.reset()
+        table.append(rows);
+    }
+
+    data = {
+        limit: limit,
+        method: method,
+        model: model
+    }
+
+    getAjaxResult(url, data, fun);
 }

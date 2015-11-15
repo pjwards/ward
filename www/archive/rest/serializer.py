@@ -18,6 +18,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = '__all__'
 
 
+class ActivityUserSerializer(UserSerializer):
+    count = serializers.IntegerField()
+
+
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
 

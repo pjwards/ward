@@ -304,17 +304,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
-    def user(self, request, pk=None):
-        _group = self.get_object()
-
-        users_post = _group.user_set.all()
-        page = self.paginate_queryset(users_post)
-        if page is not None:
-            serializers = UserSerializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializers.data)
-
-        serializers = UserSerializer(users_post, many=True, context={'request': request})
-        return Response(serializers.data)
+    def activity(self, request, pk=None):
+        """
+        Return User for group activity
+        """
+        users_post = self.get_activity()
+        return self.response_models(users_post, request, ActivityUserSerializer)
 
     def response_models(self, models, request, model_serializer):
         """
@@ -341,7 +336,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         to_date : to day from HTTP Request
 
         :param model: model to get issue
-        :return: (group, issue models)
+        :return: result models
         """
         _group = self.get_object()
 
@@ -368,7 +363,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         from_date : day to find archives from HTTP Request
 
         :param model: model to get archive
-        :return: (group, archive models)
+        :return: result models
         """
         _group = self.get_object()
 
@@ -381,6 +376,36 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         models = get_objects_by_time(_group, model, from_date, to_date).order_by('-created_time')
         return models
+
+    def get_activity(self):
+        """
+        Get user activity
+
+        :return: result models
+        """
+        _group = self.get_object()
+
+        method = self.request.query_params.get('method', 'total')
+        model = self.request.query_params.get('model', None)
+
+        if method != 'total' and method != 'week' and method != 'month':
+            raise ValueError("Method can be used 'total', 'week', or 'month'. Input method:" + method)
+        if model != 'post' and model != 'comment':
+            raise ValueError("Model can be used 'post' or 'comment'. Input model:" + model)
+
+        if method == 'total':
+            return _group.user_set.annotate(count=Count(model + 's')).order_by('-count')
+        elif method == 'month':
+            to_date, from_date = date_utils.date_range(date_utils.get_today(), -30)
+        else:
+            to_date, from_date = date_utils.date_range(date_utils.get_today(), -7)
+
+        if model == 'post':
+            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date)\
+                .annotate(count=Count('posts')).order_by('-count')
+        else:
+            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date)\
+                .annotate(count=Count('comments')).order_by('-count')
 
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
