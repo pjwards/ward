@@ -1,12 +1,11 @@
 import logging
-import operator
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db import connections
 from django.db.models import Count, Max
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, renderer_classes
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from .rest.serializer import *
@@ -19,17 +18,6 @@ from .fb_request import FBRequest
 
 logger = logging.getLogger(__name__)
 fb_request = FBRequest()
-
-
-class JSONResponse(HttpResponse):
-    """
-    An HttpResponse that renders its content into JSON.
-    """
-
-    def __init__(self, data, **kwargs):
-        content = JSONRenderer().render(data)
-        kwargs['content_type'] = 'application/json'
-        super(JSONResponse, self).__init__(content, **kwargs)
 
 
 def groups(request):
@@ -63,7 +51,7 @@ def groups(request):
         _group.save()
         logger.info('Saved group: %s', _group)
 
-        tasks.store_group_feed.delay(_group.id, get_feed_query(10, 100))
+        tasks.store_group_feed.delay(_group.id, get_feed_query(100, 100))
 
         return HttpResponseRedirect(reverse('archive:groups'))
 
@@ -130,7 +118,7 @@ def group_store(request, group_id):
     if not Group.objects.filter(id=group_id).exists():
         return redirect(reverse('archive:groups') + '?error=error2')
 
-    tasks.store_group_feed.delay(group_id, get_feed_query(10, 100))
+    tasks.store_group_feed.delay(group_id, get_feed_query(100, 100))
     return HttpResponseRedirect(reverse('archive:groups'))
 
 
@@ -145,114 +133,8 @@ def group_update(request, group_id):
     if not Group.objects.filter(id=group_id).exists():
         return redirect(reverse('archive:groups') + '?error=error2')
 
-    if tasks.update_group_feed.delay(group_id, get_feed_query(10, 100)):
+    if tasks.update_group_feed.delay(group_id, get_feed_query(100, 100)):
         return HttpResponseRedirect(reverse('archive:groups'))
-
-
-def group_statistics(request, group_id):
-    """
-    Get statistics from group.
-
-    method : year | month | day | hour from HTTP Request
-    from_date : start day from HTTP Request
-    to_date : to day from HTTP Request
-
-    :param request: request
-    :param group_id: group_id
-    :return: json
-    """
-    _group = get_object_or_404(Group, pk=group_id)
-
-    method = request.GET.get('method', 'month')
-    from_date = request.GET.get('from', None)
-    to_date = request.GET.get('to', None)
-
-    if method != 'year' and method != 'month' and method != 'day' and method != 'hour' and method != 'hour_total':
-        raise ValueError(
-            "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
-
-    all_posts = get_objects_by_time(_group, Post, from_date, to_date)
-    all_comments = get_objects_by_time(_group, Comment, from_date, to_date)
-
-    # Method Dictionary for group by time
-    dic = {
-        'year': 'strftime("%%Y", created_time)',
-        'month': 'strftime("%%Y-%%m", created_time)',
-        'day': 'strftime("%%Y-%%m-%%d", created_time)',
-        'hour': 'strftime("%%Y-%%m-%%d-%%H", created_time)',
-        'hour_total': 'strftime("%%H", created_time)',
-    }
-
-    all_posts = all_posts.extra({'date': dic[method]}).order_by().values('date').annotate(p_count=Count('created_time'))
-    all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date').annotate(
-        c_count=Count('created_time'))
-
-    post_max_cnt = all_posts.aggregate(Max('p_count'))
-    comment_max_cnt = all_comments.aggregate(Max('c_count'))
-
-    if method == 'year':
-        date_start_len = 0
-        date_end_len = 4
-    elif method == 'month':
-        date_start_len = 2
-        date_end_len = 7
-    elif method == 'day':
-        date_start_len = 5
-        date_end_len = 10
-    elif method == 'hour':
-        date_start_len = 8
-        date_end_len = 13
-    else:
-        date_start_len = 0
-        date_end_len = 2
-
-    data_source = {}
-
-    for comment in all_comments:
-        dic = dict()
-        dic["date"] = comment.get("date")[date_start_len:date_end_len]
-        dic["posts"] = 0
-        dic["comments"] = comment.get("c_count")
-        data_source[comment.get("date")] = dic
-
-    for post in all_posts:
-        if post.get("date") in data_source:
-            data_source[post.get("date")]["posts"] = post.get("p_count")
-        else:
-            dic = dict()
-            dic["date"] = post.get("date")[date_start_len:date_end_len]
-            dic["posts"] = post.get("p_count")
-            dic["comments"] = 0
-            data_source[post.get("date")] = dic
-
-    return JsonResponse({
-        'statistics': [data_source[key] for key in sorted(data_source.keys())],
-        'post_max_cnt': post_max_cnt["p_count__max"],
-        'comment_max_cnt': comment_max_cnt["c_count__max"]})
-
-
-def get_objects_by_time(_group, model, from_date=None, to_date=None):
-    """
-    Get objects between from_date and to_date.
-
-    :param _group: _group
-    :param model: model
-    :param from_date: start_date
-    :param to_date: end_date
-    :return: objects
-    """
-    if from_date:
-        if to_date:
-            if from_date == to_date:
-                from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
-                return model.objects.filter(group=_group, created_time__gt=from_date, created_time__lt=to_date)
-            return model.objects.filter(group=_group, created_time__gt=from_date, created_time__lt=to_date)
-        else:
-            return model.objects.filter(group=_group, created_time__gt=from_date)
-    elif to_date:
-        return model.objects.filter(group=_group, created_time__lt=to_date)
-    else:
-        return model.objects.filter(group=_group)
 
 
 # ViewSets define the view behavior.
@@ -272,9 +154,95 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = GroupSerializer
 
     @detail_route()
+    @renderer_classes((JSONRenderer,))
+    def statistics(self, request, pk=None):
+        """
+        Return Statistics for group
+
+        method : year | month | day | hour from HTTP Request
+        from_date : start day from HTTP Request
+        to_date : to day from HTTP Request
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        method = self.request.query_params.get('method', 'month')
+        from_date = self.request.query_params.get('from', None)
+        to_date = self.request.query_params.get('to', None)
+
+        if method != 'year' and method != 'month' and method != 'day' and method != 'hour' and method != 'hour_total':
+            raise ValueError(
+                "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
+
+        all_posts = self.get_objects_by_time(Post, from_date, to_date)
+        all_comments = self.get_objects_by_time(Comment, from_date, to_date)
+
+        # Method Dictionary for group by time
+        dic = {
+            'year': 'strftime("%%Y", created_time)',
+            'month': 'strftime("%%Y-%%m", created_time)',
+            'day': 'strftime("%%Y-%%m-%%d", created_time)',
+            'hour': 'strftime("%%Y-%%m-%%d-%%H", created_time)',
+            'hour_total': 'strftime("%%H", created_time)',
+        }
+
+        all_posts = all_posts.extra({'date': dic[method]}).order_by().values('date')\
+            .annotate(p_count=Count('created_time'))
+        all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date')\
+            .annotate(c_count=Count('created_time'))
+
+        post_max_cnt = all_posts.aggregate(Max('p_count'))
+        comment_max_cnt = all_comments.aggregate(Max('c_count'))
+
+        if method == 'year':
+            date_start_len = 0
+            date_end_len = 4
+        elif method == 'month':
+            date_start_len = 2
+            date_end_len = 7
+        elif method == 'day':
+            date_start_len = 5
+            date_end_len = 10
+        elif method == 'hour':
+            date_start_len = 8
+            date_end_len = 13
+        else:
+            date_start_len = 0
+            date_end_len = 2
+
+        data_source = {}
+
+        for comment in all_comments:
+            dic = dict()
+            dic["date"] = comment.get("date")[date_start_len:date_end_len]
+            dic["posts"] = 0
+            dic["comments"] = comment.get("c_count")
+            data_source[comment.get("date")] = dic
+
+        for post in all_posts:
+            if post.get("date") in data_source:
+                data_source[post.get("date")]["posts"] = post.get("p_count")
+            else:
+                dic = dict()
+                dic["date"] = post.get("date")[date_start_len:date_end_len]
+                dic["posts"] = post.get("p_count")
+                dic["comments"] = 0
+                data_source[post.get("date")] = dic
+
+        return Response({
+            'statistics': [data_source[key] for key in sorted(data_source.keys())],
+            'post_max_cnt': post_max_cnt["p_count__max"],
+            'comment_max_cnt': comment_max_cnt["c_count__max"]})
+
+    @detail_route()
     def post_issue(self, request, pk=None):
         """
         Return Hot Comment Issue for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
         """
         posts = self.get_issue(Post)
         return self.response_models(posts, request, PostSerializer)
@@ -283,6 +251,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     def comment_issue(self, request, pk=None):
         """
         Return Hot Comment Issue for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
         """
         comments = self.get_issue(Comment)
         return self.response_models(comments, request, CommentSerializer)
@@ -291,6 +263,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     def post_archive(self, request, pk=None):
         """
         Return Post archive for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
         """
         posts = self.get_archive(Post)
         return self.response_models(posts, request, PostSerializer)
@@ -299,6 +275,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     def comment_archive(self, request, pk=None):
         """
         Return Comment archive for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
         """
         comments = self.get_archive(Comment)
         return self.response_models(comments, request, CommentSerializer)
@@ -307,6 +287,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     def activity(self, request, pk=None):
         """
         Return User for group activity
+
+        :param request: request
+        :param pk: pk
+        :return: response model
         """
         users_post = self.get_activity()
         return self.response_models(users_post, request, ActivityUserSerializer)
@@ -328,6 +312,30 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         serializers = model_serializer(models, many=True, context={'request': request})
         return Response(serializers.data)
 
+    def get_objects_by_time(self, model, from_date=None, to_date=None):
+        """
+        Get objects between from_date and to_date.
+
+        :param model: model
+        :param from_date: start_date
+        :param to_date: end_date
+        :return: objects
+        """
+        _group = self.get_object()
+
+        if from_date:
+            if to_date:
+                if from_date == to_date:
+                    from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
+                    return model.objects.filter(group=_group, created_time__range=[from_date, to_date])
+                return model.objects.filter(group=_group, created_time__range=[from_date, to_date])
+            else:
+                return model.objects.filter(group=_group, created_time__gte=from_date)
+        elif to_date:
+            return model.objects.filter(group=_group, created_time__lte=to_date)
+        else:
+            return model.objects.filter(group=_group)
+
     def get_issue(self, model):
         """
         Get hot issue models from group.
@@ -338,8 +346,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param model: model to get issue
         :return: result models
         """
-        _group = self.get_object()
-
         from_date = self.request.query_params.get('from', None)
         to_date = self.request.query_params.get('to', None)
 
@@ -347,7 +353,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if not from_date and not to_date:
             from_date, to_date = date_utils.week_delta()
 
-        models = get_objects_by_time(_group, model, from_date, to_date)
+        models = self.get_objects_by_time(model, from_date, to_date)
 
         models = models.extra(
             select={'field_sum': 'like_count + comment_count'},
@@ -365,8 +371,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param model: model to get archive
         :return: result models
         """
-        _group = self.get_object()
-
         from_date = self.request.query_params.get('from', None)
 
         if from_date:
@@ -374,7 +378,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             from_date, to_date = date_utils.date_range(date_utils.get_today(), 1)
 
-        models = get_objects_by_time(_group, model, from_date, to_date).order_by('-created_time')
+        models = self.get_objects_by_time(model, from_date, to_date).order_by('-created_time')
         return models
 
     def get_activity(self):

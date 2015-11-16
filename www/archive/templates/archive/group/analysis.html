@@ -352,7 +352,7 @@
         var post_archive_limit = 10;
         var comment_archive_limit = 10;
 
-        var statistics_url = "{% url 'archive:group_statistics' group.id %}";
+        var statistics_url = "/api/groups/{{ group.id }}/statistics/";;
         var post_issue_url = "/api/groups/{{ group.id }}/post_issue/";
         var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
         var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";

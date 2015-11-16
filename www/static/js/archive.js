@@ -332,14 +332,11 @@ var getHourTotalStatistics = function (url, display, from, to) {
 var getActivity = function (url, limit, method, model, table) {
 
     var fun = function (source) {
-        console.dir(source);
-
         var results = source["results"];
         var rows = []
         for (var i in results) {
             var row = results[i];
             var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["picture"] + '" style="border-radius: 10px;"></div></div>';
-            var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["name"] + '</div></div>';
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": row["name"],
