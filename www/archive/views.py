@@ -1,4 +1,5 @@
 import logging
+import collections
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -294,6 +295,32 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         users_post = self.get_activity()
         return self.response_models(users_post, request, ActivityUserSerializer)
+
+    @detail_route()
+    @renderer_classes((JSONRenderer,))
+    def proportion(self, request, pk=None):
+        """
+        Return User Proportion for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        _group = self.get_object()
+
+        posts = {}
+        p_counts = _group.user_set.annotate(p_count=Count('posts')).values('p_count')
+
+        comments = {}
+        c_counts = _group.user_set.annotate(c_count=Count('comments')).values('c_count')
+
+        for p_count in p_counts:
+            posts[p_count.get('p_count')] = posts.get(p_count.get('p_count'), 0) + 1
+
+        for c_count in c_counts:
+            comments[c_count.get('c_count')] = comments.get(c_count.get('c_count'), 0) + 1
+
+        return Response({'posts': collections.OrderedDict(sorted(posts.items())), 'comments': collections.OrderedDict(sorted(comments.items()))})
 
     def response_models(self, models, request, model_serializer):
         """

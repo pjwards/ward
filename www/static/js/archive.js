@@ -172,6 +172,8 @@ var getStatistics = function (url, display, method, from, to) {
     var comment_max_cnt;
 
     var fun = function (source) {
+        var chart = jui.include("chart.builder");
+
         statistics = source['statistics'];
         post_max_cnt = ceil(source['post_max_cnt'], 2);
         comment_max_cnt = ceil(source["comment_max_cnt"], 2);
@@ -281,6 +283,8 @@ var getHourTotalStatistics = function (url, display, from, to) {
     var hour_statistics;
 
     var fun = function (source) {
+        var chart = jui.include("chart.builder");
+
         hour_statistics = source['statistics'];
         for (var i in hour_statistics) {
             delete hour_statistics[i].date;
@@ -354,6 +358,50 @@ var getActivity = function (url, limit, method, model, table) {
         method: method,
         model: model
     }
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Generate Proportion
+ */
+var getProportion = function (url, post_display, comment_display) {
+    function displayProportion(display, data) {
+        var chart = jui.include("chart.builder");
+        $(display).empty();
+        chart(display, {
+            padding: 150,
+            height: 800,
+            axis: {
+                data: [data]
+            },
+            brush: {
+                type: "pie",
+                showText: true,
+                active: "ie",
+                activeEvent: "click",
+            },
+            widget: [{
+                type: "title",
+                text: "Proprotion"
+            }, {
+                type: "tooltip",
+                orient: "left",
+            }, {
+                type: "legend",
+            }]
+        });
+    }
+
+    var fun = function (source) {
+        post_proportion = source['posts'];
+        comment_proportion = source['comments']
+
+        displayProportion(post_display, post_proportion);
+        displayProportion(comment_display, comment_proportion);
+    };
+
+    data = {}
 
     getAjaxResult(url, data, fun);
 }
