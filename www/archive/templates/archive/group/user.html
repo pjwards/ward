@@ -166,6 +166,45 @@
                     </div>
                 </div>
 
+                <div class="panel dashed">
+                    <div class="body">
+                        <h1 class="title"><i class="icon-db"></i> <strong>Archive</strong></h1>
+
+                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                            <div class="head">
+                                <strong>User Archive</strong>
+
+                                <div class="group" style="float: right">
+                                    <input type="text" class="input" id="user_archive_limit" placeholder="limit"
+                                           value="10" style="width: 60px;"/>
+                                    <input type="text" class="input" id="user_archive_search" placeholder="search"/>
+                                    <button class="btn" value="run" id="user_archive_run"><i class="icon-play"></i>
+                                        Run
+                                    </button>
+                                </div>
+                            </div>
+                            <table id="user_archive_table" class="table simple hover">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th><i class="icon-user"></i> User</th>
+                                    <th style="text-align: center;"><i class="icon-report"></i> Post</th>
+                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div id="user_archive_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                </div>
+
                 <script id="tpl_row" type="text/template">
                     <tr>
                         <td style="text-align: right;"><!= picture !></td>
@@ -174,10 +213,31 @@
                     </tr>
                 </script>
 
+                <script id="tpl_row2" type="text/template">
+                    <tr>
+                        <td style="text-align: right;"><!= picture !></td>
+                        <td><!= from !></td>
+                        <td style="text-align: center;"><!= post_count !></td>
+                        <td style="text-align: center;"><!= comment_count !></td>
+                    </tr>
+                </script>
+
                 <script id="tpl_none" type="text/template">
                     <tr>
                         <td colspan="2" class="none" align="center">Data does not exist.</td>
                     </tr>
+                </script>
+
+                <script id="tpl_none2" type="text/template">
+                    <tr>
+                        <td colspan="4" class="none" align="center">Data does not exist.</td>
+                    </tr>
+                </script>
+
+                <script id="tpl_pages" type="text/template">
+                    <! for(var i = 0; i < pages.length; i++) { !>
+                    <a href="#" class="page"><!= pages[i] !></a>
+                    <! } !>
                 </script>
             </div>
         </div>
@@ -189,6 +249,9 @@
     <script>
         var activity_url = "/api/groups/{{ group.id }}/activity/";
         var proportion_url = "/api/groups/{{ group.id }}/proportion/";
+        var user_archive_url = "/api/groups/{{ group.id }}/user_archive/";
+        var user_archive_limit = 10;
+
 
         /**
          * Generate Activity
@@ -221,13 +284,66 @@
         });
 
         /**
+         * Generate Archive
+         */
+        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+            user_archive_paging = paging("#user_archive_paging", {
+                pageCount: 10,
+                screenCount: 10,
+                event: {
+                    page: function (pNo) {
+                        getUserArchive(user_archive_url, user_archive_table, user_archive_limit, pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html()
+                }
+            });
+
+            user_archive_table = table("#user_archive_table", {
+                fields: ["", "from", "post_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                sort: [2, 3],
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row2").html(),
+                    none: $("#tpl_none2").html()
+                }
+            });
+        });
+
+        /**
          * Init user.html
          */
         $(function () {
             getActivity(activity_url, 10, "total", "post", post_activity_table);
             getActivity(activity_url, 10, "total", "comment", comment_activity_table);
 
-            getProportion(proportion_url, "#post_proportion", "#comment_proportion")
+            getProportion(proportion_url, "#post_proportion", "#comment_proportion");
+            getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_paging);
+
+            $("#user_archive_run").on("click", function () {
+                getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_paging);
+                user_archive_paging.first();
+            });
+
+            $("#user_archive_limit").on("input", function () {
+                user_archive_limit = $("#user_archive_limit").val();
+                getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_paging);
+                user_archive_paging.first();
+            });
         });
     </script>
 {% endblock %}

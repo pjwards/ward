@@ -166,7 +166,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         :param request: request
         :param pk: pk
-        :return: response model
+        :return: json response
         """
         method = self.request.query_params.get('method', 'month')
         from_date = self.request.query_params.get('from', None)
@@ -188,9 +188,9 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             'hour_total': 'strftime("%%H", created_time)',
         }
 
-        all_posts = all_posts.extra({'date': dic[method]}).order_by().values('date')\
+        all_posts = all_posts.extra({'date': dic[method]}).order_by().values('date') \
             .annotate(p_count=Count('created_time'))
-        all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date')\
+        all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date') \
             .annotate(c_count=Count('created_time'))
 
         post_max_cnt = all_posts.aggregate(Max('p_count'))
@@ -304,7 +304,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         :param request: request
         :param pk: pk
-        :return: response model
+        :return: json respomse
         """
         _group = self.get_object()
 
@@ -320,7 +320,21 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         for c_count in c_counts:
             comments[c_count.get('c_count')] = comments.get(c_count.get('c_count'), 0) + 1
 
-        return Response({'posts': collections.OrderedDict(sorted(posts.items())), 'comments': collections.OrderedDict(sorted(comments.items()))})
+        return Response({'posts': collections.OrderedDict(sorted(posts.items())),
+                         'comments': collections.OrderedDict(sorted(comments.items()))})
+
+    @detail_route()
+    def user_archive(self, request, pk=None):
+        """
+        Return User Archive for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        _group = self.get_object()
+
+        return self.response_models(_group.user_set.order_by('name'), request, UserSerializer)
 
     def response_models(self, models, request, model_serializer):
         """
@@ -432,10 +446,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             to_date, from_date = date_utils.date_range(date_utils.get_today(), -7)
 
         if model == 'post':
-            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date)\
+            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date) \
                 .annotate(count=Count('posts')).order_by('-count')
         else:
-            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date)\
+            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date) \
                 .annotate(count=Count('comments')).order_by('-count')
 
 

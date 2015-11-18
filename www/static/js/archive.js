@@ -340,7 +340,6 @@ var getActivity = function (url, limit, method, model, table) {
         var rows = []
         for (var i in results) {
             var row = results[i];
-            var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["picture"] + '" style="border-radius: 10px;"></div></div>';
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": row["name"],
@@ -371,7 +370,7 @@ var getProportion = function (url, post_display, comment_display) {
         $(display).empty();
         chart(display, {
             padding: 150,
-            height: 800,
+            height: 600,
             axis: {
                 data: [data]
             },
@@ -402,6 +401,44 @@ var getProportion = function (url, post_display, comment_display) {
     };
 
     data = {}
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Get user archive by using ajax
+ */
+var getUserArchive = function (url, table, limit, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            rows.push({
+                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
+                "from": row["name"],
+                "post_count": row["posts"].length,
+                "comment_count": row["comments"].length,
+            });
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+    }
 
     getAjaxResult(url, data, fun);
 }
