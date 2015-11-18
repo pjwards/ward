@@ -33,7 +33,8 @@ urlpatterns = i18n_patterns("",
     # Change the admin prefix here to use an alternate URL for the
     # admin interface, which would be marginally more secure.
     ("^admin/", include(admin.site.urls)),
-    url(r'^archive/', include('archive.urls', namespace="archive"))
+    url(r'^archive/', include('archive.urls', namespace="archive")),
+    url(r'^analysis/', include('analysis.urls', namespace="analysis")),
 )
 
 

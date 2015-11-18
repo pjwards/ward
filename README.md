@@ -14,13 +14,15 @@
 * django-rest-framework (tested with version 3.3.0)
 * markdown (tested with version 2.6.3)
 * django-filter (tested with version 0.11.0)
+* JPype1-py3 (tested with version 0.5.5.2)
+* konlpy (tested with version 0.4.4)
 
 #### Optional dependencies:
 
 * redis (tested with version 2.10.3)
 * rabbitmq-server
 * redis-server
-
+* MeCab
 
 ## Installation
 
@@ -77,6 +79,21 @@ brew install redis
 ```bash
 brew install nodejs
 npm install bower
+```
+
+#### MeCab
+
+##### Ubuntu
+
+```bash
+sudo yum install curl
+bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
+```
+
+##### Mac
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
 ```
 
 ## Tip
