@@ -138,6 +138,32 @@ def group_update(request, group_id):
         return HttpResponseRedirect(reverse('archive:groups'))
 
 
+def group_search(request, group_id):
+    """
+    Search from group
+
+    :param request: request
+    :param group_id: group_id
+    :return: searched data
+    """
+    _groups = Group.objects.all()
+    _group = get_object_or_404(Group, pk=group_id)
+
+    search = request.GET['q']
+    if not search:
+        search = None
+
+    return render(
+        request,
+        'archive/group/search.html',
+        {
+            'groups': _groups,
+            'group': _group,
+            'search': search,
+        }
+    )
+
+
 # ViewSets define the view behavior.
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -333,7 +359,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :return: response model
         """
         _group = self.get_object()
-        search = self.request.query_params.get('q', None)
+        search = self.request.query_params.get('q', '')
 
         if search:
             return self.response_models(_group.user_set.order_by('name').search(search), request, UserSerializer)
@@ -351,7 +377,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         _group = self.get_object()
 
-        search = self.request.query_params.get('q', None)
+        search = self.request.query_params.get('q', '')
         return self.response_models(_group.user_set.search(search), request, UserSerializer)
 
     @detail_route()
@@ -365,7 +391,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         _group = self.get_object()
 
-        search = self.request.query_params.get('q', None)
+        search = self.request.query_params.get('q', '')
         return self.response_models(_group.post_set.search(search), request, PostSerializer)
 
     @detail_route()
@@ -379,7 +405,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         _group = self.get_object()
 
-        search = self.request.query_params.get('q', None)
+        search = self.request.query_params.get('q', '')
         return self.response_models(_group.comment_set.search(search), request, CommentSerializer)
 
     def response_models(self, models, request, model_serializer):

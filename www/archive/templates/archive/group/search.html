@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block css %}
+    <style type="text/css">
+        /* Base */
+        .visit_total {
+            font-size: 15px;
+        }
+
+        .visit_total .title {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .visit_total .number {
+            font-size: 20px;
+        }
+
+        .visit_total .chart {
+            margin-top: 5px;
+            height: 50px;
+            width: 100px;
+        }
+
+        .bargauge {
+            font-size: 15px;
+        }
+
+        .bargauge .title {
+            padding: 16px;
+        }
+
+        .bargauge .chart {
+            height: 150px;
+            width: 80%;
+        }
+
+        .body {
+            padding: 10px;
+        }
+
+        .dashed {
+            border-top: 1px dashed #e5e5e5;
+
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    {% include 'archive/group/header.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="menu">
+
+            <div class="vmenu ">
+                <a href="{% url 'archive:group_analysis' group.id %}"><i class="icon-profile"></i> Analysis</a>
+                <a href="{% url 'archive:group_user' group.id %}"><i class="icon-user"></i> User</a>
+                <a class="disabled"><i class="icon-gear"></i> Management</a>
+            </div>
+
+        </div>
+        <div class="content">
+
+            <div class="content-list">
+                <div class="dashboard-first">
+                    <div class="col col-3">
+                        <div class="card">
+                            <div class="title">Total Posts</div>
+                            <div class="value">{{ group.post_count }}</div>
+                        </div>
+                    </div>
+                    <div class="col col-3">
+                        <div class="card">
+                            <div class="title">Total Comments</div>
+                            <div class="value">{{ group.comment_count }}</div>
+                        </div>
+
+                    </div>
+                    <div class="col col-3">
+                        <div class="card">
+                            <div class="title">Weekly Posts</div>
+                            <div class="value">{{ posts|length }}</div>
+                        </div>
+
+                    </div>
+                    <div class="col col-3">
+                        <div class="card">
+                            <div class="title">Last Updated</div>
+                            <div class="value">{{ group.get_diff_time }}</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="body">
+                        <h1 class="title"><i class="icon-report"></i> <strong>Post</strong></h1>
+
+                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                            <div class="head">
+                                <strong>Post List</strong>
+
+                                <div class="group" style="float: right">
+                                    <input type="text" class="input" id="post_limit" placeholder="Limit"
+                                           value="10" style="width: 60px; text-align: right;"/>
+                                </div>
+                            </div>
+                            <table id="post_table" class="table simple hover">
+                                <colgroup>
+                                    <col style="width: 20%;">
+                                    <col style="width: 50%;">
+                                    <col style="width: 15%;">
+                                    <col style="width: 15%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                    <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                    <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div id="post_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel dashed">
+                    <div class="body">
+                        <h1 class="title"><i class="icon-message"></i> <strong>Comment</strong></h1>
+
+                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                            <div class="head">
+                                <strong>Comment List</strong>
+
+                                <div class="group" style="float: right">
+                                    <input type="text" class="input" id="comment_limit" placeholder="Limit"
+                                           value="10" style="width: 60px; text-align: right;"/>
+                                </div>
+                            </div>
+                            <table id="comment_table" class="table simple hover">
+                                <colgroup>
+                                    <col style="width: 20%;">
+                                    <col style="width: 50%;">
+                                    <col style="width: 15%;">
+                                    <col style="width: 15%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                    <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                    <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div id="comment_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel dashed">
+                    <div class="body">
+                        <h1 class="title"><i class="icon-user"></i> <strong>User</strong></h1>
+
+                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                            <div class="head">
+                                <strong>User List</strong>
+
+                                <div class="group" style="float: right">
+                                    <input type="text" class="input" id="user_limit" placeholder="Limit"
+                                           value="10" style="width: 60px; text-align: right;"/>
+                                </div>
+                            </div>
+                            <table id="user_table" class="table simple hover">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th><i class="icon-user"></i> User</th>
+                                    <th style="text-align: center;"><i class="icon-report"></i> Post</th>
+                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div id="user_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                </div>
+
+                <script id="tpl_row" type="text/template">
+                    <tr>
+                        <td><!= from !></td>
+                        <td><!= message !></td>
+                        <td style="text-align: center;"><!= like_count !></td>
+                        <td style="text-align: center;"><!= comment_count !></td>
+                    </tr>
+                </script>
+
+                <script id="tpl_none" type="text/template">
+                    <tr>
+                        <td colspan="5" class="none" align="center">Data does not exist.</td>
+                    </tr>
+                </script>
+
+                <script id="tpl_pages" type="text/template">
+                    <! for(var i = 0; i < pages.length; i++) { !>
+                    <a href="#" class="page"><!= pages[i] !></a>
+                    <! } !>
+                </script>
+
+                <script id="tpl_row2" type="text/template">
+                    <tr>
+                        <td style="text-align: right;"><!= picture !></td>
+                        <td><!= from !></td>
+                        <td style="text-align: center;"><!= post_count !></td>
+                        <td style="text-align: center;"><!= comment_count !></td>
+                    </tr>
+                </script>
+
+                <script id="tpl_none2" type="text/template">
+                    <tr>
+                        <td colspan="4" class="none" align="center">Data does not exist.</td>
+                    </tr>
+                </script>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
+    <script>
+        var search = {% if search %}'{{ search }}'{% else %}''{% endif %};
+        var post_limit = 10;
+        var comment_limit = 10;
+        var user_limit = 10;
+
+        var post_search_url = "/api/groups/{{ group.id }}/post_search/";
+        var comment_search_url = "/api/groups/{{ group.id }}/comment_search/";
+        var user_search_url = "/api/groups/{{ group.id }}/user_search/";
+
+        /**
+         * Generate Archive
+         */
+        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+            post_paging = paging("#post_paging", {
+                pageCount: 10,
+                screenCount: 10,
+                event: {
+                    page: function (pNo) {
+                        getSearchPC(post_search_url, post_table, post_limit, search, pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html(),
+                }
+            });
+
+            post_table = table("#post_table", {
+                fields: ["from", "message", "like_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                sort: [2, 3],
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
+                }
+            });
+
+            comment_paging = paging("#comment_paging", {
+                pageCount: 10,
+                screenCount: 10,
+                event: {
+                    page: function (pNo) {
+                        getSearchPC(comment_search_url, comment_table, comment_limit, search, pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html()
+                }
+            });
+
+            comment_table = table("#comment_table", {
+                fields: ["from", "message", "like_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                sort: [2, 3],
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
+                }
+            });
+
+            user_paging = paging("#user_paging", {
+                pageCount: 10,
+                screenCount: 10,
+                event: {
+                    page: function (pNo) {
+                        getSearchU(user_search_url, user_table, user_limit, search, pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html()
+                }
+            });
+
+            user_table = table("#user_table", {
+                fields: ["", "from", "post_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                sort: [2, 3],
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row2").html(),
+                    none: $("#tpl_none2").html()
+                }
+            });
+        });
+
+        /**
+         * Init analysis.html
+         */
+        $(function () {
+            $("#group_search_input").val(search);
+            getSearchPC(post_search_url, post_table, post_limit, search, 1, post_paging);
+            getSearchPC(comment_search_url, comment_table, comment_limit, search, 1, comment_paging);
+            getSearchU(user_search_url, user_table, user_limit, search, 1, user_paging);
+
+            $("#post_limit").on("input", function () {
+                post_limit = $("#post_limit").val();
+                getSearchPC(post_search_url, post_table, post_limit, search, 1, post_paging);
+                post_paging.first();
+            });
+
+            $("#comment_limit").on("input", function () {
+                comment_limit = $("#comment_limit").val();
+                getSearchPC(comment_search_url, comment_table, comment_limit, search, 1, comment_paging);
+                comment_paging.first();
+            });
+
+            $("#user_limit").on("input", function () {
+                user_limit = $("#user_limit").val();
+                getSearchU(user_search_url, user_table, user_limit, search, 1, user_paging);
+                user_paging.first();
+            });
+        });
+    </script>
+{% endblock %}

@@ -51,7 +51,15 @@ var timeSince = function (date) {
 /**
  * to round to n decimal places
  */
-var ceil = function (num, places) {
+var ceil = function (num) {
+    var places;
+
+    if (num < 100) {
+        places = 1;
+    } else {
+        places = 2;
+    }
+
     var multiplier = Math.pow(10, places);
     return Math.ceil(num / multiplier) * multiplier;
 }
@@ -83,7 +91,7 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
         var rows = []
         for (var i in results) {
             var row = results[i];
-            var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
+            var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
             var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
             var fb_url = "https://www.facebook.com/";
             var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
@@ -128,7 +136,7 @@ var getArchive = function (url, table, limit, from, page, paging) {
         var rows = []
         for (var i in results) {
             var row = results[i];
-            var picture = '<div class="col col-6"><div class="timeline-badge" align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
+            var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
             var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
             var fb_url = "https://www.facebook.com/";
             var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
@@ -175,8 +183,8 @@ var getStatistics = function (url, display, method, from, to) {
         var chart = jui.include("chart.builder");
 
         statistics = source['statistics'];
-        post_max_cnt = ceil(source['post_max_cnt'], 2);
-        comment_max_cnt = ceil(source["comment_max_cnt"], 2);
+        post_max_cnt = ceil(source['post_max_cnt']);
+        comment_max_cnt = ceil(source["comment_max_cnt"]);
 
         $(display).empty();
         chart(display, {
@@ -442,6 +450,89 @@ var getUserArchive = function (url, table, limit, page, search, paging) {
 
     if (search) {
         data['q'] = search;
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Get search post and comment by using ajax
+ */
+var getSearchPC = function (url, table, limit, search, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
+            var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
+            var fb_url = "https://www.facebook.com/";
+            var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+            var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+            rows.push({
+                "from": picture + from,
+                "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
+                "like_count": row["like_count"],
+                "comment_count": row["comment_count"],
+            });
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        q: search,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Get search user by using ajax
+ */
+var getSearchU = function (url, table, limit, search, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            rows.push({
+                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
+                "from": row["name"],
+                "post_count": row["posts"].length,
+                "comment_count": row["comments"].length,
+            });
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        q: search,
     }
 
     getAjaxResult(url, data, fun);
