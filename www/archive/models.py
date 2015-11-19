@@ -1,6 +1,7 @@
 from django.db import models
 
 from django.utils import timezone
+from mezzanine.core.managers import SearchableManager
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -68,6 +69,9 @@ class User(models.Model):
     picture = models.CharField(max_length=255, null=True, blank=True)
     groups = models.ManyToManyField(Group)
 
+    objects = SearchableManager()
+    search_fields = ("name",)
+
     def __str__(self):
         return self.id
 
@@ -83,6 +87,9 @@ class Post(models.Model):
     like_count = models.IntegerField(default=0)
     share_count = models.IntegerField(default=0)
     group = models.ForeignKey(Group)
+
+    objects = SearchableManager()
+    search_fields = ("message",)
 
     def __str__(self):
         return self.id
@@ -124,6 +131,9 @@ class Comment(models.Model):
     parent = models.ForeignKey('Comment', null=True, related_name='comments')
     group = models.ForeignKey(Group)
 
+    objects = SearchableManager()
+    search_fields = ("message",)
+
     def __str__(self):
         return self.id
 
@@ -151,3 +161,6 @@ class Attachment(models.Model):
     type = models.CharField(max_length=30, null=True, blank=True)
     # photo, share, unavailable, album(sub), video_autoplay, multi_share(sub), video_share_youtube, note
     media = models.ForeignKey(Media, null=True, related_name='media')
+
+    objects = SearchableManager()
+    search_fields = ("description",)

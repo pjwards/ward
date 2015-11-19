@@ -408,7 +408,7 @@ var getProportion = function (url, post_display, comment_display) {
 /**
  * Get user archive by using ajax
  */
-var getUserArchive = function (url, table, limit, page, paging) {
+var getUserArchive = function (url, table, limit, page, search, paging) {
     var fun = function (source) {
         var results = source["results"];
         var rows = []
@@ -438,6 +438,10 @@ var getUserArchive = function (url, table, limit, page, paging) {
     data = {
         limit: limit,
         offset: (page - 1) * limit,
+    }
+
+    if (search) {
+        data['q'] = search;
     }
 
     getAjaxResult(url, data, fun);
