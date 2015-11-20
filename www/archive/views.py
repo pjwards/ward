@@ -549,9 +549,11 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         from_date = self.request.query_params.get('from', None)
 
         if from_date:
-            from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
+            from_date = date_utils.get_date_from_str(from_date)
+            to_date = from_date
         else:
-            from_date, to_date = date_utils.date_range(date_utils.get_today(), 1)
+            from_date = date_utils.get_today()
+            to_date = from_date
 
         models = self.get_objects_by_time(model, from_date, to_date).order_by('-created_time')
         return models
@@ -571,7 +573,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         _user = get_object_or_404(User, id=user_id)
 
         if from_date:
-            from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
+            from_date = date_utils.get_date_from_str(from_date)
+            to_date = from_date
 
         models = self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
         return models

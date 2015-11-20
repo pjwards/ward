@@ -87,7 +87,6 @@ var getAjaxResult = function (url, data, fun) {
  */
 function getIdFromUrl(url) {
     var split_url = url.split('/');
-    console.dir(split_url);
     return split_url[split_url.length-2];
 }
 

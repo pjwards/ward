@@ -1,5 +1,6 @@
 from django.utils import timezone
 import datetime
+import pytz
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -79,7 +80,7 @@ def combine_min_time(date):
     :param date: date
     :return: date combined min time
     """
-    return timezone.datetime.combine(date, datetime.time.min)
+    return timezone.datetime.combine(date, datetime.time.min).replace(tzinfo=timezone.utc)
 
 
 def combine_max_time(date):
@@ -89,7 +90,7 @@ def combine_max_time(date):
     :param date: date
     :return: date combined max time
     """
-    return timezone.datetime.combine(date, datetime.time.max)
+    return timezone.datetime.combine(date, datetime.time.max).replace(tzinfo=timezone.utc)
 
 
 def combine_time_2day(from_date, to_date):
