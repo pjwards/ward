@@ -178,3 +178,21 @@ body {
 .container.hidden-menu .content {
     padding: 0px;
 }
+
+.more-link a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.more-link > a i {
+    color: #888;
+    margin-left: 5px;
+}
+
+.more-link > a:hover {
+    text-decoration: underline;
+}
+
+.more-link > a:hover i {
+    text-decoration: none !important;
+}

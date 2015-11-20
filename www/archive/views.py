@@ -3,7 +3,6 @@ import collections
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.db import connections
 from django.db.models import Count, Max
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes
@@ -76,6 +75,7 @@ def group_analysis(request, group_id):
     """
     _groups = Group.objects.all()
     _group = get_object_or_404(Group, pk=group_id)
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
     return render(
         request,
@@ -83,6 +83,7 @@ def group_analysis(request, group_id):
         {
             'groups': _groups,
             'group': _group,
+            'posts': posts,
         }
     )
 
@@ -97,6 +98,7 @@ def group_user(request, group_id):
     """
     _groups = Group.objects.all()
     _group = get_object_or_404(Group, pk=group_id)
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
     return render(
         request,
@@ -104,6 +106,33 @@ def group_user(request, group_id):
         {
             'groups': _groups,
             'group': _group,
+            'posts': posts,
+        }
+    )
+
+
+def group_search(request, group_id):
+    """
+    Search from group
+
+    :param request: request
+    :param group_id: group_id
+    :return: searched data
+    """
+    _groups = Group.objects.all()
+    _group = get_object_or_404(Group, pk=group_id)
+
+    search = request.GET['q']
+    if not search:
+        search = None
+
+    return render(
+        request,
+        'archive/group/search.html',
+        {
+            'groups': _groups,
+            'group': _group,
+            'search': search,
         }
     )
 
@@ -138,28 +167,23 @@ def group_update(request, group_id):
         return HttpResponseRedirect(reverse('archive:groups'))
 
 
-def group_search(request, group_id):
+def user(request, user_id):
     """
-    Search from group
+    Display a user
 
     :param request: request
-    :param group_id: group_id
-    :return: searched data
+    :param user_id: user id
+    :return: render
     """
-    _groups = Group.objects.all()
-    _group = get_object_or_404(Group, pk=group_id)
-
-    search = request.GET['q']
-    if not search:
-        search = None
+    _user = get_object_or_404(User, id=user_id)
+    _groups = _user.groups
 
     return render(
         request,
-        'archive/group/search.html',
+        'archive/user/user.html',
         {
-            'groups': _groups,
-            'group': _group,
-            'search': search,
+            'user': _user,
+            'groups': _groups.all(),
         }
     )
 
@@ -413,6 +437,30 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         search = self.request.query_params.get('q', '')
         return self.response_models(_group.comment_set.search(search), request, CommentSerializer)
 
+    @detail_route()
+    def user_post_archive(self, request, pk=None):
+        """
+        Return user post archive for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        posts = self.get_archive_by_user(Post)
+        return self.response_models(posts, request, PostSerializer)
+
+    @detail_route()
+    def user_comment_archive(self, request, pk=None):
+        """
+        Return user comment archive for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        comments = self.get_archive_by_user(Comment)
+        return self.response_models(comments, request, CommentSerializer)
+
     def response_models(self, models, request, model_serializer):
         """
         Return response for models with pagination
@@ -508,6 +556,26 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         models = self.get_objects_by_time(model, from_date, to_date).order_by('-created_time')
         return models
 
+    def get_archive_by_user(self, model):
+        """
+        Get archive models by user.
+
+        from_date : day to find archives from HTTP Request
+
+        :param model: model to get archive
+        :return: result models
+        """
+        from_date = self.request.query_params.get('from', None)
+        to_date = None
+        user_id = self.request.query_params.get('user_id', None)
+        _user = get_object_or_404(User, id=user_id)
+
+        if from_date:
+            from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
+
+        models = self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
+        return models
+
     def get_activity(self):
         """
         Get user activity
@@ -530,6 +598,11 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             to_date, from_date = date_utils.date_range(date_utils.get_today(), -30)
         else:
             to_date, from_date = date_utils.date_range(date_utils.get_today(), -7)
+
+        if from_date:
+            from_date = date_utils.combine_min_time(from_date)
+        if to_date:
+            to_date = date_utils.combine_max_time(to_date)
 
         if model == 'post':
             return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date) \

@@ -83,6 +83,15 @@ var getAjaxResult = function (url, data, fun) {
 }
 
 /**
+ * Get url from id
+ */
+function getIdFromUrl(url) {
+    var split_url = url.split('/');
+    console.dir(split_url);
+    return split_url[split_url.length-2];
+}
+
+/**
  * Get issue by using ajax
  */
 var getIssue = function (url, table, limit, from, to, page, paging) {
@@ -92,7 +101,8 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
         for (var i in results) {
             var row = results[i];
             var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
-            var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
+            var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+            var from = '<div class="col col-6 more-link" style="padding-top: 5px;"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
             var fb_url = "https://www.facebook.com/";
             var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
             var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
@@ -137,7 +147,8 @@ var getArchive = function (url, table, limit, from, page, paging) {
         for (var i in results) {
             var row = results[i];
             var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
-            var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
+            var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+            var from = '<div class="col col-6 more-link" style="padding-top: 5px;"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
             var fb_url = "https://www.facebook.com/";
             var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
             var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
@@ -348,9 +359,10 @@ var getActivity = function (url, limit, method, model, table) {
         var rows = []
         for (var i in results) {
             var row = results[i];
+            var user_url = '/archive/user/' + row["id"] + '/';
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": row["name"],
+                "from": '<div class=" more-link"><a href="'+ user_url +'"><div class="h5">' + row["name"] + '</div></a></div>',
                 "count": row["count"],
             });
         }
@@ -422,9 +434,10 @@ var getUserArchive = function (url, table, limit, page, search, paging) {
         var rows = []
         for (var i in results) {
             var row = results[i];
+            var user_url = '/archive/user/' + row["id"] + '/';
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": row["name"],
+                "from": '<div class=" more-link"><a href="'+ user_url +'"><div class="h5">' + row["name"] + '</div></a></div>',
                 "post_count": row["posts"].length,
                 "comment_count": row["comments"].length,
             });
@@ -465,7 +478,8 @@ var getSearchPC = function (url, table, limit, search, page, paging) {
         for (var i in results) {
             var row = results[i];
             var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
-            var from = '<div class="col col-6" style="padding-top: 5px;"><div class="h5">' + row["user"].name + '</div><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
+            var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+            var from = '<div class="col col-6 more-link" style="padding-top: 5px;"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
             var fb_url = "https://www.facebook.com/";
             var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
             var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
@@ -508,9 +522,10 @@ var getSearchU = function (url, table, limit, search, page, paging) {
         var rows = []
         for (var i in results) {
             var row = results[i];
+            var user_url = '/archive/user/' + row["id"] + '/';
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": row["name"],
+                "from": '<div class=" more-link"><a href="'+ user_url +'"><div class="h5">' + row["name"] + '</div></a></div>',
                 "post_count": row["posts"].length,
                 "comment_count": row["comments"].length,
             });
@@ -533,6 +548,56 @@ var getSearchU = function (url, table, limit, search, page, paging) {
         limit: limit,
         offset: (page - 1) * limit,
         q: search,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Get archive for user by using ajax
+ */
+var getArchiveByUser = function (url, user_id, table, limit, from, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
+            var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+            var from = '<div class="col col-6 more-link" style="padding-top: 5px;"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
+            var fb_url = "https://www.facebook.com/";
+            var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+            var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+            rows.push({
+                "from": picture + from,
+                "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
+                "like_count": row["like_count"],
+                "comment_count": row["comment_count"],
+            });
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    if (!user_id) {
+        return;
+    }
+
+    data = {
+        user_id: user_id,
+        limit: limit,
+        offset: (page - 1) * limit,
+        from: from,
     }
 
     getAjaxResult(url, data, fun);

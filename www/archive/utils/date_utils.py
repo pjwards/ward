@@ -79,7 +79,7 @@ def combine_min_time(date):
     :param date: date
     :return: date combined min time
     """
-    return datetime.datetime.combine(date, datetime.time.min)
+    return timezone.datetime.combine(date, datetime.time.min)
 
 
 def combine_max_time(date):
@@ -89,7 +89,7 @@ def combine_max_time(date):
     :param date: date
     :return: date combined max time
     """
-    return datetime.datetime.combine(date, datetime.time.max)
+    return timezone.datetime.combine(date, datetime.time.max)
 
 
 def combine_time_2day(from_date, to_date):
