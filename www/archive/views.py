@@ -198,6 +198,11 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         from_date = self.request.query_params.get('from', None)
         to_date = self.request.query_params.get('to', None)
 
+        if from_date:
+            from_date = date_utils.get_date_from_str(from_date)
+        if to_date:
+            to_date = date_utils.get_date_from_str(to_date)
+
         if method != 'year' and method != 'month' and method != 'day' and method != 'hour' and method != 'hour_total':
             raise ValueError(
                 "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
@@ -437,9 +442,13 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         _group = self.get_object()
 
         if from_date:
+            from_date = date_utils.combine_min_time(from_date)
+        if to_date:
+            to_date = date_utils.combine_max_time(to_date)
+
+        if from_date:
             if to_date:
                 if from_date == to_date:
-                    from_date, to_date = date_utils.date_range(date_utils.get_date_from_str(from_date), 1)
                     return model.objects.filter(group=_group, created_time__range=[from_date, to_date])
                 return model.objects.filter(group=_group, created_time__range=[from_date, to_date])
             else:
@@ -465,6 +474,11 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
         if not from_date and not to_date:
             from_date, to_date = date_utils.week_delta()
+
+        if from_date:
+            from_date = date_utils.get_date_from_str(from_date)
+        if to_date:
+            to_date = date_utils.get_date_from_str(to_date)
 
         models = self.get_objects_by_time(model, from_date, to_date)
 

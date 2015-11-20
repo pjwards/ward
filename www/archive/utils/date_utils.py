@@ -1,4 +1,5 @@
-from django.utils.timezone import now, datetime, timedelta
+from django.utils import timezone
+import datetime
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -23,10 +24,10 @@ def week_range(date):
         from_date = date
     else:
         # Otherwise, subtract `dow` number days to get the first day
-        todate = date - timedelta(dow)
+        todate = date - timezone.timedelta(dow)
 
     # Now, add 6 for the last day of the week (i.e., count up to Saturday)
-    to_date = from_date + timedelta(6)
+    to_date = from_date + timezone.timedelta(6)
 
     return from_date, to_date
 
@@ -38,7 +39,7 @@ def week_delta():
 
     :return: a tuple of (from_date, to_date)
     """
-    return now() - timedelta(days=7), now()
+    return timezone.now() - timezone.timedelta(days=7), timezone.now()
 
 
 def date_range(date, days):
@@ -49,7 +50,7 @@ def date_range(date, days):
     :param days: after days
     :return: a tuple of (from_date, to_date)
     """
-    return date, date + timedelta(days=days)
+    return date, date + timezone.timedelta(days=days)
 
 
 def get_date_from_str(str):
@@ -59,7 +60,7 @@ def get_date_from_str(str):
     :param str: string
     :return:
     """
-    return datetime.strptime(str, '%Y-%m-%d').date()
+    return timezone.datetime.strptime(str, '%Y-%m-%d').date()
 
 
 def get_today():
@@ -68,4 +69,39 @@ def get_today():
 
     :return: today
     """
-    return datetime.today()
+    return timezone.datetime.today()
+
+
+def combine_min_time(date):
+    """
+    Combine `date` with min time value (00:00)
+
+    :param date: date
+    :return: date combined min time
+    """
+    return datetime.datetime.combine(date, datetime.time.min)
+
+
+def combine_max_time(date):
+    """
+    Combine `date` with max time value (23:59:99)
+
+    :param date: date
+    :return: date combined max time
+    """
+    return datetime.datetime.combine(date, datetime.time.max)
+
+
+def combine_time_2day(from_date, to_date):
+    """
+    Return combine time
+
+    :param from_date: from date
+    :param to_date: to date
+    :return: (from_date, to_date)
+    """
+    # combine `from_date` with min time value (00:00)
+    from_date = combine_min_time(from_date)
+    # combine `to_date` with max time value (23:59:99) to have end date
+    to_date = combine_max_time(to_date)
+    return from_date, to_date
