@@ -1,5 +1,5 @@
 $(function () {
-    $(".logo").click(function () {
+    $(".hidden-logo").click(function () {
         $(".container").toggleClass("hidden-menu");
     })
 })

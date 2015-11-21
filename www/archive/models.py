@@ -42,6 +42,9 @@ class Group(models.Model):
     post_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
 
+    objects = SearchableManager()
+    search_fields = ("name",)
+
     def __str__(self):
         return self.id
 

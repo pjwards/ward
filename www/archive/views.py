@@ -1,11 +1,11 @@
 import logging
 import collections
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route, renderer_classes
+from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from .rest.serializer import *
@@ -27,19 +27,27 @@ def groups(request):
     :param request: request
     :return: render
     """
+    latest_group_list = Group.objects.order_by('name')
+
     if request.method == "GET":
-        latest_group_list = Group.objects.order_by('name')
-        error = None
-        if 'error' in request.GET:
-            error = 'error'
+        return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, })
     elif request.method == "POST":
+
+        group_id = request.POST.get("id", None)
+
+        if group_id is None:
+            error = 'Does not exist group id.'
+            return JsonResponse({'error': error})
+
         group_data = fb_request.group(request.POST['id'])
 
         if group_data is None:
-            return redirect(reverse('archive:groups') + '?error=error1')
+            error = 'Does not exist group.'
+            return JsonResponse({'error': error})
 
         if Group.objects.filter(id=group_data.get('id')).exists():
-            return redirect(reverse('archive:groups') + '?error=error2')
+            error = 'This group is already exist.'
+            return JsonResponse({'error': error})
 
         _group = Group()
         _group.id = group_data.get('id')
@@ -53,16 +61,7 @@ def groups(request):
 
         tasks.store_group_feed.delay(_group.id, get_feed_query(100, 100))
 
-        return HttpResponseRedirect(reverse('archive:groups'))
-
-    return render(
-        request,
-        'archive/group/list.html',
-        {
-            'latest_group_list': latest_group_list,
-            'error': error,
-        }
-    )
+        return JsonResponse({'success': _group.id})
 
 
 def group_analysis(request, group_id):
@@ -146,7 +145,9 @@ def group_store(request, group_id):
     :return: if you succeed, redirect groups page
     """
     if not Group.objects.filter(id=group_id).exists():
-        return redirect(reverse('archive:groups') + '?error=error2')
+        latest_group_list = Group.objects.order_by('name')
+        error = 'Does not exist group.'
+        return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, 'error': error})
 
     tasks.store_group_feed.delay(group_id, get_feed_query(100, 100))
     return HttpResponseRedirect(reverse('archive:groups'))
@@ -161,7 +162,9 @@ def group_update(request, group_id):
     :return: if you succeed, redirect groups page
     """
     if not Group.objects.filter(id=group_id).exists():
-        return redirect(reverse('archive:groups') + '?error=error2')
+        latest_group_list = Group.objects.order_by('name')
+        error = 'Does not exist group.'
+        return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, 'error': error})
 
     if tasks.update_group_feed.delay(group_id, get_feed_query(100, 100)):
         return HttpResponseRedirect(reverse('archive:groups'))
@@ -407,7 +410,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         _group = self.get_object()
 
         search = self.request.query_params.get('q', '')
-        return self.response_models(_group.user_set.search(search), request, UserSerializer)
+        return self.response_models(_group.user_set.order_by('name').search(search), request, UserSerializer)
 
     @detail_route()
     def post_search(self, request, pk=None):
@@ -460,6 +463,15 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         comments = self.get_archive_by_user(Comment)
         return self.response_models(comments, request, CommentSerializer)
+
+    @list_route()
+    def group_search(self, request):
+        _groups = self.get_queryset()
+        search = self.request.query_params.get('q', '')
+        if search:
+            return self.response_models(_groups.order_by('name').search(search), request, GroupSerializer)
+        else:
+            return self.response_models(_groups.order_by('name'), request, GroupSerializer)
 
     def response_models(self, models, request, model_serializer):
         """

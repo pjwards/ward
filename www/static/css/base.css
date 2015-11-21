@@ -32,6 +32,18 @@ body {
     padding-top: 10px;
 }
 
+.header .hidden-logo {
+    position: relative;
+    float: left;
+    width: 98px;
+    height: 48px;
+    z-index: 1;
+    font-size: 25px;
+    text-align: center;
+    padding-top: 10px;
+}
+
+
 .header .toolbar {
     position: relative;
     padding: 20px;

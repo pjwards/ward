@@ -1,41 +1,39 @@
-<div class="header">
-    <div class="logo">
-        <i class="icon-menu"></i>
+{% load staticfiles %}
+<div class="toolbar">
+    <div class="col col-3">
+        <span>{% block title %}{{ group.name }}{% endblock %}</span>
+
+        &nbsp; &nbsp;
+
+        <form id="group_search" method="get" action="{% url 'archive:group_search' group.id %}"
+              style="display: inline;">
+            <div class="group">
+                <input id="group_search_input" type="text" class="input mini" name="q" placeholder="Search"/>
+                <a class="btn mini" onclick="document.getElementById('group_search').submit();"><i
+                        class="icon-search"></i></a>
+            </div>
+        </form>
     </div>
-    <div class="toolbar">
-        <div class="col col-3">
-            <span>{% block title %}{{ group.name }}{% endblock %}</span>
 
+    <div class="col col-3">
+    </div>
+
+    <div class="col col-3">
+    </div>
+
+    <div class="col col-3">
+        <span style="float:right">
+              Sample <i class="icon-check"></i>
+        </span>
+
+        <span style="float:right">
+            <select id="dynamic_select">
+                {% for grp in groups %}
+                    <option id="{{ grp.id }}" value="{% url 'archive:group' grp.id %}"
+                            {% if group.id == grp.id %}selected="selected"{% endif %}>{{ grp.name }}</option>
+                {% endfor %}
+            </select>
             &nbsp; &nbsp;
-
-            <form id="group_search" method="get" action="{% url 'archive:group_search' group.id %}" style="display: inline;">
-                <div class="group">
-                    <input id="group_search_input" type="text" class="input mini" name="q" placeholder="Search"/>
-                    <a class="btn mini" onclick="document.getElementById('group_search').submit();"><i class="icon-search"></i></a>
-                </div>
-            </form>
-        </div>
-
-        <div class="col col-3">
-        </div>
-
-        <div class="col col-3">
-        </div>
-
-        <div class="col col-3">
-            <span style="float:right">
-                  Sample <i class="icon-check"></i>
-            </span>
-
-            <span style="float:right">
-                <select id="dynamic_select">
-                    {% for grp in groups %}
-                        <option id="{{ grp.id }}" value="{% url 'archive:group' grp.id %}"
-                                {% if group.id == grp.id %}selected="selected"{% endif %}>{{ grp.name }}</option>
-                    {% endfor %}
-                </select>
-                &nbsp; &nbsp;
-            </span>
-        </div>
+        </span>
     </div>
 </div>

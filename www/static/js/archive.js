@@ -48,6 +48,20 @@ var timeSince = function (date) {
     return interval + ' ' + intervalType + ' ago';
 };
 
+var getToday = function() {
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+
+    var yyyy = today.getFullYear();
+    if(dd<10){
+        dd='0'+dd
+    }
+    if(mm<10){
+        mm='0'+mm
+    }
+    return yyyy + '-' + mm + '-' + dd;
+}
 /**
  * to round to n decimal places
  */
@@ -87,7 +101,7 @@ var getAjaxResult = function (url, data, fun) {
  */
 function getIdFromUrl(url) {
     var split_url = url.split('/');
-    return split_url[split_url.length-2];
+    return split_url[split_url.length - 2];
 }
 
 /**
@@ -361,7 +375,7 @@ var getActivity = function (url, limit, method, model, table) {
             var user_url = '/archive/user/' + row["id"] + '/';
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": '<div class=" more-link"><a href="'+ user_url +'"><div class="h5">' + row["name"] + '</div></a></div>',
+                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
                 "count": row["count"],
             });
         }
@@ -436,7 +450,7 @@ var getUserArchive = function (url, table, limit, page, search, paging) {
             var user_url = '/archive/user/' + row["id"] + '/';
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": '<div class=" more-link"><a href="'+ user_url +'"><div class="h5">' + row["name"] + '</div></a></div>',
+                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
                 "post_count": row["posts"].length,
                 "comment_count": row["comments"].length,
             });
@@ -524,7 +538,7 @@ var getSearchU = function (url, table, limit, search, page, paging) {
             var user_url = '/archive/user/' + row["id"] + '/';
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": '<div class=" more-link"><a href="'+ user_url +'"><div class="h5">' + row["name"] + '</div></a></div>',
+                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
                 "post_count": row["posts"].length,
                 "comment_count": row["comments"].length,
             });
@@ -601,3 +615,131 @@ var getArchiveByUser = function (url, user_id, table, limit, from, page, paging)
 
     getAjaxResult(url, data, fun);
 }
+
+/**
+ * Get groups by using ajax
+ */
+var getGroups = function (url, table, limit, page, search, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var group_url = '/archive/group/' + row["id"] + '/';
+            rows.push({
+                "id": '<div class=" more-link"><a href="' + group_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
+                "name": '<div class=" more-link"><a href="' + group_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
+                "updated_time": '<div class="h5"><i class="icon-realtime"></i> ' + timeSince(row["updated_time"]) + '</div>',
+                "post_count": '<div class="h5">' + row["post_count"] + '</div>',
+                "comment_count": '<div class="h5">' + row["comment_count"] + '</div>',
+                "privacy": '<div class="h5">' + row["privacy"] + '</div>',
+                "is_stored": row["is_stored"] ? '<i class="icon-check"></i>' : '<i class="icon-close"></i>',
+                "update": '<a class="btn" href="/archive/group/' + row["id"] + '/update/">Update</a>',
+            });
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        q: search,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Generate Notify
+ */
+jui.ready([ "ui.notify" ], function(notify) {
+    var handler = {
+        show: function(data) {
+            console.log("show : " + JSON.stringify(data));
+        },
+        hide: function(data) {
+            console.log("hide : " + JSON.stringify(data));
+        },
+        click: function(data) {
+            console.log("click : " + JSON.stringify(data));
+        }
+    };
+
+    notify_1 = notify("body", {
+        position: "top-right",
+        event: handler,
+        tpl: {
+            item: $("#tpl_alarm").html()
+        }
+    });
+
+    notify_2 = notify("body", {
+        position: "top-left",
+        event: handler,
+        timeout: 0,
+        tpl: {
+            item: $("#tpl_alarm").html()
+        }
+    });
+
+    notify_3 = notify("body", {
+        position: "top",
+        event: handler,
+        timeout: 3,
+        padding: {
+            top: 100
+        },
+        tpl: {
+            item: $("#tpl_alarm").html()
+        }
+    });
+
+    notify_4 = notify("body", {
+        position: "bottom",
+        event: handler,
+        timeout: 3,
+        distance: 30,
+        tpl: {
+            item: $("#tpl_alarm").html()
+        }
+    });
+
+    notify_5 = notify("body", {
+        position: "bottom-left",
+        event: handler,
+        showDuration: 1000,
+        hideDuration: 1000,
+        tpl: {
+            item: $("#tpl_alarm").html()
+        }
+    });
+
+    notify_6 = notify("body", {
+        position: "bottom-right",
+        event: handler,
+        showEasing: "linear",
+        tpl: {
+            item: $("#tpl_alarm").html()
+        }
+    });
+
+    notify_top_submit = function(type, data) {
+        if(type == 1) notify_1.add(data);
+        if(type == 2) notify_2.add(data);
+        if(type == 3) notify_3.add(data);
+        if(type == 4) notify_4.add(data);
+        if(type == 5) notify_5.add(data);
+        if(type == 6) notify_6.add(data);
+    }
+});

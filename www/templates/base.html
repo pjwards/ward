@@ -23,11 +23,11 @@
     {% block css %}{% endblock %}
 </head>
 <body class="jui">
-{% block header %}
-    <div class="header">
-        <div class="logo">
-            <i class="icon-menu"></i>
-        </div>
+<div class="header">
+    <div class="logo">
+        <a href="/"><img src="{% static 'images/ward.png' %}" width="40px;"/></a>
+    </div>
+    {% block header %}
         <div class="toolbar">
             <div class="col col-3">
                 <span>Ward</span>
@@ -55,8 +55,8 @@
                 </span>
             </div>
         </div>
-    </div>
-{% endblock %}
+    {% endblock %}
+</div>
 
 {% block content %}
 {% endblock %}
@@ -64,7 +64,12 @@
 {% block footer %}
 {% endblock %}
 
-
+<script id="tpl_alarm" type="text/template">
+    <div class="notify <!= color !>">
+        <div class="title"><!= title !></div>
+        <div class="message"><!= message !></div>
+    </div>
+</script>
 
 <!-- jQuery -->
 <script type="text/javascript" src='{% static 'jquery/dist/jquery.min.js' %}'></script>
