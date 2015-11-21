@@ -95,7 +95,7 @@ class FBRequest:
         :return: group data
         """
         try:
-            re = self.graph.request(group_id, args={'fields': 'id,name,description,updated_time,privacy'})
+            re = self.graph.request(group_id, args={'fields': 'id,name,description,updated_time,privacy,owner'})
         except facebook.GraphAPIError as e:
             logger.info('Fail to get group')
             return None

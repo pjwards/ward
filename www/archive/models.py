@@ -41,6 +41,7 @@ class Group(models.Model):
     is_stored = models.BooleanField(default=False)
     post_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
+    owner = models.ForeignKey('User', null=True, related_name='group_owner')
 
     objects = SearchableManager()
     search_fields = ("name",)

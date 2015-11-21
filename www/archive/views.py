@@ -1,20 +1,22 @@
-import logging
 import collections
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect, JsonResponse
+import logging
+
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
-from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from .rest.serializer import *
-from .rest.pagination import *
+from rest_framework.response import Response
+
+from archive.fb.fb_query import get_feed_query
+from archive.fb.fb_request import FBRequest
+from archive.fb.fb_lookup import lookup_id
 from . import tasks
-from .utils import date_utils
-from .fb_query import get_feed_query
 from .models import User, Group, Post, Comment
-from .fb_request import FBRequest
+from .rest.serializer import *
+from .utils import date_utils
 
 logger = logging.getLogger(__name__)
 fb_request = FBRequest()
@@ -32,33 +34,26 @@ def groups(request):
     if request.method == "GET":
         return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, })
     elif request.method == "POST":
-
-        group_id = request.POST.get("id", None)
-
-        if group_id is None:
-            error = 'Does not exist group id.'
+        fb_url = request.POST.get("fb_url", None)
+        if fb_url is None:
+            error = 'Does not exist a url.'
             return JsonResponse({'error': error})
 
-        group_data = fb_request.group(request.POST['id'])
+        group_id = lookup_id(fb_url)
+        if group_id is None:
+            error = 'Does not exist the group or enroll the wrong url.'
+            return JsonResponse({'error': error})
 
+        group_data = fb_request.group(group_id)
         if group_data is None:
-            error = 'Does not exist group.'
+            error = 'Does not exist group or privacy group.'
             return JsonResponse({'error': error})
 
         if Group.objects.filter(id=group_data.get('id')).exists():
             error = 'This group is already exist.'
             return JsonResponse({'error': error})
 
-        _group = Group()
-        _group.id = group_data.get('id')
-        _group.name = group_data.get('name')
-        _group.description = group_data.get('description')
-        _group.updated_time = group_data.get('updated_time')
-        _group.privacy = group_data.get('privacy')
-
-        _group.save()
-        logger.info('Saved group: %s', _group)
-
+        _group = tasks.store_group(group_data)
         tasks.store_group_feed.delay(_group.id, get_feed_query(100, 100))
 
         return JsonResponse({'success': _group.id})

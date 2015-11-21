@@ -595,6 +595,7 @@ var getGroups = function (url, table, limit, page, search, paging) {
         for (var i in results) {
             var row = results[i];
             var group_url = '/archive/group/' + row["id"] + '/';
+            var privacy_btn = row["privacy"] == "CLOSED"? 'disable':'';
             rows.push({
                 "id": '<div class=" more-link"><a href="' + group_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
                 "name": '<div class=" more-link"><a href="' + group_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
@@ -603,7 +604,7 @@ var getGroups = function (url, table, limit, page, search, paging) {
                 "comment_count": '<div class="h5">' + row["comment_count"] + '</div>',
                 "privacy": '<div class="h5">' + row["privacy"] + '</div>',
                 "is_stored": row["is_stored"] ? '<i class="icon-check"></i>' : '<i class="icon-close"></i>',
-                "update": '<a class="btn" href="/archive/group/' + row["id"] + '/update/">Update</a>',
+                "update": '<a class="btn ' + privacy_btn + '" href="/archive/group/' + row["id"] + '/update/">Update</a>',
             });
         }
         ;
@@ -648,6 +649,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_1 = notify("body", {
         position: "top-right",
         event: handler,
+        timeout: 1500,
         tpl: {
             item: $("#tpl_alarm").html()
         }
@@ -656,7 +658,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_2 = notify("body", {
         position: "top-left",
         event: handler,
-        timeout: 0,
+        timeout: 1500,
         tpl: {
             item: $("#tpl_alarm").html()
         }
@@ -665,7 +667,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_3 = notify("body", {
         position: "top",
         event: handler,
-        timeout: 3,
+        timeout: 1500,
         padding: {
             top: 100
         },
@@ -677,7 +679,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_4 = notify("body", {
         position: "bottom",
         event: handler,
-        timeout: 3,
+        timeout: 1500,
         distance: 30,
         tpl: {
             item: $("#tpl_alarm").html()
@@ -687,6 +689,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_5 = notify("body", {
         position: "bottom-left",
         event: handler,
+        timeout: 1500,
         showDuration: 1000,
         hideDuration: 1000,
         tpl: {
@@ -697,6 +700,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_6 = notify("body", {
         position: "bottom-right",
         event: handler,
+        timeout: 1500,
         showEasing: "linear",
         tpl: {
             item: $("#tpl_alarm").html()

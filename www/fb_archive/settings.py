@@ -1,7 +1,8 @@
 from __future__ import absolute_import, unicode_literals
-import os
-from django.utils.translation import ugettext_lazy as _
 
+import os
+
+from django.utils.translation import ugettext_lazy as _
 
 ######################
 # MEZZANINE SETTINGS #
@@ -355,7 +356,7 @@ CELERY_TIMEZONE = 'Asia/Seoul'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 from datetime import timedelta
-from archive.fb_query import get_feed_query
+from archive.fb.fb_query import get_feed_query
 CELERYBEAT_SCHEDULE = {
     'add-every-30-seconds': {
         'task': 'archive.tasks.update_groups_feed',

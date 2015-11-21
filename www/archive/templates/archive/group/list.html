@@ -24,7 +24,7 @@
                 <form id="group_enroll" method="post" style="display: inline; float: right;">
                     {% csrf_token %}
                     <div class="group">
-                        <input id="group_enroll_input" type="text" class="input" name="id" placeholder="Group Id"
+                        <input id="group_enroll_input" type="text" class="input" name="fb_url" placeholder="Group Url"
                                required/>
                         <a class="btn" id="group_enroll_submit">enroll</a>
                     </div>
@@ -171,7 +171,7 @@
                                 message: getToday(),
                                 color: 'success',
                             }
-                            notify_top_submit(2, data);
+                            notify_top_submit(1, data);
                         }
                         else if (json["error"]) {
                             data = {
@@ -179,13 +179,21 @@
                                 message: getToday(),
                                 color: 'danger',
                             }
-                            notify_top_submit(2, data);
+                            notify_top_submit(1, data);
                         }
+                        getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
+                        groups_paging.first();
                     },
                     error: function (request, status, error) {
-                        alert(status);
+                        data = {
+                                title: "An unexpected error has occurred.",
+                                message: getToday(),
+                                color: 'danger',
+                            }
+                        notify_top_submit(1, data);
                     }
                 });
+                $("#group_enroll_input").val('');
             });
         });
     </script>

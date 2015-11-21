@@ -16,6 +16,8 @@
 * django-rest-framework (tested with version 3.3.0)
 * markdown (tested with version 2.6.3)
 * django-filter (tested with version 0.11.0)
+* beautifulsoup4 (tested with version 4.4.1)
+* lxml (tested with version 3.5.0)
 
 #### Optional dependencies:
 

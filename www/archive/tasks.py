@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
-from fb_archive import celery_app as app
+import logging
+
 from celery import shared_task
 
-from .fb_request import FBRequest
-
-import logging
+from archive.fb.fb_request import FBRequest
 from .models import User, Group, Post, Comment, Media, Attachment
 
 __author__ = "Donghyun Seo"
@@ -225,6 +224,38 @@ def store_feed(feed_data, group):
 
 
 @shared_task
+def store_group(group_data):
+    """
+    This method stores a group.
+
+    :param group_data: feed data(dictionary)
+    :return:
+    """
+    group_id = group_data.get('id')
+    if not Group.objects.filter(id=group_id).exists():
+        group = Group()
+        group.id = group_data.get('id')
+        group.name = group_data.get('name')
+        group.description = group_data.get('description')
+        group.updated_time = group_data.get('updated_time')
+        group.privacy = group_data.get('privacy')
+        group.save()
+        group.owner = store_user(group_data.get('owner').get('id'), group_data.get('owner').get('name'), group)
+        group.save()
+        logger.info('Saved group: %s', group)
+    else:
+        group = Group.objects.filter(id=group_id)[0]
+        group.name = group_data.get('name')
+        group.description = group_data.get('description')
+        group.updated_time = group_data.get('updated_time')
+        group.privacy = group_data.get('privacy')
+        group.owner = store_user(group_data.get('owner').get('id'), group_data.get('owner').get('name'), group)
+        group.save()
+        logger.info('Update group updated_time: %s', group.id)
+    return group
+
+
+@shared_task
 def store_group_feed(group_id, query, is_whole=False):
     """
     This method is storing group's feeds by using facebook group api.
@@ -237,6 +268,9 @@ def store_group_feed(group_id, query, is_whole=False):
     """
     logger.info('Saving %s feed', group_id)
     group = Group.objects.filter(id=group_id)[0]
+
+    if group.privacy == "CLOSED":
+        return False
 
     feeds = []
 
@@ -265,15 +299,17 @@ def update_group_feed(group_id, query, is_whole=False):
     :return: success?
     """
     logger.info('Updating %s feed', group_id)
-    updated_time = fb_request.group(group_id).get('updated_time')
+    group_data = fb_request.group(group_id)
+    updated_time = group_data.get('updated_time')
     group = Group.objects.filter(id=group_id)[0]
 
     if not group.is_updated(updated_time):
         return False
 
-    group.updated_time = updated_time
-    group.save()
-    logger.info('Update group updated_time: %s', group.id)
+    if group.privacy == "CLOSED":
+        return False
+
+    store_group(group_data)
 
     feeds = []
 
