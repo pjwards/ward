@@ -48,17 +48,17 @@ var timeSince = function (date) {
     return interval + ' ' + intervalType + ' ago';
 };
 
-var getToday = function() {
+var getToday = function () {
     var today = new Date();
     var dd = today.getDate();
-    var mm = today.getMonth()+1; //January is 0!
+    var mm = today.getMonth() + 1; //January is 0!
 
     var yyyy = today.getFullYear();
-    if(dd<10){
-        dd='0'+dd
+    if (dd < 10) {
+        dd = '0' + dd
     }
-    if(mm<10){
-        mm='0'+mm
+    if (mm < 10) {
+        mm = '0' + mm
     }
     return yyyy + '-' + mm + '-' + dd;
 }
@@ -99,9 +99,26 @@ var getAjaxResult = function (url, data, fun) {
 /**
  * Get url from id
  */
-function getIdFromUrl(url) {
+var getIdFromUrl = function(url) {
     var split_url = url.split('/');
     return split_url[split_url.length - 2];
+}
+
+/**
+ * Post and comment Display
+ */
+var pcDisplac = function(rows, row) {
+    var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+    var fb_url = "https://www.facebook.com/";
+    var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+    var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+    rows.push({
+        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
+        "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>',
+        "message": message.length < 100 ? message + btn : message.substring(0, 100) + "..." + btn,
+        "like_count": row["like_count"],
+        "comment_count": row["comment_count"],
+    });
 }
 
 /**
@@ -112,19 +129,7 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            var row = results[i];
-            var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
-            var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
-            var from = '<div class="col col-6 more-link" style="padding-top: 5px;"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
-            var fb_url = "https://www.facebook.com/";
-            var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
-            var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
-            rows.push({
-                "from": picture + from,
-                "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
-                "like_count": row["like_count"],
-                "comment_count": row["comment_count"],
-            });
+            pcDisplac(rows, results[i]);
         }
         ;
 
@@ -158,19 +163,7 @@ var getArchive = function (url, table, limit, from, page, paging) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            var row = results[i];
-            var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
-            var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
-            var from = '<div class="col col-6 more-link" style="padding-top: 5px;"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
-            var fb_url = "https://www.facebook.com/";
-            var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
-            var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
-            rows.push({
-                "from": picture + from,
-                "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
-                "like_count": row["like_count"],
-                "comment_count": row["comment_count"],
-            });
+            pcDisplac(rows, results[i]);
         }
         ;
 
@@ -489,19 +482,7 @@ var getSearchPC = function (url, table, limit, search, page, paging) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            var row = results[i];
-            var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
-            var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
-            var from = '<div class="col col-6 more-link" style="padding-top: 5px;"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
-            var fb_url = "https://www.facebook.com/";
-            var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
-            var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
-            rows.push({
-                "from": picture + from,
-                "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
-                "like_count": row["like_count"],
-                "comment_count": row["comment_count"],
-            });
+            pcDisplac(rows, results[i]);
         }
         ;
 
@@ -574,19 +555,7 @@ var getArchiveByUser = function (url, user_id, table, limit, from, page, paging)
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            var row = results[i];
-            var picture = '<div class="col col-6"><div align="middle"><img src="' + row["user"]["picture"] + '" style="border-radius: 10px;"></div></div>';
-            var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
-            var from = '<div class="col col-6 more-link" style="padding-top: 5px;"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>';
-            var fb_url = "https://www.facebook.com/";
-            var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
-            var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
-            rows.push({
-                "from": picture + from,
-                "message": message.length < 80 ? message + btn : message.substring(0, 80) + "..." + btn,
-                "like_count": row["like_count"],
-                "comment_count": row["comment_count"],
-            });
+            pcDisplac(rows, results[i]);
         }
         ;
 
@@ -663,15 +632,15 @@ var getGroups = function (url, table, limit, page, search, paging) {
 /**
  * Generate Notify
  */
-jui.ready([ "ui.notify" ], function(notify) {
+jui.ready(["ui.notify"], function (notify) {
     var handler = {
-        show: function(data) {
+        show: function (data) {
             console.log("show : " + JSON.stringify(data));
         },
-        hide: function(data) {
+        hide: function (data) {
             console.log("hide : " + JSON.stringify(data));
         },
-        click: function(data) {
+        click: function (data) {
             console.log("click : " + JSON.stringify(data));
         }
     };
@@ -734,12 +703,12 @@ jui.ready([ "ui.notify" ], function(notify) {
         }
     });
 
-    notify_top_submit = function(type, data) {
-        if(type == 1) notify_1.add(data);
-        if(type == 2) notify_2.add(data);
-        if(type == 3) notify_3.add(data);
-        if(type == 4) notify_4.add(data);
-        if(type == 5) notify_5.add(data);
-        if(type == 6) notify_6.add(data);
+    notify_top_submit = function (type, data) {
+        if (type == 1) notify_1.add(data);
+        if (type == 2) notify_2.add(data);
+        if (type == 3) notify_3.add(data);
+        if (type == 4) notify_4.add(data);
+        if (type == 5) notify_5.add(data);
+        if (type == 6) notify_6.add(data);
     }
 });

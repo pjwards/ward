@@ -97,82 +97,84 @@
 
                 <div class="panel">
                     <div class="body">
-                        <h1 class="title"><i class="icon-report"></i> <strong>Post</strong></h1>
+                        <div class="col col-6"><h1 class="title"><i class="icon-report"></i> <strong>Post</strong></h1>
 
-                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                            <div class="head">
-                                <strong>Post List</strong>
+                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                                <div class="head">
+                                    <strong>Post List</strong>
 
-                                <div class="group" style="float: right">
-                                    <input type="text" class="input" id="post_limit" placeholder="Limit"
-                                           value="10" style="width: 60px; text-align: right;"/>
+                                    <div class="group" style="float: right">
+                                        <input type="text" class="input" id="post_limit" placeholder="Limit"
+                                               value="10" style="width: 60px; text-align: right;"/>
+                                    </div>
                                 </div>
+                                <table id="post_table" class="table simple hover borderless">
+                                    <colgroup>
+                                        <col style="width: 60px;">
+                                        <col style="width: 100px;">
+                                        <col style="width: 60%;">
+                                        <col style="width: 20%;">
+                                        <col style="width: 20%;">
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th><i class="icon-user"></i> From</th>
+                                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
-                            <table id="post_table" class="table simple hover">
-                                <colgroup>
-                                    <col style="width: 20%;">
-                                    <col style="width: 50%;">
-                                    <col style="width: 15%;">
-                                    <col style="width: 15%;">
-                                </colgroup>
-                                <thead>
-                                <tr>
-                                    <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                    <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                    <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+
+                            <div id="post_paging" class="paging" style="margin-top: 3px;">
+                                <a href="#" class="prev">Previous</a>
+
+                                <div class="list"></div>
+                                <a href="#" class="next">Next</a>
+                            </div>
                         </div>
+                        <div class="col col-6">
+                            <h1 class="title"><i class="icon-message"></i> <strong>Comment</strong></h1>
 
-                        <div id="post_paging" class="paging" style="margin-top: 3px;">
-                            <a href="#" class="prev">Previous</a>
+                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                                <div class="head">
+                                    <strong>Comment List</strong>
 
-                            <div class="list"></div>
-                            <a href="#" class="next">Next</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-message"></i> <strong>Comment</strong></h1>
-
-                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                            <div class="head">
-                                <strong>Comment List</strong>
-
-                                <div class="group" style="float: right">
-                                    <input type="text" class="input" id="comment_limit" placeholder="Limit"
-                                           value="10" style="width: 60px; text-align: right;"/>
+                                    <div class="group" style="float: right">
+                                        <input type="text" class="input" id="comment_limit" placeholder="Limit"
+                                               value="10" style="width: 60px; text-align: right;"/>
+                                    </div>
                                 </div>
+                                <table id="comment_table" class="table simple hover borderless">
+                                    <colgroup>
+                                        <col style="width: 60px;">
+                                        <col style="width: 100px;">
+                                        <col style="width: 60%;">
+                                        <col style="width: 20%;">
+                                        <col style="width: 20%;">
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th><i class="icon-user"></i> From</th>
+                                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
-                            <table id="comment_table" class="table simple hover">
-                                <colgroup>
-                                    <col style="width: 20%;">
-                                    <col style="width: 50%;">
-                                    <col style="width: 15%;">
-                                    <col style="width: 15%;">
-                                </colgroup>
-                                <thead>
-                                <tr>
-                                    <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                    <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                    <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
 
-                        <div id="comment_paging" class="paging" style="margin-top: 3px;">
-                            <a href="#" class="prev">Previous</a>
+                            <div id="comment_paging" class="paging" style="margin-top: 3px;">
+                                <a href="#" class="prev">Previous</a>
 
-                            <div class="list"></div>
-                            <a href="#" class="next">Next</a>
+                                <div class="list"></div>
+                                <a href="#" class="next">Next</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -190,7 +192,7 @@
                                            value="10" style="width: 60px; text-align: right;"/>
                                 </div>
                             </div>
-                            <table id="user_table" class="table simple hover">
+                            <table id="user_table" class="table simple hover borderless">
                                 <thead>
                                 <tr>
                                     <th></th>
@@ -214,6 +216,7 @@
 
                 <script id="tpl_row" type="text/template">
                     <tr>
+                        <td style="text-align: right;"><!= picture !></td>
                         <td><!= from !></td>
                         <td><!= message !></td>
                         <td style="text-align: center;"><!= like_count !></td>
@@ -283,11 +286,10 @@
             });
 
             post_table = table("#post_table", {
-                fields: ["from", "message", "like_count", "comment_count"],
+                fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
@@ -319,11 +321,10 @@
             });
 
             comment_table = table("#comment_table", {
-                fields: ["from", "message", "like_count", "comment_count"],
+                fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block title %}{{ group.name }}{% endblock %}
+
 {% block css %}
     <style type="text/css">
         /* Base */
@@ -177,7 +179,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <table id="user_archive_table" class="table simple hover">
+                            <table id="user_archive_table" class="table simple hover borderless">
                                 <thead>
                                 <tr>
                                     <th></th>
