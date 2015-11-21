@@ -17,8 +17,25 @@ admin.autodiscover()
 urlpatterns = i18n_patterns("",
     # Change the admin prefix here to use an alternate URL for the
     # admin interface, which would be marginally more secure.
-    ("^admin/", include(admin.site.urls)),
     url(r'^$', views.groups),
+    url(r"^admin/", include(admin.site.urls)),
+    url(
+        r'^accounts/login/',
+        'django.contrib.auth.views.login',
+        name='login',
+        kwargs={
+            'template_name': 'login.html'
+        }
+    ),
+    url(
+        r'^accounts/logout/',
+        'django.contrib.auth.views.logout',
+        name='logout',
+        kwargs={
+            'next_page': '/'
+        }
+    ),
+
     url(r'^archive/', include('archive.urls', namespace="archive"))
 )
 

@@ -27,35 +27,42 @@
     <div class="logo">
         <a href="/"><img src="{% static 'images/ward.png' %}" width="40px;"/></a>
     </div>
-    {% block header %}
-        <div class="toolbar">
-            <div class="col col-3">
+    <div class="toolbar">
+        {% block header %}
+            <div class="col col-6">
                 <span>Ward</span>
 
                 &nbsp; &nbsp;
 
-                <form method="get" action="" style="display: inline;">
-                    <div class="group">
-                        <input type="text" class="input mini" name="q" placeholder="Search"/>
-                        <a class="btn mini"><i class="icon-search"></i></a>
-                    </div>
+                <form id="search_form" method="get" action=""
+                      style="display: inline;">
+                    <input id="search_input" type="text" style="width: 50%;" class="input small" name="q"
+                           placeholder="Search"/>
                 </form>
             </div>
 
-
             <div class="col col-3">
             </div>
+        {% endblock %}
 
-            <div class="col col-3">
-            </div>
-
-            <div class="col col-3">
-                <span style="float:right">
-                      Sample <i class="icon-check"></i>
-                </span>
-            </div>
+        <div class="col col-3">
+            <span class="more-link" style="float:right">
+                {% if user.is_authenticated %}
+                    <a id="login_dropdown_btn" href="#" onclick="login_dropdown.show();">{{ user.username }} <i
+                            class="icon-arrow1"></i></a>
+                    <div id="login_dropdown" class="dropdown large">
+                        <ul style="width: 200px; right:100px;">
+                            <li class="disabled">Signed in as {{ user.username }}</li>
+                            <li class="divider"></li>
+                            <li value="{% url 'logout' %}">Sign out</li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}">Sign in</a>
+                {% endif %}
+            </span>
         </div>
-    {% endblock %}
+    </div>
 </div>
 
 {% block content %}

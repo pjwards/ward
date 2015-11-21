@@ -195,6 +195,8 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, "templates"),
 )
 
+# Login Redirct Url Setting
+LOGIN_REDIRECT_URL = '/'
 
 #############
 # DATABASES #
@@ -381,6 +383,7 @@ STATICFILES_FINDERS = (
 )
 
 BOWER_INSTALLED_APPS = (
+    # 'jquery-backstretch',
     'jquery',
     'jquery-ui',
     'jui',

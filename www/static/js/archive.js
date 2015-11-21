@@ -1,67 +1,6 @@
 /**
  * Created by donghyun on 11/14/15.
  */
-
-/**
- * Generate Time Since
- */
-var timeSince = function (date) {
-    if (typeof date !== 'object') {
-        date = new Date(date);
-    }
-
-    var seconds = Math.floor((new Date() - date) / 1000);
-    var intervalType;
-
-    var interval = Math.floor(seconds / 31536000);
-    if (interval >= 1) {
-        intervalType = 'year';
-    } else {
-        interval = Math.floor(seconds / 2592000);
-        if (interval >= 1) {
-            intervalType = 'month';
-        } else {
-            interval = Math.floor(seconds / 86400);
-            if (interval >= 1) {
-                intervalType = 'day';
-            } else {
-                interval = Math.floor(seconds / 3600);
-                if (interval >= 1) {
-                    intervalType = "hour";
-                } else {
-                    interval = Math.floor(seconds / 60);
-                    if (interval >= 1) {
-                        intervalType = "minute";
-                    } else {
-                        interval = seconds;
-                        intervalType = "second";
-                    }
-                }
-            }
-        }
-    }
-
-    if (interval > 1 || interval === 0) {
-        intervalType += 's';
-    }
-
-    return interval + ' ' + intervalType + ' ago';
-};
-
-var getToday = function () {
-    var today = new Date();
-    var dd = today.getDate();
-    var mm = today.getMonth() + 1; //January is 0!
-
-    var yyyy = today.getFullYear();
-    if (dd < 10) {
-        dd = '0' + dd
-    }
-    if (mm < 10) {
-        mm = '0' + mm
-    }
-    return yyyy + '-' + mm + '-' + dd;
-}
 /**
  * to round to n decimal places
  */
@@ -99,7 +38,7 @@ var getAjaxResult = function (url, data, fun) {
 /**
  * Get url from id
  */
-var getIdFromUrl = function(url) {
+var getIdFromUrl = function (url) {
     var split_url = url.split('/');
     return split_url[split_url.length - 2];
 }
@@ -107,7 +46,7 @@ var getIdFromUrl = function(url) {
 /**
  * Post and comment Display
  */
-var pcDisplac = function(rows, row) {
+var pcDisplac = function (rows, row) {
     var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
     var fb_url = "https://www.facebook.com/";
     var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
@@ -595,7 +534,7 @@ var getGroups = function (url, table, limit, page, search, paging) {
         for (var i in results) {
             var row = results[i];
             var group_url = '/archive/group/' + row["id"] + '/';
-            var privacy_btn = row["privacy"] == "CLOSED"? 'disable':'';
+            var privacy_btn = row["privacy"] == "CLOSED" ? 'disable' : '';
             rows.push({
                 "id": '<div class=" more-link"><a href="' + group_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
                 "name": '<div class=" more-link"><a href="' + group_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
@@ -715,4 +654,17 @@ jui.ready(["ui.notify"], function (notify) {
         if (type == 5) notify_5.add(data);
         if (type == 6) notify_6.add(data);
     }
+});
+
+jui.ready(["ui.combo"], function (combo) {
+    groups_combo = combo("#groups_combo", {
+        index: 0,
+        width: 200,
+        keydown: true,
+        event: {
+            change: function (data) {
+                location.href = data.value;
+            }
+        }
+    });
 });
