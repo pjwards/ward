@@ -1,10 +1,12 @@
 from django.conf.urls import patterns, include, url
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
+from django.views.generic import TemplateView
+from django.views.generic.edit import CreateView
 
 from mezzanine.core.views import direct_to_template
 from mezzanine.conf import settings
-
+from registration.backends.hmac.views import ActivationView, RegistrationView
 from rest_framework import routers
 from archive import views
 
@@ -19,26 +21,39 @@ urlpatterns = i18n_patterns("",
     # admin interface, which would be marginally more secure.
     url(r'^$', views.groups),
     url(r"^admin/", include(admin.site.urls)),
-    url(
-        r'^accounts/login/',
-        'django.contrib.auth.views.login',
-        name='login',
-        kwargs={
-            'template_name': 'login.html'
-        }
-    ),
-    url(
-        r'^accounts/logout/',
-        'django.contrib.auth.views.logout',
-        name='logout',
-        kwargs={
-            'next_page': '/'
-        }
-    ),
 
-    url(r'^archive/', include('archive.urls', namespace="archive"))
+    url(r'^archive/', include('archive.urls', namespace="archive")),
 )
 
+urlpatterns += i18n_patterns("",
+    url(r'^activate/complete/$',
+        TemplateView.as_view(
+            template_name='registration/activation_complete.html'
+        ),
+        name='registration_activation_complete'),
+    # The activation key can make use of any character from the
+    # URL-safe base64 alphabet, plus the colon as a separator.
+    url(r'^activate/(?P<activation_key>[-:\w]+)/$',
+        ActivationView.as_view(),
+        name='registration_activate'),
+    url(r'^register/$',
+        RegistrationView.as_view(),
+        name='registration_register'),
+    url(r'^register/complete/$',
+        TemplateView.as_view(
+            template_name='registration/registration_complete.html'
+        ),
+        name='registration_complete'),
+    url(r'^register/closed/$',
+        TemplateView.as_view(
+            template_name='registration/registration_closed.html'
+        ),
+        name='registration_disallowed'),
+    url(r'^',include('registration.auth_urls', namespace="auth")),
+    url(r'^accounts/', include('registration.backends.hmac.urls', namespace="registration")),
+    # url(r'^accounts/', include('registration.backends.simple.urls', namespace="registration")),
+
+)
 
 # #########################
 # # DJANGO REST FRAMEWORK #

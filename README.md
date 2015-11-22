@@ -18,6 +18,7 @@
 * django-filter (tested with version 0.11.0)
 * beautifulsoup4 (tested with version 4.4.1)
 * lxml (tested with version 3.5.0)
+* django-registration (tested with version 2.0.2)
 
 #### Optional dependencies:
 

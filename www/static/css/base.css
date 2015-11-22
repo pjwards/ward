@@ -208,16 +208,3 @@ body {
 .more-link > a:hover i {
     text-decoration: none !important;
 }
-
-.login_container {
-    height: 700px;
-    text-align:center;
-    vertical-align:middle;
-    display:table-cell;
-}
-
-.login_block {
-    width:50px;
-    height:50px;
-    display:inline-block;
-}

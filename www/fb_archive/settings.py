@@ -233,6 +233,7 @@ INSTALLED_APPS = (
     "django.contrib.sites",
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "mezzanine.boot",
     "mezzanine.conf",
     "mezzanine.core",
@@ -248,6 +249,8 @@ INSTALLED_APPS = (
     'djcelery',
     'djangobower',
     'rest_framework',
+    'registration',
+
     'archive',
 )
 
@@ -446,6 +449,19 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 20,
 }
+
+
+#######################
+# DJANGO REGISTRATION #
+#######################
+ACCOUNT_ACTIVATION_DAYS = 7
+EMAIL_HOST = 'smtp.localhost'
+EMAIL_PORT = 2025
+EMAIL_HOST_USER = 'webmaster'
+EMAIL_HOST_PASSWORD = '1234'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "webmaster@localhost"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 ##################
