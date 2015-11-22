@@ -1,0 +1,29 @@
+{% extends "registration/base.html" %}
+
+{% block title %}Registration complete{% endblock %}
+
+{% block header %}
+    <h1><strong><a href="/">Ward</a></strong></h1>
+
+    <div class="description">
+        <p>
+            <strong>What is hot issue this week?</strong> Hot issues, hot people and analysis for a
+            facebook group.
+            <br/><a href="{% url 'auth:auth_login' %}">Sign in</a> now, you can use funny functions.
+        </p>
+    </div>
+{% endblock %}
+
+{% block content-head-left %}
+    <h3>Check your email</h3>
+{% endblock %}
+
+{% block content-head-right %}
+    <i class="fa fa-envelope"></i>
+{% endblock %}
+
+{% block content %}
+    <p>An activation link has been sent to the email address you supplied, along with instructions for activating your account.</p>
+    <p>If you want to move the main page, use this <a href="/">link</a>.</p>
+{% endblock %}
+

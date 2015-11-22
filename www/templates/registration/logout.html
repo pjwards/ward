@@ -1,0 +1,31 @@
+{% extends "registration/base.html" %}
+
+{% block title %}Signed out{% endblock %}
+
+{% block header %}
+    <h1><strong><a href="/">Ward</a></strong></h1>
+
+    <div class="description">
+        <p>
+            <strong>What is hot issue this week?</strong> Hot issues, hot people and analysis for a
+            facebook group.
+            <br/><a href="{% url 'auth:auth_login' %}">Sign in</a> now, you can use funny functions.
+        </p>
+    </div>
+{% endblock %}
+
+{% block content-head-left %}
+    <h3>Sign out our site</h3>
+
+    <p>You've been signed out.</p>
+{% endblock %}
+
+{% block content-head-right %}
+    <i class="fa fa-sign-out"></i>
+{% endblock %}
+
+{% block content %}
+    <p>Thanks for stopping by; when you come back, don't forget to <a href="{% url 'auth:auth_login' %}">sign in</a>
+        again.</p>
+    <p>If you want to move the main page, use this <a href="/">link</a>.</p>
+{% endblock %}

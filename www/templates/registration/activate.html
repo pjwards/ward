@@ -1,0 +1,35 @@
+{% extends "registration/base.html" %}
+
+{% block title %}Account activated{% endblock %}
+
+{% block header %}
+    <h1><strong><a href="/">Ward</a></strong></h1>
+
+    <div class="description">
+        <p>
+            <strong>What is hot issue this week?</strong> Hot issues, hot people and analysis for a
+            facebook group.
+            <br/><a href="{% url 'auth:auth_login' %}">Sign in</a> now, you can use funny functions.
+        </p>
+    </div>
+{% endblock %}
+
+{% block content-head-left %}
+    <h3>Account activated.</h3>
+{% endblock %}
+
+{% block content-head-right %}
+    <i class="fa fa-smile-o"></i>
+{% endblock %}
+
+{% block content %}
+    {% load humanize %}
+    {% if account %}
+        <p>Thanks for signing up! Now you can <a href="{% url 'auth:auth_login' %}">sign in</a>.</p>
+    {% else %}
+        <p>Sorry, it didn't work. Either your activation link was incorrect, or
+            the activation key for your account has expired; activation keys are
+            only valid for {{ expiration_days|apnumber }} days after
+            registration.</p>
+    {% endif %}
+{% endblock %}

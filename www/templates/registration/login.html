@@ -1,0 +1,85 @@
+{% extends "registration/base.html" %}
+
+{% block title %}Sign in{% endblock %}
+
+{% block header %}
+    <h1><strong><a href="/">Ward</a></strong></h1>
+
+    <div class="description">
+        <p>
+            <strong>What is hot issue this week?</strong> Hot issues, hot people and analysis for a
+            facebook group.
+            <br/><a href="/accounts/register/"><strong>Sign up</strong></a> now, you can use funny functions.
+        </p>
+    </div>
+{% endblock %}
+
+{% block content-head-left %}
+    <h3>Sign in our site</h3>
+
+    <p>Enter your username and password to sign in:</p>
+    {% if form.errors %}
+        <p style="color: #de615e;">Your username and password didn't match. Please try again.</p>
+    {% endif %}
+
+    {% if next %}
+        {% if user.is_authenticated %}
+            <p style="color: #de615e;">Your account doesn't have access to this page. To proceed,
+                please login with an account that has access.</p>
+        {% else %}
+            <p style="color: #de615e;">Please login to see this page.</p>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+{% block content-head-right %}
+    <i class="fa fa-sign-in"></i>
+{% endblock %}
+
+{% block content %}
+    <form role="form" method="post" action="" class="login-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}"/>
+
+        <div class="form-group">
+            <label class="sr-only" for="id_username">Username</label>
+            <input type="text" placeholder="{% if form.username.errors %}{{ form.username.errors.as_text }}
+            {% else %}Username...{% endif %}"
+                   class="form-username form-control"
+                   id="id_username" name="username" required>
+
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="id_password">Password</label>
+            <input type="password" placeholder="{% if form.password.errors %}{{ form.password.errors.as_text }}
+            {% else %}Password...{% endif %}"
+                   class="form-password form-control"
+                   id="id_password" name="password" required>
+        </div>
+        <button type="submit" class="btn">Sign in!</button>
+
+    </form>
+{% endblock %}
+
+{% block content-related %}
+    <div style="text-align: center;">
+        <a href="{% url 'password_reset' %}">Lost password?</a>
+
+        <p>If you don't have an account, you can <a href="/accounts/register/">sign up</a> for one.
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <h3>...or sgin in with:</h3>
+
+    <div class="social-login-buttons">
+        <a class="btn btn-link-2" href="#">
+            <i class="fa fa-facebook"></i> Facebook
+        </a>
+        <a class="btn btn-link-2" href="#">
+            <i class="fa fa-twitter"></i> Twitter
+        </a>
+        <a class="btn btn-link-2" href="#">
+            <i class="fa fa-google-plus"></i> Google Plus
+        </a>
+    </div>
+{% endblock %}
