@@ -1,4 +1,5 @@
 from django.db import models
+#from archive.models import Post
 
 
 class SpamContent(models.Model):

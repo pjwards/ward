@@ -4,7 +4,8 @@ from konlpy.tag import Twitter
 from konlpy.tag import Kkma
 from urllib.parse import urlparse
 import re
-from konlpy.utils import pprint
+from collections import Counter
+#from konlpy.utils import pprint
 
 
 class AnalysisDiction:
@@ -91,7 +92,7 @@ def get_url_from_string(string_data):
     return_urls = []
     for i in urls:  # Rid of param and query in urls
         mid = urlparse(i)
-        string_url = mid[0]+"://"+mid[1]+mid+[2]
+        string_url = mid[0]+"://"+mid[1]+mid[2]
         return_urls.append(string_url)
     return return_urls
 
@@ -103,10 +104,13 @@ def count_in_list(string_data):
     :return: return list has tuples that have word and count
     """
     return_list = []
-    standard_words = list(set(string_data))
-    for i in standard_words:
-        return_list.append((i, string_data.count(i)))
+    res = Counter(string_data)
+    for i in res.keys():
+        return_list.append((i, res.get(i)))
     return return_list
 
-    #def merge_analyzed_list(self, list1, list2):
+
+#def merge_analyzed_list(list1, list2):
+
+#def url_check
 

@@ -1,6 +1,5 @@
 __author__ = 'jeonjiseong'
 
-#from archive.models import Post
 from analysis.analysis_core import AnalysisDiction
 import analysis.analysis_core as core
 from .models import SpamContent, SpamList
@@ -42,14 +41,19 @@ class Spam:
         :param analyzed_words: analyzed data set
         """
         spam_db = SpamList.objects.all()
-        for i in analyzed_words:        # change better algorithm
+        words_s = sorted(analyzed_words)
+        temp = []
+        for i in words_s:
             for j in spam_db:
-                if i[0] == j.word:
+                if j.word == i[0]:
+                    temp.append(j.word)
                     j.count += i[1]
-                else:
-                    new_spam = SpamList(word=i[0])
-                    new_spam.save()
-        spam_db.save()
+                    j.save()
+
+        for i in words_s:
+            if i[0] not in temp:
+                new_word = SpamList(word=i[0])
+                new_word.save()
 
     def init_db(self):
         """
@@ -75,18 +79,16 @@ class Spam:
         update spam words in database and this procedure is based on spam.txt
         """
         data_set = [line.strip() for line in open("analysis/texts/spam.txt", 'r')]
-        print(data_set)
-        standard = SpamList.objects.all()
-        for i in data_set:      # change better algorithm
-            for j in standard:
-                if i == j.word:
-                    continue
-                store_data = SpamList(word=i)
+        db_all = SpamList.objects.all()
+        standard = [a.word for a in db_all]
+        for j in data_set:
+            if j not in standard:
+                store_data = SpamList(word=j)
                 store_data.save()
 
     #def improve_analysis_level
 
-    #warning sign for same spam content
+    ##warning sign for same spam content
 
 
 def run_app():      # test-only method
@@ -101,26 +103,19 @@ def run_app():      # test-only method
 
     a = SpamList.objects.all()
     for i in a:
-        print(i.word)
-        print(i.count)
-        print(i.status)
+        print(i.word+"/"+str(i.count)+"/"+i.status)
     print(total)
     print(analyzed_words)
-    if total > 10:      # evaluate whether a content is spam or not
-        urls = core.get_url_from_string(string)
-        if len(urls) != 0:
-            url_list = [(u, 1) for u in urls]
-            analyzed_words += url_list
+    spam.update_standard_word()
+    if total > 10:       #evaluate whether a content is spam or not
+    #    urls = core.get_url_from_string(string)
+        #if len(urls) != 0:
+            # url double problem
+    #        url_list = [(u, 1) for u in urls]
+    #        analyzed_words += url_list
         spam.update_analysis_level(analyzed_words)
 
-
-
-
-
-
-    #posts = Post.objects.all()
-    #for post in posts:
-    #    pprint(self.twitter.phrases(post.message))
-    #    self.wordscluster = self.mecab.pos(self.stringdata)
-
+    a = SpamList.objects.all()
+    for i in a:
+        print(i.word+"/"+str(i.count)+"/"+i.status)
 
