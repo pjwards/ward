@@ -61,6 +61,24 @@ var pcDisplac = function (rows, row) {
 }
 
 /**
+ * Post and comment Display for management
+ */
+var pcDisplacM = function (rows, row, name) {
+    var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+    var fb_url = "https://www.facebook.com/";
+    var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+    var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+    rows.push({
+        "checkbox": '<input type="checkbox" name="del_' +name + '" value="' + row["id"] + '">',
+        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
+        "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>',
+        "message": message.length < 100 ? message + btn : message.substring(0, 100) + "..." + btn,
+        "like_count": row["like_count"],
+        "comment_count": row["comment_count"],
+    });
+}
+
+/**
  * Get issue by using ajax
  */
 var getIssue = function (url, table, limit, from, to, page, paging) {
@@ -668,3 +686,78 @@ jui.ready(["ui.combo"], function (combo) {
         }
     });
 });
+
+/**
+ * Get search post and comment for management by using ajax
+ */
+var getSearchPCM = function (url, table, limit, model, search, search_check, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            pcDisplacM(rows, results[i], model);
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        q: search,
+        c: search_check,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Get search user for management by using ajax
+ */
+var getSearchUM = function (url, table, limit, search, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var user_url = '/archive/user/' + row["id"] + '/';
+            rows.push({
+                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
+                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
+                "id": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
+                "post_count": row["posts"].length,
+                "comment_count": row["comments"].length,
+            });
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        q: search,
+    }
+
+    getAjaxResult(url, data, fun);
+}

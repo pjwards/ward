@@ -1,6 +1,5 @@
 import collections
 import logging
-
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
 from django.http import HttpResponseRedirect, JsonResponse
@@ -9,7 +8,6 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-
 from archive.fb.fb_query import get_feed_query
 from archive.fb.fb_request import FBRequest
 from archive.fb.fb_lookup import lookup_id
@@ -36,17 +34,17 @@ def groups(request):
     elif request.method == "POST":
         fb_url = request.POST.get("fb_url", None)
         if fb_url is None:
-            error = 'Does not exist a url.'
+            error = 'Did not exist a url.'
             return JsonResponse({'error': error})
 
         group_id = lookup_id(fb_url)
         if group_id is None:
-            error = 'Does not exist the group or enroll the wrong url.'
+            error = 'Did not exist the group or enroll the wrong url.'
             return JsonResponse({'error': error})
 
         group_data = fb_request.group(group_id)
         if group_data is None:
-            error = 'Does not exist group or privacy group.'
+            error = 'Did not exist group or privacy group.'
             return JsonResponse({'error': error})
 
         if Group.objects.filter(id=group_data.get('id')).exists():
@@ -56,7 +54,7 @@ def groups(request):
         _group = tasks.store_group(group_data)
         tasks.store_group_feed.delay(_group.id, get_feed_query(100, 100))
 
-        return JsonResponse({'success': _group.id})
+        return JsonResponse({'success': 'Success to enroll ' + _group.id})
 
 
 def group_analysis(request, group_id):
@@ -129,6 +127,48 @@ def group_search(request, group_id):
             'search': search,
         }
     )
+
+
+def group_management(request, group_id):
+    """
+    Manage group
+
+    :param request: request
+    :param group_id: group_id
+    :return: searched data
+    """
+    _group = get_object_or_404(Group, pk=group_id)
+
+    if request.method == "GET":
+        _groups = Group.objects.all()
+        return render(
+            request,
+            'archive/group/management.html',
+            {
+                'groups': _groups,
+                'group': _group,
+            }
+        )
+    elif request.method == "POST":
+        model = request.POST.get("model", None)
+        if model is None:
+            error = 'Did not exist a model.'
+            return JsonResponse({'error': error})
+
+        if model == 'post':
+            check_box = request.POST.getlist('del_post')
+        elif model == 'comment':
+            check_box = request.POST.getlist('del_comment')
+        else:
+            return JsonResponse({'success': _group.id})
+
+        if check_box:
+            pass
+        else:
+            error = 'Did not check any check box.'
+            return JsonResponse({'error': error})
+
+        return JsonResponse({'success': _group.id})
 
 
 def group_store(request, group_id):
@@ -405,7 +445,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         _group = self.get_object()
 
         search = self.request.query_params.get('q', '')
-        return self.response_models(_group.user_set.order_by('name').search(search), request, UserSerializer)
+        if search:
+            return self.response_models(_group.user_set.order_by('name').search(search), request, UserSerializer)
+        else:
+            return self.response_models(_group.user_set.order_by('name'), request, UserSerializer)
 
     @detail_route()
     def post_search(self, request, pk=None):
@@ -416,10 +459,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        _group = self.get_object()
-
-        search = self.request.query_params.get('q', '')
-        return self.response_models(_group.post_set.search(search), request, PostSerializer)
+        posts = self.group_search(Post)
+        return self.response_models(posts, request, PostSerializer)
 
     @detail_route()
     def comment_search(self, request, pk=None):
@@ -430,10 +471,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        _group = self.get_object()
-
-        search = self.request.query_params.get('q', '')
-        return self.response_models(_group.comment_set.search(search), request, CommentSerializer)
+        comments = self.group_search(Comment)
+        return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
     def user_post_archive(self, request, pk=None):
@@ -461,12 +500,33 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
     @list_route()
     def group_search(self, request):
+        """
+        Return group search
+
+        :param request: request
+        :return: response model
+        """
         _groups = self.get_queryset()
         search = self.request.query_params.get('q', '')
         if search:
             return self.response_models(_groups.order_by('name').search(search), request, GroupSerializer)
         else:
             return self.response_models(_groups.order_by('name'), request, GroupSerializer)
+
+    @detail_route()
+    @renderer_classes((JSONRenderer,))
+    def user_autocomplete(self, request, pk=None):
+        """
+        User list for auto complete
+
+        :param request: request
+        :param pk: pk
+        :return: json
+        """
+        _group = self.get_object()
+        users = _group.user_set.values('id', 'name')
+
+        return Response({'users': users})
 
     def response_models(self, models, request, model_serializer):
         """
@@ -620,6 +680,27 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date) \
                 .annotate(count=Count('comments')).order_by('-count')
+
+    def group_search(self, model):
+        """
+        Get models by search
+
+        :param request: request
+        :return: models
+        """
+        _group = self.get_object()
+
+        search = self.request.query_params.get('q', '')
+        search_check = self.request.query_params.get('c', None)
+
+        if search_check == 'user':
+            _user = User.objects.filter(id=search)
+            return model.objects.filter(group=_group, user=_user)
+
+        if search:
+            return model.objects.filter(group=_group).search(search)
+        else:
+            return model.objects.filter(group=_group)
 
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):

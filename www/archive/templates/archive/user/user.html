@@ -75,13 +75,15 @@
                     </div>
                     <table id="post_archive_table" class="table simple hover">
                         <colgroup>
+                            <col style="width: 60px;">
+                            <col style="width: 100px;">
+                            <col style="width: 60%;">
                             <col style="width: 20%;">
-                            <col style="width: 50%;">
-                            <col style="width: 15%;">
-                            <col style="width: 15%;">
+                            <col style="width: 20%;">
                         </colgroup>
                         <thead>
                         <tr>
+                            <th></th>
                             <th style="text-align: center;"><i class="icon-user"></i> From</th>
                             <th style="text-align: center;"><i class="icon-report"></i> Message</th>
                             <th style="text-align: center;"><i class="icon-like"></i> Like</th>
@@ -118,13 +120,15 @@
                     </div>
                     <table id="comment_archive_table" class="table simple hover">
                         <colgroup>
+                            <col style="width: 60px;">
+                            <col style="width: 100px;">
+                            <col style="width: 60%;">
                             <col style="width: 20%;">
-                            <col style="width: 50%;">
-                            <col style="width: 15%;">
-                            <col style="width: 15%;">
+                            <col style="width: 20%;">
                         </colgroup>
                         <thead>
                         <tr>
+                            <th></th>
                             <th style="text-align: center;"><i class="icon-user"></i> From</th>
                             <th style="text-align: center;"><i class="icon-report"></i> Message</th>
                             <th style="text-align: center;"><i class="icon-like"></i> Like</th>
@@ -147,6 +151,7 @@
 
     <script id="tpl_row" type="text/template">
         <tr>
+            <td style="text-align: right;"><!= picture !></td>
             <td><!= from !></td>
             <td><!= message !></td>
             <td style="text-align: center;"><!= like_count !></td>
@@ -196,7 +201,7 @@
             });
 
             post_archive_table = table("#post_archive_table", {
-                fields: ["from", "message", "like_count", "comment_count"],
+                fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
@@ -232,7 +237,7 @@
             });
 
             comment_archive_table = table("#comment_archive_table", {
-                fields: ["from", "message", "like_count", "comment_count"],
+                fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
@@ -289,7 +294,7 @@
                         post_archive_url = data.value + 'user_post_archive/'
                         comment_archive_url = data.value + 'user_comment_archive/'
 
-                        getArchiveByUser(post_archive_url,user_id, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
+                        getArchiveByUser(post_archive_url, user_id, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
                         getArchiveByUser(comment_archive_url, user_id, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
                     }
                 }

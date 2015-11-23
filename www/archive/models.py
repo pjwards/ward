@@ -91,6 +91,7 @@ class Post(models.Model):
     like_count = models.IntegerField(default=0)
     share_count = models.IntegerField(default=0)
     group = models.ForeignKey(Group)
+    is_deleted = models.BigIntegerField(default=False)
 
     objects = SearchableManager()
     search_fields = ("message",)
@@ -134,6 +135,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, related_name='comments')
     parent = models.ForeignKey('Comment', null=True, related_name='comments')
     group = models.ForeignKey(Group)
+    is_deleted = models.BigIntegerField(default=False)
 
     objects = SearchableManager()
     search_fields = ("message",)
@@ -168,3 +170,9 @@ class Attachment(models.Model):
 
     objects = SearchableManager()
     search_fields = ("description",)
+
+
+class Blacklist(models.Model):
+    group = models.ForeignKey(Group, related_name='blacklist')
+    user = models.ForeignKey(User, related_name='blacklist')
+    count = models.IntegerField(default=0)

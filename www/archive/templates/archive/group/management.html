@@ -1,0 +1,576 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block css %}
+    <style type="text/css">
+        /* Base */
+        .visit_total {
+            font-size: 15px;
+        }
+
+        .visit_total .title {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .visit_total .number {
+            font-size: 20px;
+        }
+
+        .visit_total .chart {
+            margin-top: 5px;
+            height: 50px;
+            width: 100px;
+        }
+
+        .bargauge {
+            font-size: 15px;
+        }
+
+        .bargauge .title {
+            padding: 16px;
+        }
+
+        .bargauge .chart {
+            height: 150px;
+            width: 80%;
+        }
+
+        .body {
+            padding: 10px;
+        }
+
+        .dashed {
+            border-top: 1px dashed #e5e5e5;
+
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    {% include 'archive/group/header.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="menu">
+
+            <div class="vmenu ">
+                <a href="{% url 'archive:group_analysis' group.id %}"><i class="icon-profile"></i> Analysis</a>
+                <a href="{% url 'archive:group_user' group.id %}"><i class="icon-user"></i> User</a>
+                <a href="{% url 'archive:group_management' group.id %}" class="active"><i class="icon-gear"></i>
+                    Management</a>
+            </div>
+
+        </div>
+        <div class="content">
+
+            <div class="content-list">
+                <div class="dashboard-first">
+                    <div class="col col-3">
+                        <div class="card">
+                            <div class="title">Total Posts</div>
+                            <div class="value">{{ group.post_count }}</div>
+                        </div>
+                    </div>
+                    <div class="col col-3">
+                        <div class="card">
+                            <div class="title">Total Comments</div>
+                            <div class="value">{{ group.comment_count }}</div>
+                        </div>
+
+                    </div>
+                    <div class="col col-3">
+                        <div class="card">
+                            <div class="title">Weekly Posts</div>
+                            <div class="value">{{ posts|length }}</div>
+                        </div>
+
+                    </div>
+                    <div class="col col-3">
+                        <div class="card">
+                            <div class="title">Last Updated</div>
+                            <div class="value">{{ group.get_diff_time }}</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="body">
+                        <div class="col col-6"><h1 class="title"><i class="icon-report"></i> <strong>Post</strong></h1>
+
+                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                                <div class="head">
+                                    <strong>Post List</strong>
+
+                                    <div class="group" style="float: right">
+                                        <div id="post_radio" class="group">
+                                            <a class="btn " value="text"><i class="icon-text"></i></a>
+                                            <a class="btn " value="user"><i class="icon-user"></i></a>
+                                            <input type="text" class="input" id="post_limit" placeholder="Limit"
+                                                   value="10" style="width: 60px; text-align: right;"/>
+                                            <input type="text" class="input" id="post_search" placeholder="Search"/>
+                                        </div>
+                                        <button id="post_del_btn" class="btn">
+                                            <i class="icon-trashcan"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form id="post_del_form" action="" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="model" value="post">
+                                    <table id="post_table" class="table simple hover borderless">
+                                        <colgroup>
+                                            <col style="width: 20px;">
+                                            <col style="width: 60px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 60%;">
+                                            <col style="width: 20%;">
+                                            <col style="width: 20%;">
+                                        </colgroup>
+                                        <thead>
+                                        <tr>
+                                            <th style="text-align: center;">
+                                                <input type="checkbox" id="check_all_post"
+                                                       style="display: inline-block;">
+                                            </th>
+                                            <th></th>
+                                            <th><i class="icon-user"></i> From</th>
+                                            <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                            <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                            <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </form>
+                            </div>
+
+                            <div id="post_paging" class="paging" style="margin-top: 3px;">
+                                <a href="#" class="prev">Previous</a>
+
+                                <div class="list"></div>
+                                <a href="#" class="next">Next</a>
+                            </div>
+                        </div>
+                        <div class="col col-6">
+                            <h1 class="title"><i class="icon-message"></i> <strong>Comment</strong></h1>
+
+                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                                <div class="head">
+                                    <strong>Comment List</strong>
+
+                                    <div class="group" style="float: right">
+                                        <div id="comment_radio" class="group">
+                                            <a class="btn " value="text"><i class="icon-text"></i></a>
+                                            <a class="btn " value="user"><i class="icon-user"></i></a>
+                                            <input type="text" class="input" id="comment_limit" placeholder="Limit"
+                                                   value="10" style="width: 60px; text-align: right;"/>
+                                            <input type="text" class="input" id="comment_search"
+                                                   placeholder="Search"/>
+                                        </div>
+                                        <button id="comment_del_btn" class="btn">
+                                            <i class="icon-trashcan"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form id="comment_del_form" action="" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="model" value="comment">
+                                    <table id="comment_table" class="table simple hover borderless">
+                                        <colgroup>
+                                            <col style="width: 20px;">
+                                            <col style="width: 60px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 60%;">
+                                            <col style="width: 20%;">
+                                            <col style="width: 20%;">
+                                        </colgroup>
+                                        <thead>
+                                        <tr>
+                                            <th style="text-align: center;">
+                                                <input type="checkbox" id="check_all_comment"
+                                                       style="display: inline-block;">
+                                            </th>
+                                            <th></th>
+                                            <th><i class="icon-user"></i> From</th>
+                                            <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                            <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                            <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </form>
+                            </div>
+
+                            <div id="comment_paging" class="paging" style="margin-top: 3px;">
+                                <a href="#" class="prev">Previous</a>
+
+                                <div class="list"></div>
+                                <a href="#" class="next">Next</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel dashed">
+                    <div class="body">
+                        <h1 class="title"><i class="icon-user"></i> <strong>User</strong></h1>
+
+                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
+                            <div class="head">
+                                <strong>User List</strong>
+
+                                <div class="group" style="float: right">
+                                    <input type="text" class="input" id="user_limit" placeholder="Limit"
+                                           value="10" style="width: 60px; text-align: right;"/>
+                                    <input type="text" class="input" id="user_search" placeholder="Search"/>
+                                </div>
+                            </div>
+                            <table id="user_table" class="table simple hover borderless">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th><i class="icon-user"></i> User</th>
+                                    <th style="text-align: center;"><i class="icon-orderedlist"></i> Id</th>
+                                    <th style="text-align: center;"><i class="icon-report"></i> Post</th>
+                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div id="user_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                </div>
+
+                <script id="tpl_row" type="text/template">
+                    <tr>
+                        <td style="text-align: right;"><!= checkbox !></td>
+                        <td style="text-align: right;"><!= picture !></td>
+                        <td><!= from !></td>
+                        <td><!= message !></td>
+                        <td style="text-align: center;"><!= like_count !></td>
+                        <td style="text-align: center;"><!= comment_count !></td>
+                    </tr>
+                </script>
+
+                <script id="tpl_none" type="text/template">
+                    <tr>
+                        <td colspan="6" class="none" align="center">Data does not exist.</td>
+                    </tr>
+                </script>
+
+                <script id="tpl_pages" type="text/template">
+                    <! for(var i = 0; i < pages.length; i++) { !>
+                    <a href="#" class="page"><!= pages[i] !></a>
+                    <! } !>
+                </script>
+
+                <script id="tpl_row2" type="text/template">
+                    <tr>
+                        <td style="text-align: right;"><!= picture !></td>
+                        <td><!= from !></td>
+                        <td style="text-align: center;"><!= id !></td>
+                        <td style="text-align: center;"><!= post_count !></td>
+                        <td style="text-align: center;"><!= comment_count !></td>
+                    </tr>
+                </script>
+
+                <script id="tpl_none2" type="text/template">
+                    <tr>
+                        <td colspan="5" class="none" align="center">Data does not exist.</td>
+                    </tr>
+                </script>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
+    <script>
+        var post_limit = 10;
+        var comment_limit = 10;
+        var user_limit = 10;
+
+        var post_search = $('#post_search');
+        var comment_search = $('#comment_search');
+        var user_search = $('#user_search');
+
+        var post_search_url = "/api/groups/{{ group.id }}/post_search/";
+        var comment_search_url = "/api/groups/{{ group.id }}/comment_search/";
+        var user_search_url = "/api/groups/{{ group.id }}/user_search/";
+        var user_autocomplete_url = "/api/groups/{{ group.id }}/user_autocomplete/";
+
+        var post_search_check = 'text';
+        var comment_search_check = 'text';
+
+        /**
+         * Generate Archive
+         */
+        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+            post_paging = paging("#post_paging", {
+                pageCount: 10,
+                screenCount: 10,
+                event: {
+                    page: function (pNo) {
+                        getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html(),
+                }
+            });
+
+            post_table = table("#post_table", {
+                fields: ["", "", "from", "message", "like_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
+                }
+            });
+
+            comment_paging = paging("#comment_paging", {
+                pageCount: 10,
+                screenCount: 10,
+                event: {
+                    page: function (pNo) {
+                        getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html()
+                }
+            });
+
+            comment_table = table("#comment_table", {
+                fields: ["", "", "from", "message", "like_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
+                }
+            });
+
+            user_paging = paging("#user_paging", {
+                pageCount: 10,
+                screenCount: 10,
+                event: {
+                    page: function (pNo) {
+                        getSearchUM(user_search_url, user_table, user_limit, user_search.val(), pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html()
+                }
+            });
+
+            user_table = table("#user_table", {
+                fields: ["", "from", "id", "post_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row2").html(),
+                    none: $("#tpl_none2").html()
+                }
+            });
+        });
+
+        /**
+         * Generate Button
+         */
+        jui.ready(["ui.button"], function (button) {
+            post_radio = button("#post_radio", {
+                type: "radio",
+                index: 0,
+                event: {
+                    change: function (data) {
+                        post_search_check = data.value;
+                    }
+                }
+            });
+            comment_radio = button("#comment_radio", {
+                type: "radio",
+                index: 0,
+                event: {
+                    change: function (data) {
+                        comment_search_check = data.value;
+                    }
+                }
+            });
+        });
+
+        /**
+         * Init analysis.html
+         */
+        $(function () {
+            getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
+            getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+            getSearchUM(user_search_url, user_table, user_limit, user_search.val(), 1, user_paging);
+
+            $("#post_limit").on("input", function () {
+                post_limit = $("#post_limit").val();
+                getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
+                post_paging.first();
+            });
+
+            $("#comment_limit").on("input", function () {
+                comment_limit = $("#comment_limit").val();
+                getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+                comment_paging.first();
+            });
+
+            $("#user_limit").on("input", function () {
+                user_limit = $("#user_limit").val();
+                getSearchUM(user_search_url, user_table, user_limit, user_search.val(), 1, user_paging);
+                user_paging.first();
+            });
+
+            $("#post_search").keypress(function (event) {
+                var key_code = event.keyCode || window.event.keyCode;
+                if (key_code == 13) {
+                    getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
+                    post_paging.first();
+                }
+            });
+
+            $("#comment_search").keypress(function (event) {
+                var key_code = event.keyCode || window.event.keyCode;
+                if (key_code == 13) {
+                    getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+                    comment_paging.first();
+                }
+            });
+
+            $("#user_search").keypress(function (event) {
+                var key_code = event.keyCode || window.event.keyCode;
+                if (key_code == 13) {
+                    getSearchUM(user_search_url, user_table, user_limit, user_search.val(), 1, user_paging);
+                    user_paging.first();
+                }
+            });
+        });
+
+        $(function () {
+            $("#check_all_post").click(function () {
+                if ($("#check_all_post").prop("checked")) {
+                    $("input[name=del_post]").prop("checked", true);
+                } else {
+                    $("input[name=del_post]").prop("checked", false);
+                }
+            });
+
+            $("#check_all_comment").click(function () {
+                if ($("#check_all_comment").prop("checked")) {
+                    $("input[name=del_comment]").prop("checked", true);
+                } else {
+                    $("input[name=del_comment]").prop("checked", false);
+                }
+            });
+
+            $("#post_del_btn").on("click", function () {
+                var data = $("#post_del_form").serialize();
+                var answer = confirm("Are you sure delete?")
+                if (answer) {
+                    deleteAjax(data);
+                    getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
+                    post_paging.first();
+                }
+
+            });
+
+            $("#comment_del_btn").on("click", function () {
+                var data = $("#comment_del_form").serialize();
+                var answer = confirm("Are you sure delete?")
+                if (answer) {
+                    deleteAjax(data);
+                    getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+                    comment_paging.first();
+                }
+            });
+        });
+
+        function deleteAjax(data) {
+            $.ajax({
+                url: '{% url 'archive:group_management' group.id %}',
+                type: "post",
+                data: data,
+                success: function (json, status) {
+                    if (json["success"]) {
+                        data = {
+                            title: json["success"],
+                            message: getToday(),
+                            color: 'success',
+                        }
+                        notify_top_submit(1, data);
+                    }
+                    else if (json["error"]) {
+                        data = {
+                            title: json["error"],
+                            message: getToday(),
+                            color: 'danger',
+                        }
+                        notify_top_submit(1, data);
+                    }
+                },
+                error: function (request, status, error) {
+                    data = {
+                        title: "An unexpected error has occurred.",
+                        message: getToday(),
+                        color: 'danger',
+                    }
+                    notify_top_submit(1, data);
+                }
+            });
+        }
+    </script>
+{% endblock %}

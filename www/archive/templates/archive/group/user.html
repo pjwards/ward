@@ -60,7 +60,7 @@
             <div class="vmenu ">
                 <a href="{% url 'archive:group_analysis' group.id %}"><i class="icon-profile"></i> Analysis</a>
                 <a href="{% url 'archive:group_user' group.id %}" class="active"><i class="icon-user"></i> User</a>
-                <a class="disabled"><i class="icon-gear"></i> Management</a>
+                <a href="{% url 'archive:group_management' group.id %}"><i class="icon-gear"></i> Management</a>
             </div>
 
         </div>
@@ -174,9 +174,6 @@
                                     <input type="text" class="input" id="user_archive_limit" placeholder="Limit"
                                            value="10" style="width: 60px; text-align: right;"/>
                                     <input type="text" class="input" id="user_archive_search" placeholder="Search"/>
-                                    <button class="btn" value="run" id="user_archive_run"><i class="icon-play"></i>
-                                        Run
-                                    </button>
                                 </div>
                             </div>
                             <table id="user_archive_table" class="table simple hover borderless">
@@ -301,7 +298,6 @@
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
@@ -330,11 +326,6 @@
             getProportion(proportion_url, "#post_proportion", "#comment_proportion");
             getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
 
-            $("#user_archive_run").on("click", function () {
-                getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
-                user_archive_paging.first();
-            });
-
             $("#user_archive_limit").on("input", function () {
                 user_archive_limit = $("#user_archive_limit").val();
                 getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
@@ -343,7 +334,10 @@
 
             $("#user_archive_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
-                if (key_code == 13) $("#user_archive_run").click();
+                if (key_code == 13) {
+                    getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
+                    user_archive_paging.first();
+                }
             })
         });
     </script>

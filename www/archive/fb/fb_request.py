@@ -14,16 +14,22 @@ class FBRequest:
     """
     FBRequest gets data from facebook by using graph api and facebook-sdk.
     """
-    def __init__(self):
+    def __init__(self, access_token=None):
 
         app_id = settings.FB_APP_ID
         app_secret = settings.FB_APP_SECRET
         app_version = settings.FB_APP_VERSION
 
-        self.graph = facebook.GraphAPI(
-            access_token=facebook.GraphAPI().get_app_access_token(app_id, app_secret),
-            version=app_version
-        )
+        if access_token is None:
+            self.graph = facebook.GraphAPI(
+                access_token=facebook.GraphAPI().get_app_access_token(app_id, app_secret),
+                version=app_version
+            )
+        else:
+            self.graph = facebook.GraphAPI(
+                access_token=access_token,
+                version=app_version
+            )
 
     def feed(self, group, query, feeds):
         """
@@ -111,8 +117,17 @@ class FBRequest:
         :param user_id: user id to get picture
         :return: picture url
         """
-
         re = self.graph.request(user_id + "/picture")
 
         logger.info('Get user picture: %s', user_id)
         return re.get('url')
+
+    def delete_object(self, object_id):
+        """
+        Delete some object
+
+        :param object_id: object id
+        :return:
+        """
+        self.graph.delete_object(object_id)
+        logger.info('Delete object: %s', object_id)

@@ -1,4 +1,3 @@
-
 $(document).ready(function(){
 	
 	$(".form-username").val("Username...");

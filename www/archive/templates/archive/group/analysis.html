@@ -61,7 +61,7 @@
                 <a href="{% url 'archive:group_analysis' group.id %}" class="active"><i class="icon-profile"></i>
                     Analysis</a>
                 <a href="{% url 'archive:group_user' group.id %}"><i class="icon-user"></i> User</a>
-                <a class="disabled"><i class="icon-gear"></i> Management</a>
+                <a href="{% url 'archive:group_management' group.id %}"><i class="icon-gear"></i> Management</a>
             </div>
 
         </div>
@@ -380,7 +380,6 @@
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
@@ -416,7 +415,6 @@
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
@@ -457,7 +455,6 @@
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
@@ -493,7 +490,6 @@
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
-                sort: [2, 3],
                 event: {
                     sort: function (column, e) {
                         var className = {
