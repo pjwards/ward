@@ -72,7 +72,7 @@ def group_analysis(request, group_id):
     """
     _groups = Group.objects.all()
     _group = get_object_or_404(Group, pk=group_id)
-    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta(), is_deleted=False)
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
     return render(
         request,
@@ -95,7 +95,7 @@ def group_user(request, group_id):
     """
     _groups = Group.objects.all()
     _group = get_object_or_404(Group, pk=group_id)
-    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta(), is_deleted=False)
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
     return render(
         request,
@@ -603,15 +603,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if from_date:
             if to_date:
                 if from_date == to_date:
-                    return model.objects.filter(group=_group, created_time__range=[from_date, to_date],
-                                                is_deleted=False)
-                return model.objects.filter(group=_group, created_time__range=[from_date, to_date], is_deleted=False)
+                    return model.objects.filter(group=_group, created_time__range=[from_date, to_date])
+                return model.objects.filter(group=_group, created_time__range=[from_date, to_date])
             else:
-                return model.objects.filter(group=_group, created_time__gte=from_date, is_deleted=False)
+                return model.objects.filter(group=_group, created_time__gte=from_date)
         elif to_date:
-            return model.objects.filter(group=_group, created_time__lte=to_date, is_deleted=False)
+            return model.objects.filter(group=_group, created_time__lte=to_date)
         else:
-            return model.objects.filter(group=_group, is_deleted=False)
+            return model.objects.filter(group=_group)
 
     def get_issue(self, model):
         """
@@ -715,11 +714,11 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             to_date = date_utils.combine_max_time(to_date)
 
         if model == 'post':
-            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date,
-                                          posts__is_deleted=False).annotate(count=Count('posts')).order_by('-count')
+            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date)\
+                .annotate(count=Count('posts')).order_by('-count')
         else:
-            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date,
-                                          posts__is_deleted=False).annotate(count=Count('comments')).order_by('-count')
+            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date)\
+                .annotate(count=Count('comments')).order_by('-count')
 
     def group_search_by_check(self, model):
         """
@@ -735,12 +734,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if search_check == 'user':
             _user = User.objects.filter(id=search)
-            return model.objects.filter(group=_group, user=_user, is_deleted=False).order_by('-created_time')
+            return model.objects.filter(group=_group, user=_user).order_by('-created_time')
 
         if search:
-            return model.objects.filter(group=_group, is_deleted=False).order_by('-created_time').search(search)
+            return model.objects.filter(group=_group).order_by('-created_time').search(search)
         else:
-            return model.objects.filter(group=_group, is_deleted=False).order_by('-created_time')
+            return model.objects.filter(group=_group).order_by('-created_time')
 
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):

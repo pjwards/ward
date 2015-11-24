@@ -138,7 +138,8 @@ def store_comment(comment_data, post, group, parent=None):
     # store reply comments
     if 'comments' in comment_data:
         for reply_comment_data in comment_data.get('comments').get('data'):
-            store_comment(comment_data=reply_comment_data, post=post, group=group, parent=parent)
+            comment = Comment.objects.filter(id=comment_id)[0]
+            store_comment(comment_data=reply_comment_data, post=post, group=group, parent=comment)
 
 
 @shared_task
@@ -366,7 +367,7 @@ def delete_group_content(_fb_request, object_id, model):
         return True, "Successfully deleted, but '" + object_id + "' does not exist in our site."
 
     if isinstance(content, Post):
-        deleted_post = DeletedPost(content)
+        deleted_post = DeletedPost.create(content)
         deleted_post.save()
         comments = Comment.objects.filter(post=content)
 
@@ -378,8 +379,17 @@ def delete_group_content(_fb_request, object_id, model):
             for comment in comments:
                 comment.delete()
     else:
-        deleted_comment = DeletedComment(content)
+        deleted_comment = DeletedComment.create(content)
         deleted_comment.save()
+
+        child_comments = Comment.objects.filter(parent=content)
+        if child_comments:
+            for child_comment in child_comments:
+                deleted_comment = DeletedComment.create(child_comment)
+                deleted_comment.save()
+
+            for child_comment in child_comments:
+                child_comment.delete()
 
     content.delete()
 

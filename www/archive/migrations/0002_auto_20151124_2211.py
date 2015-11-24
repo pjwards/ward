@@ -11,9 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='post',
-            old_name='shares',
-            new_name='share_count',
+        migrations.AlterField(
+            model_name='deletedcomment',
+            name='parent',
+            field=models.CharField(null=True, max_length=20),
         ),
     ]

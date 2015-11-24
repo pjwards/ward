@@ -234,7 +234,7 @@ class DeletedComment(models.Model):
     like_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
     post = models.CharField(max_length=50)
-    parent = models.CharField(max_length=20)
+    parent = models.CharField(max_length=20, null=True)
     group = models.ForeignKey(Group, related_name='delete_comments')
 
     objects = SearchableManager()
@@ -254,6 +254,10 @@ class DeletedComment(models.Model):
 
     @classmethod
     def create(cls, comment):
+        if comment.parent:
+            parent = comment.parent.id
+        else:
+            parent = None
         return cls(id=comment.id, user=comment.user, created_time=comment.created_time, message=comment.message,
                    like_count=comment.like_count, comment_count=comment.comment_count, post=comment.post.id,
-                   parent=comment.parent.id, group=comment.group)
+                   parent=parent, group=comment.group)
