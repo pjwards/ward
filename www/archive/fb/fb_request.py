@@ -131,3 +131,16 @@ class FBRequest:
         """
         self.graph.delete_object(object_id)
         logger.info('Delete object: %s', object_id)
+
+    def validate_token(self):
+        """
+        Validate token
+
+        :return:
+        """
+        try:
+            self.graph.request("me")
+            return True, None
+        except facebook.GraphAPIError as e:
+            logger.info('Fail to access')
+            return False, e.__str__()

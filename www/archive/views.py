@@ -32,25 +32,30 @@ def groups(request):
     if request.method == "GET":
         return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, })
     elif request.method == "POST":
+        # Get a url and validate the url
         fb_url = request.POST.get("fb_url", None)
         if fb_url is None:
             error = 'Did not exist a url.'
             return JsonResponse({'error': error})
 
+        # Get a group id from the url and validate the group id
         group_id = lookup_id(fb_url)
         if group_id is None:
             error = 'Did not exist the group or enroll the wrong url.'
             return JsonResponse({'error': error})
 
+        # Get group data from graph api and validate the group data
         group_data = fb_request.group(group_id)
         if group_data is None:
             error = 'Did not exist group or privacy group.'
             return JsonResponse({'error': error})
 
+        # Check the group exist
         if Group.objects.filter(id=group_data.get('id')).exists():
             error = 'This group is already exist.'
             return JsonResponse({'error': error})
 
+        # Store the group
         _group = tasks.store_group(group_data)
         tasks.store_group_feed.delay(_group.id, get_feed_query(100, 100))
 
@@ -67,7 +72,7 @@ def group_analysis(request, group_id):
     """
     _groups = Group.objects.all()
     _group = get_object_or_404(Group, pk=group_id)
-    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta(), is_deleted=False)
 
     return render(
         request,
@@ -90,7 +95,7 @@ def group_user(request, group_id):
     """
     _groups = Group.objects.all()
     _group = get_object_or_404(Group, pk=group_id)
-    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta(), is_deleted=False)
 
     return render(
         request,
@@ -150,25 +155,59 @@ def group_management(request, group_id):
             }
         )
     elif request.method == "POST":
+        # Get a model and validate a model
         model = request.POST.get("model", None)
         if model is None:
             error = 'Did not exist a model.'
             return JsonResponse({'error': error})
 
+        # Get a access token and validate the access token
+        access_token = request.POST.get("access_token", None)
+        if not access_token:
+            error = 'Did not exist a access token.'
+            return JsonResponse({'error': error})
+
+        # Get a check box by using model
         if model == 'post':
             check_box = request.POST.getlist('del_post')
         elif model == 'comment':
             check_box = request.POST.getlist('del_comment')
         else:
-            return JsonResponse({'success': _group.id})
+            error = 'This model did not validate.'
+            return JsonResponse({'success': error})
 
-        if check_box:
-            pass
-        else:
+        # Validate the check box
+        if not check_box:
             error = 'Did not check any check box.'
             return JsonResponse({'error': error})
 
-        return JsonResponse({'success': _group.id})
+        # Generate fb request by using the access token
+        fb_request_del = FBRequest(access_token=access_token)
+
+        # Validate access token
+        res, e = fb_request_del.validate_token()
+        if not res:
+            return JsonResponse({'error': e})
+
+        # Delete object in check box
+        total = len(check_box)
+        error = set()
+        success = 0
+        fail = 0
+        for object_id in check_box:
+            res, e = tasks.delete_group_content(fb_request_del, object_id, model)
+            if res:
+                success += 1
+            else:
+                fail += 1
+                error.add(e)
+
+        return JsonResponse(
+            {
+                'model': model,
+                'result': {'total': total, 'success': success, 'fail': fail},
+                'error': list(error)
+            })
 
 
 def group_store(request, group_id):
@@ -459,7 +498,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        posts = self.group_search(Post)
+        posts = self.group_search_by_check(Post)
         return self.response_models(posts, request, PostSerializer)
 
     @detail_route()
@@ -471,7 +510,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        comments = self.group_search(Comment)
+        comments = self.group_search_by_check(Comment)
         return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
@@ -564,14 +603,15 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if from_date:
             if to_date:
                 if from_date == to_date:
-                    return model.objects.filter(group=_group, created_time__range=[from_date, to_date])
-                return model.objects.filter(group=_group, created_time__range=[from_date, to_date])
+                    return model.objects.filter(group=_group, created_time__range=[from_date, to_date],
+                                                is_deleted=False)
+                return model.objects.filter(group=_group, created_time__range=[from_date, to_date], is_deleted=False)
             else:
-                return model.objects.filter(group=_group, created_time__gte=from_date)
+                return model.objects.filter(group=_group, created_time__gte=from_date, is_deleted=False)
         elif to_date:
-            return model.objects.filter(group=_group, created_time__lte=to_date)
+            return model.objects.filter(group=_group, created_time__lte=to_date, is_deleted=False)
         else:
-            return model.objects.filter(group=_group)
+            return model.objects.filter(group=_group, is_deleted=False)
 
     def get_issue(self, model):
         """
@@ -675,17 +715,17 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             to_date = date_utils.combine_max_time(to_date)
 
         if model == 'post':
-            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date) \
-                .annotate(count=Count('posts')).order_by('-count')
+            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date,
+                                          posts__is_deleted=False).annotate(count=Count('posts')).order_by('-count')
         else:
-            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date) \
-                .annotate(count=Count('comments')).order_by('-count')
+            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date,
+                                          posts__is_deleted=False).annotate(count=Count('comments')).order_by('-count')
 
-    def group_search(self, model):
+    def group_search_by_check(self, model):
         """
         Get models by search
 
-        :param request: request
+        :param model: model
         :return: models
         """
         _group = self.get_object()
@@ -695,12 +735,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if search_check == 'user':
             _user = User.objects.filter(id=search)
-            return model.objects.filter(group=_group, user=_user)
+            return model.objects.filter(group=_group, user=_user, is_deleted=False).order_by('-created_time')
 
         if search:
-            return model.objects.filter(group=_group).search(search)
+            return model.objects.filter(group=_group, is_deleted=False).order_by('-created_time').search(search)
         else:
-            return model.objects.filter(group=_group)
+            return model.objects.filter(group=_group, is_deleted=False).order_by('-created_time')
 
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Group, Post, Comment, Media, Attachment
+from .models import User, Group, Post, Comment, Media, Attachment, Blacklist
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -51,9 +51,25 @@ class AttachmentAdmin(admin.ModelAdmin):
     list_display = ('title', 'description', 'type', 'url')
 
 
+class BlacklistAdmin(admin.ModelAdmin):
+    list_display = ('get_user', 'get_group', 'count', 'updated_time')
+    list_filter = ['updated_time']
+    search_fields = ['user__name']
+
+    def get_user(self, obj):
+        return obj.user.name
+    get_user.short_description = 'User'
+    get_user.admin_order_field = 'user__name'
+
+    def get_group(self, obj):
+        return obj.group.name
+    get_group.short_description = 'Group'
+    get_group.admin_order_field = 'group__name'
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Media, MediaAdmin)
 admin.site.register(Attachment, AttachmentAdmin)
+admin.site.register(Blacklist, BlacklistAdmin)

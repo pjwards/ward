@@ -98,7 +98,17 @@
 
                 <div class="panel">
                     <div class="body">
-                        <div class="col col-6"><h1 class="title"><i class="icon-report"></i> <strong>Post</strong></h1>
+                        <h1 class="title"><i class="icon-report"></i> <strong>Access Token</strong></h1>
+
+                        <input type="text" class="input" id="access_token" name="access_token" placeholder="Please Input Access Token"
+                               style="width: 100%;"/>
+                    </div>
+                </div>
+
+                <div class="panel dashed">
+                    <div class="body">
+                        <div class="col col-6">
+                            <h1 class="title"><i class="icon-report"></i> <strong>Post</strong></h1>
 
                             <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
                                 <div class="head">
@@ -519,6 +529,7 @@
 
             $("#post_del_btn").on("click", function () {
                 var data = $("#post_del_form").serialize();
+                data += "&access_token=" + encodeURIComponent($("#access_token").val());
                 var answer = confirm("Are you sure delete?")
                 if (answer) {
                     deleteAjax(data);
@@ -530,6 +541,7 @@
 
             $("#comment_del_btn").on("click", function () {
                 var data = $("#comment_del_form").serialize();
+                data += "&access_token=" + encodeURIComponent($("#access_token").val());
                 var answer = confirm("Are you sure delete?")
                 if (answer) {
                     deleteAjax(data);
@@ -543,13 +555,43 @@
             $.ajax({
                 url: '{% url 'archive:group_management' group.id %}',
                 type: "post",
+                async:false,
                 data: data,
                 success: function (json, status) {
-                    if (json["success"]) {
+                    if (json["result"]) {
+                        var title = '';
+                        var error_text = '<br>';
+                        var color = 'success';
+
+                        var result = json["result"];
+                        var error = json["error"];
+                        if (result["success"] > 0) {
+                            title = 'Successfully deleted ' + result["success"] + ' ' + json["model"];
+                            if (result["success"] > 1) {
+                                title += 's'
+                            }
+                            var total = '. (' + result["success"] + '/' + result["total"] + ')';
+                            title += total;
+                        } else {
+                            title = 'Failed to delete ' + result["fail"] + ' ' + json["model"];
+                            if (result["fail"] > 1) {
+                                title += 's'
+                            }
+                            var total = '. (' + result["fail"] + '/' + result["total"] + ')';
+                            title += total;
+                            color = 'danger';
+                        }
+
+                        if(error.length > 0) {
+                            for(var i in error) {
+                                error_text += error[i];
+                                error_text += '<br>';
+                            }
+                        }
                         data = {
-                            title: json["success"],
-                            message: getToday(),
-                            color: 'success',
+                            title: title,
+                            message: getToday() + error_text,
+                            color: color,
                         }
                         notify_top_submit(1, data);
                     }

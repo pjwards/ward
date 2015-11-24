@@ -606,7 +606,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_1 = notify("body", {
         position: "top-right",
         event: handler,
-        timeout: 1500,
+        timeout: 2000,
         tpl: {
             item: $("#tpl_alarm").html()
         }
@@ -615,7 +615,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_2 = notify("body", {
         position: "top-left",
         event: handler,
-        timeout: 1500,
+        timeout: 2000,
         tpl: {
             item: $("#tpl_alarm").html()
         }
@@ -624,7 +624,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_3 = notify("body", {
         position: "top",
         event: handler,
-        timeout: 1500,
+        timeout: 2000,
         padding: {
             top: 100
         },
@@ -636,7 +636,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_4 = notify("body", {
         position: "bottom",
         event: handler,
-        timeout: 1500,
+        timeout: 2000,
         distance: 30,
         tpl: {
             item: $("#tpl_alarm").html()
@@ -646,7 +646,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_5 = notify("body", {
         position: "bottom-left",
         event: handler,
-        timeout: 1500,
+        timeout: 2000,
         showDuration: 1000,
         hideDuration: 1000,
         tpl: {
@@ -657,7 +657,7 @@ jui.ready(["ui.notify"], function (notify) {
     notify_6 = notify("body", {
         position: "bottom-right",
         event: handler,
-        timeout: 1500,
+        timeout: 2000,
         showEasing: "linear",
         tpl: {
             item: $("#tpl_alarm").html()

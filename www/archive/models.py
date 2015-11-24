@@ -176,3 +176,4 @@ class Blacklist(models.Model):
     group = models.ForeignKey(Group, related_name='blacklist')
     user = models.ForeignKey(User, related_name='blacklist')
     count = models.IntegerField(default=0)
+    updated_time = models.DateTimeField(auto_now=True)

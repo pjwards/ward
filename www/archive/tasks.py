@@ -1,11 +1,9 @@
 from __future__ import absolute_import
-
 import logging
-
+from facebook import GraphAPIError
 from celery import shared_task
-
 from archive.fb.fb_request import FBRequest
-from .models import User, Group, Post, Comment, Media, Attachment
+from .models import User, Group, Post, Comment, Media, Attachment, Blacklist
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -343,3 +341,47 @@ def update_groups_feed(query, is_whole=False):
 
     for group in groups:
         update_group_feed(group.get('id'), query, is_whole)
+
+
+def delete_group_content(_fb_request, object_id, model):
+    """
+    Delete group content
+
+    :param _fb_request: fb request
+    :param object_id: object_id
+    :param model: model (post or comment)
+    :return:
+    """
+    try:
+        _fb_request.delete_object(object_id)
+    except GraphAPIError as e:
+        return False, e.__str__()
+
+    try:
+        if model == 'post':
+            content = Post.objects.get(pk=object_id)
+        else:
+            content = Comment.objects.get(pk=object_id)
+    except (Post.DoesNotExist, Comment.DoesNotExist):
+        return True, "Successfully deleted, but '" + object_id + "' does not exist in our site."
+
+    if isinstance(content, Post):
+        comments = Comment.objects.filter(post=content)
+
+        if comments:
+            for comment in comments:
+                comment.is_deleted = True
+                comment.save()
+
+    content.is_deleted = True
+    content.save()
+
+    try:
+        bl = Blacklist.objects.get(group=content.group, user=content.user)
+    except Blacklist.DoesNotExist:
+        bl = Blacklist(group=content.group, user=content.user)
+
+    bl.count += 1
+    bl.save()
+
+    return True, None
