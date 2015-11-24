@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Group, Post, Comment, Media, Attachment, Blacklist
+from .models import User, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -40,7 +40,7 @@ class CommentAdmin(admin.ModelAdmin):
     inlines = [CommentInline]
     list_display = ('id', 'user', 'created_time', 'message', 'comment_count', 'like_count')
     list_filter = ['created_time']
-    search_fields = ['user']
+    search_fields = ['message']
 
 
 class MediaAdmin(admin.ModelAdmin):
@@ -66,6 +66,28 @@ class BlacklistAdmin(admin.ModelAdmin):
     get_group.short_description = 'Group'
     get_group.admin_order_field = 'group__name'
 
+
+class DeletedPostAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['user', 'message', 'picture']}),
+        ('Date information', {'fields': ['created_time', 'updated_time'], 'classes': ['collapse']}),
+    ]
+    list_display = (
+    'id', 'user', 'created_time', 'updated_time', 'message', 'comment_count', 'like_count', 'share_count')
+    list_filter = ['created_time', 'updated_time']
+    search_fields = ['message']
+
+
+class DeletedCommentAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['user', 'message']}),
+        ('Date information', {'fields': ['created_time'], 'classes': ['collapse']}),
+    ]
+    list_display = ('id', 'user', 'created_time', 'message', 'comment_count', 'like_count')
+    list_filter = ['created_time']
+    search_fields = ['user']
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
@@ -73,3 +95,5 @@ admin.site.register(Comment, CommentAdmin)
 admin.site.register(Media, MediaAdmin)
 admin.site.register(Attachment, AttachmentAdmin)
 admin.site.register(Blacklist, BlacklistAdmin)
+admin.site.register(DeletedPost, DeletedPostAdmin)
+admin.site.register(DeletedComment, DeletedCommentAdmin)

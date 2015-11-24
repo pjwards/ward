@@ -3,7 +3,7 @@ import logging
 from facebook import GraphAPIError
 from celery import shared_task
 from archive.fb.fb_request import FBRequest
-from .models import User, Group, Post, Comment, Media, Attachment, Blacklist
+from .models import User, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -366,15 +366,22 @@ def delete_group_content(_fb_request, object_id, model):
         return True, "Successfully deleted, but '" + object_id + "' does not exist in our site."
 
     if isinstance(content, Post):
+        deleted_post = DeletedPost(content)
+        deleted_post.save()
         comments = Comment.objects.filter(post=content)
 
         if comments:
             for comment in comments:
-                comment.is_deleted = True
-                comment.save()
+                deleted_comment = DeletedComment.create(comment)
+                deleted_comment.save()
 
-    content.is_deleted = True
-    content.save()
+            for comment in comments:
+                comment.delete()
+    else:
+        deleted_comment = DeletedComment(content)
+        deleted_comment.save()
+
+    content.delete()
 
     try:
         bl = Blacklist.objects.get(group=content.group, user=content.user)
