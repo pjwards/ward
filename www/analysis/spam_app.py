@@ -1,8 +1,8 @@
-from analysis.analysis_core import AnalysisDiction
 import analysis.analysis_core as core
 from .models import SpamContentList, SpamWordList
 
 __author__ = 'jeonjiseong'
+
 
 class Spam:
     """
@@ -12,7 +12,7 @@ class Spam:
         """
         Initialize Spam class
         """
-        self.analyzer = AnalysisDiction(True, True)
+        self.analyzer = core.AnalysisDiction(True, True)
         self.group = group
 
     def compare_and_count(self, string_data):
