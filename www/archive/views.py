@@ -1,4 +1,5 @@
 import collections
+from operator import itemgetter
 import logging
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
@@ -426,16 +427,16 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
+    @renderer_classes((JSONRenderer,))
     def activity(self, request, pk=None):
         """
         Return User for group activity
 
         :param request: request
         :param pk: pk
-        :return: response model
+        :return: json
         """
-        users_post = self.get_activity()
-        return self.response_models(users_post, request, ActivityUserSerializer)
+        return Response(self.get_activity(request))
 
     @detail_route()
     @renderer_classes((JSONRenderer,))
@@ -696,14 +697,17 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         models = self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
         return models
 
-    def get_activity(self):
+    def get_activity(self, request):
         """
         Get user activity
 
-        :return: result models
+        :param request: request
+        :return: source
         """
         _group = self.get_object()
+        source = {}
 
+        # Check params
         method = self.request.query_params.get('method', 'total')
         model = self.request.query_params.get('model', None)
 
@@ -712,8 +716,15 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if model != 'post' and model != 'comment':
             raise ValueError("Model can be used 'post' or 'comment'. Input model:" + model)
 
+        # Check method and return source by total or generate date
         if method == 'total':
-            return _group.user_set.annotate(count=Count(model + 's')).order_by('-count')
+            for _user in _group.user_set.all():
+                if model == 'post':
+                    source[_user.id] = Post.objects.filter(group=_group, user=_user).count()
+                else:
+                    source[_user.id] = Comment.objects.filter(group=_group, user=_user).count()
+
+            return self.dic_sorted(source, request)
         elif method == 'month':
             to_date, from_date = date_utils.date_range(date_utils.get_today(), -30)
         else:
@@ -724,12 +735,39 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if to_date:
             to_date = date_utils.combine_max_time(to_date)
 
-        if model == 'post':
-            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date) \
-                .annotate(count=Count('posts')).order_by('-count')
-        else:
-            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date) \
-                .annotate(count=Count('comments')).order_by('-count')
+        # Return source by special date
+        for _user in _group.user_set.all():
+            if model == 'post':
+                source[_user.id] = Post.objects.filter(group=_group, user=_user, created_time__gt=from_date,
+                                                 created_time__lt=to_date).count()
+            else:
+                source[_user.id] = Comment.objects.filter(group=_group, user=_user, created_time__gt=from_date,
+                                                 created_time__lt=to_date).count()
+        return self.dic_sorted(source, request)
+
+    @staticmethod
+    def dic_sorted(dic, request):
+        """
+        Sort dictionary and return top 10
+
+        :param dic: raw source
+        :param request: request
+        :return: sorted source
+        """
+        max_len = 10
+        sorted_x = sorted(dic.items(), key=itemgetter(1), reverse=True)
+
+        if max_len > len(sorted_x):
+            max_len = len(sorted_x)
+
+        source = {}
+        for x in range(max_len):
+            source[x] = {
+                'user': UserSerializer(User.objects.get(id=sorted_x[x][0]), context={'request': request}).data,
+                'count': sorted_x[x][1],
+            }
+        return source
+
 
     def group_search_by_check(self, model):
         """
