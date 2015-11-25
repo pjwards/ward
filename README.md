@@ -19,12 +19,15 @@
 * beautifulsoup4 (tested with version 4.4.1)
 * lxml (tested with version 3.5.0)
 * django-registration (tested with version 2.0.2)
+* JPype1-py3 (tested with version 0.5.5.2)
+* konlpy (tested with version 0.4.4)
 
 #### Optional dependencies:
 
 * redis (tested with version 2.10.3)
 * rabbitmq-server
 * redis-server
+* MeCab
 
 #### Front-End
 
@@ -96,6 +99,21 @@ brew install redis
 ```bash
 brew install nodejs
 npm install bower
+```
+
+#### MeCab
+
+##### Ubuntu
+
+```bash
+sudo yum install curl
+bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
+```
+
+##### Mac
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
 ```
 
 ## Tip
