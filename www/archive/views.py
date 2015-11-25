@@ -202,6 +202,10 @@ def group_management(request, group_id):
                 fail += 1
                 error.add(e)
 
+        # Post and comment count in group size change
+        tasks.check_cp_cnt_group(_group)
+
+        # Return result json
         return JsonResponse(
             {
                 'model': model,
@@ -320,14 +324,17 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             'hour_total': 'strftime("%%H", created_time)',
         }
 
+        # Get posts and comment count in some date
         all_posts = all_posts.extra({'date': dic[method]}).order_by().values('date') \
             .annotate(p_count=Count('created_time'))
         all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date') \
             .annotate(c_count=Count('created_time'))
 
+        # Max count in above data
         post_max_cnt = all_posts.aggregate(Max('p_count'))
         comment_max_cnt = all_comments.aggregate(Max('c_count'))
 
+        # Value for slice
         if method == 'year':
             date_start_len = 0
             date_end_len = 4
@@ -344,6 +351,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             date_start_len = 0
             date_end_len = 2
 
+        # Merge post and comment data
         data_source = {}
 
         for comment in all_comments:
@@ -363,6 +371,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
                 dic["comments"] = 0
                 data_source[post.get("date")] = dic
 
+        # Return json data after rearranging data
         return Response({
             'statistics': [data_source[key] for key in sorted(data_source.keys())],
             'post_max_cnt': post_max_cnt["p_count__max"],
@@ -440,12 +449,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         _group = self.get_object()
 
+        # Count posts and comments about user in group
         posts = {}
         p_counts = _group.user_set.annotate(p_count=Count('posts')).values('p_count')
 
         comments = {}
         c_counts = _group.user_set.annotate(c_count=Count('comments')).values('c_count')
 
+        # Count user about counted number
         for p_count in p_counts:
             posts[p_count.get('p_count')] = posts.get(p_count.get('p_count'), 0) + 1
 
@@ -714,10 +725,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             to_date = date_utils.combine_max_time(to_date)
 
         if model == 'post':
-            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date)\
+            return _group.user_set.filter(posts__created_time__gt=from_date, posts__created_time__lt=to_date) \
                 .annotate(count=Count('posts')).order_by('-count')
         else:
-            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date)\
+            return _group.user_set.filter(comments__created_time__gt=from_date, comments__created_time__lt=to_date) \
                 .annotate(count=Count('comments')).order_by('-count')
 
     def group_search_by_check(self, model):
@@ -772,3 +783,7 @@ class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
+
+
+def about(request):
+    return render(request, 'about.html', {})

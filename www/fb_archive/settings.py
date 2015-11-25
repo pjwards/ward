@@ -386,12 +386,19 @@ STATICFILES_FINDERS = (
 )
 
 BOWER_INSTALLED_APPS = (
-    # 'jquery-backstretch',
-    'jquery',
+    'jquery#1.9.1',
     'jquery-ui',
     'jui',
-    'font-awesome',
+    'bootstrap',
+    'font-awesome#4.4.0',
     'bootstrap-social',
+
+    # Creative
+    'wow',
+    'jquery-easing',
+    'animate.css',
+    'FitText.js',
+    'jquery-backstretch',
 )
 
 

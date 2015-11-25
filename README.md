@@ -32,8 +32,14 @@
 * jQuery UI
 * Font Awesome
 * JUI
+* Bootstrap
 * Bootstrap Social
 
+* wow
+* jquery-easing
+* animate.css
+* FitText.js
+* jquery-backstretch
 
 ## Installation
 

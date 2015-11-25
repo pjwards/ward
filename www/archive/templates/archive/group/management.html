@@ -535,6 +535,8 @@
                     deleteAjax(data);
                     getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
                     post_paging.first();
+                    getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+                    comment_paging.first();
                 }
 
             });

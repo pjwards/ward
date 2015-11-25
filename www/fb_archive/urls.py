@@ -20,6 +20,7 @@ urlpatterns = i18n_patterns("",
     # Change the admin prefix here to use an alternate URL for the
     # admin interface, which would be marginally more secure.
     url(r'^$', views.groups),
+    url(r'^about/$', views.about, name='about'),
     url(r"^admin/", include(admin.site.urls)),
 
     url(r'^archive/', include('archive.urls', namespace="archive")),
@@ -52,12 +53,11 @@ urlpatterns += i18n_patterns("",
     url(r'^',include('registration.auth_urls', namespace="auth")),
     url(r'^accounts/', include('registration.backends.hmac.urls', namespace="registration")),
     # url(r'^accounts/', include('registration.backends.simple.urls', namespace="registration")),
-
 )
 
-# #########################
-# # DJANGO REST FRAMEWORK #
-# #########################
+#########################
+# DJANGO REST FRAMEWORK #
+#########################
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()

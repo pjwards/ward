@@ -116,8 +116,6 @@ def store_comment(comment_data, post, group, parent=None):
             comment.parent = parent
 
         comment.save()
-        group.comment_count += 1
-        group.save()
         logger.info('Saved comment: %s', comment.id)
 
         if 'attachment' in comment_data:
@@ -175,8 +173,6 @@ def store_feed(feed_data, group):
             post.share_count = 0
 
         post.save()
-        group.post_count += 1
-        group.save()
         logger.info('Saved post: %s', post.id)
 
         # save attachments
@@ -255,6 +251,19 @@ def store_group(group_data):
 
 
 @shared_task
+def check_cp_cnt_group(group):
+    """
+    Check comment and post count in group.
+
+    :param group: group
+    :return:
+    """
+    group.post_count = group.posts.count()
+    group.comment_count = group.comments.count()
+    group.save()
+
+
+@shared_task
 def store_group_feed(group_id, query, is_whole=False):
     """
     This method is storing group's feeds by using facebook group api.
@@ -284,6 +293,7 @@ def store_group_feed(group_id, query, is_whole=False):
 
     group.is_stored = True
     group.save()
+    check_cp_cnt_group(group)
 
 
 @shared_task
@@ -317,14 +327,16 @@ def update_group_feed(group_id, query, is_whole=False):
             query = fb_request.feed(group, query, feeds)
             for feed in feeds:
                 if not store_feed(feed, group):
+                    check_cp_cnt_group(group)
                     return True
             feeds = []
     else:
         fb_request.feed(group, query, feeds)
         for feed in feeds:
             if not store_feed(feed, group):
+                check_cp_cnt_group(group)
                 return True
-
+    check_cp_cnt_group(group)
     return True
 
 
@@ -353,11 +365,13 @@ def delete_group_content(_fb_request, object_id, model):
     :param model: model (post or comment)
     :return:
     """
+    # Delete object in facebook
     try:
         _fb_request.delete_object(object_id)
     except GraphAPIError as e:
         return False, e.__str__()
 
+    # Find object in our site
     try:
         if model == 'post':
             content = Post.objects.get(pk=object_id)
@@ -366,6 +380,7 @@ def delete_group_content(_fb_request, object_id, model):
     except (Post.DoesNotExist, Comment.DoesNotExist):
         return True, "Successfully deleted, but '" + object_id + "' does not exist in our site."
 
+    # Delete object in our site with related object
     if isinstance(content, Post):
         deleted_post = DeletedPost.create(content)
         deleted_post.save()
@@ -393,6 +408,7 @@ def delete_group_content(_fb_request, object_id, model):
 
     content.delete()
 
+    # Add blacklist count
     try:
         bl = Blacklist.objects.get(group=content.group, user=content.user)
     except Blacklist.DoesNotExist:
