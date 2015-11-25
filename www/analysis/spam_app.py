@@ -102,7 +102,6 @@ class Spam:
 
         #urls = core.get_url_from_string(string_data)
         #url_list = core.url_duplication_check(data_set,urls)
-
     ##warning sign for same spam content
 
 
