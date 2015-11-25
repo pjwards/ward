@@ -1,18 +1,17 @@
-__author__ = 'jeonjiseong'
-
 from konlpy.tag import Twitter
 from konlpy.tag import Kkma
 from urllib.parse import urlparse
 import re
 from collections import Counter
-#from konlpy.utils import pprint
+
+__author__ = 'jeonjiseong'
 
 
 class AnalysisDiction:
     """
     This class is for analysis of korean texts using kkma and twitter dictionaries
     """
-    def __init__(self, on_kkma=False, on_twitter=False):    #maybe move to init of analysis_app
+    def __init__(self, on_kkma=False, on_twitter=False):    # maybe move to init of analysis_app
         """
         Allocate kkma or twitter diction instance
         :param on_kkma: kkma instance
@@ -58,6 +57,17 @@ class AnalysisDiction:
             return self.twitter.pos(string_data, True, True)
         else:
             return False
+
+
+def analyze_text(string_data, db_data):
+    val_words = [item for item, count in Counter(string_data).items() if count > 1]
+    res = []
+    for i in val_words:
+        if i in db_data:
+            res.append((i, 10))
+        elif i not in db_data:
+            res.append((i, 1))
+    return res
 
 
 def compare_and_make_words(words, comparison_words):
@@ -110,7 +120,22 @@ def count_in_list(string_data):
     return return_list
 
 
+def url_duplication_check(data_set, urls):
+    """
+    Remove elements from urls list in data_set and urls list
+    :param data_set: data_set list
+    :param urls: list of urls
+    :return: list that no duplicated elements that are in data_set and urls list
+    """
+    url_list = list(set(urls))
+    for i in data_set:
+        if i in url_list:
+            urls.remove(i)  # this sequence only removes first element of duplicates
+
+    return url_list
+
+
 #def merge_analyzed_list(list1, list2):
 
-#def url_check
+
 
