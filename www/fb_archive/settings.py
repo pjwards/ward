@@ -252,6 +252,7 @@ INSTALLED_APPS = (
     'registration',
 
     'archive',
+    'analysis',
 )
 
 # List of processors used by RequestContext to populate the context.

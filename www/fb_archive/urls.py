@@ -1,12 +1,25 @@
+"""fb_archive URL Configuration
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/1.8/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
+Including another URLconf
+    1. Add an import:  from blog import urls as blog_urls
+    2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
+"""
 from django.conf.urls import patterns, include, url
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
-from django.views.generic import TemplateView
-from django.views.generic.edit import CreateView
 
 from mezzanine.core.views import direct_to_template
 from mezzanine.conf import settings
-from registration.backends.hmac.views import ActivationView, RegistrationView
+
 from rest_framework import routers
 from archive import views
 
@@ -19,45 +32,15 @@ admin.autodiscover()
 urlpatterns = i18n_patterns("",
     # Change the admin prefix here to use an alternate URL for the
     # admin interface, which would be marginally more secure.
-    url(r'^$', views.groups),
-    url(r'^about/$', views.about, name='about'),
-    url(r"^admin/", include(admin.site.urls)),
-
+    ("^admin/", include(admin.site.urls)),
     url(r'^archive/', include('archive.urls', namespace="archive")),
+    url(r'^analysis/', include('analysis.urls', namespace="analysis")),
 )
 
-urlpatterns += i18n_patterns("",
-    url(r'^activate/complete/$',
-        TemplateView.as_view(
-            template_name='registration/activation_complete.html'
-        ),
-        name='registration_activation_complete'),
-    # The activation key can make use of any character from the
-    # URL-safe base64 alphabet, plus the colon as a separator.
-    url(r'^activate/(?P<activation_key>[-:\w]+)/$',
-        ActivationView.as_view(),
-        name='registration_activate'),
-    url(r'^register/$',
-        RegistrationView.as_view(),
-        name='registration_register'),
-    url(r'^register/complete/$',
-        TemplateView.as_view(
-            template_name='registration/registration_complete.html'
-        ),
-        name='registration_complete'),
-    url(r'^register/closed/$',
-        TemplateView.as_view(
-            template_name='registration/registration_closed.html'
-        ),
-        name='registration_disallowed'),
-    url(r'^',include('registration.auth_urls', namespace="auth")),
-    url(r'^accounts/', include('registration.backends.hmac.urls', namespace="registration")),
-    # url(r'^accounts/', include('registration.backends.simple.urls', namespace="registration")),
-)
 
-#########################
-# DJANGO REST FRAMEWORK #
-#########################
+# #########################
+# # DJANGO REST FRAMEWORK #
+# #########################
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
