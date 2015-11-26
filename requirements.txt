@@ -3,7 +3,6 @@ celery==3.1.18
 django-celery==3.1.17
 git+https://github.com/pythonforfacebook/facebook-sdk.git
 mezzanine==4.0.1
-django-bower==5.0.4
 redis==2.10.3
 djangorestframework==3.3.0
 markdown==2.6.3
@@ -13,3 +12,4 @@ lxml==3.5.0
 django-registration==2.0.2
 JPype1-py3==0.5.5.2
 konlpy==0.4.4
+python-social-auth==0.2.13

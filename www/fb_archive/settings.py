@@ -130,7 +130,17 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = False
 
-AUTHENTICATION_BACKENDS = ("mezzanine.core.auth_backends.MezzanineBackend",)
+AUTHENTICATION_BACKENDS = (
+    "mezzanine.core.auth_backends.MezzanineBackend",
+    'social.backends.open_id.OpenIdAuth',
+    'social.backends.google.GoogleOpenId',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.google.GoogleOAuth',
+    'social.backends.twitter.TwitterOAuth',
+    'social.backends.yahoo.YahooOpenId',
+    'social.backends.facebook.Facebook2OAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 # The numeric mode to set newly-uploaded files to. The value should be
 # a mode you'd pass directly to os.chmod.
@@ -247,9 +257,9 @@ INSTALLED_APPS = (
     # "mezzanine.mobile",
 
     'djcelery',
-    'djangobower',
     'rest_framework',
     'registration',
+    'social.apps.django_app.default',
 
     'archive',
     'analysis',
@@ -269,6 +279,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.tz",
     "mezzanine.conf.context_processors.settings",
     "mezzanine.pages.context_processors.page",
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
 )
 
 # TEMPLATES = [
@@ -338,6 +350,22 @@ OPTIONAL_APPS = (
 )
 
 
+###############
+# SOCIAL AUTH #
+###############
+
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_LOGIN_URL = '/'
+
+# Facebook
+SOCIAL_AUTH_FACEBOOK_KEY = ''
+SOCIAL_AUTH_FACEBOOK_SECRET = ''
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+  'locale': 'en_US',
+  'fields': 'id, name, email'
+}
+
 #####################
 # FACEBOOK SETTINGS #
 #####################
@@ -370,37 +398,6 @@ CELERYBEAT_SCHEDULE = {
         'args': (get_feed_query(10, 100), False)
     },
 }
-
-
-################
-# DJANGO BOWER #
-################
-
-BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'static')
-# BOWER_COMPONENTS_ROOT = STATIC_ROOT
-# BOWER_PATH = '/usr/local/bin/bower'
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'djangobower.finders.BowerFinder',
-)
-
-BOWER_INSTALLED_APPS = (
-    'jquery#1.9.1',
-    'jquery-ui',
-    'jui',
-    'bootstrap',
-    'font-awesome#4.4.0',
-    'bootstrap-social',
-
-    # Creative
-    'wow',
-    'jquery-easing',
-    'animate.css',
-    'FitText.js',
-    'jquery-backstretch',
-)
 
 
 ####################

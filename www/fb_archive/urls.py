@@ -24,6 +24,8 @@ urlpatterns = i18n_patterns("",
     url(r"^admin/", include(admin.site.urls)),
 
     url(r'^archive/', include('archive.urls', namespace="archive")),
+
+    url('', include('social.apps.django_app.urls', namespace='social')),
 )
 
 urlpatterns += i18n_patterns("",

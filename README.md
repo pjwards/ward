@@ -12,7 +12,6 @@
 * django-celery (tested with version 3.1.17)
 * facebook-sdk (tested with version 1.0.0a0)
 * mezzanine (tested with version 4.0.1)
-* django-bower (tested with version 5.0.4)
 * django-rest-framework (tested with version 3.3.0)
 * markdown (tested with version 2.6.3)
 * django-filter (tested with version 0.11.0)
@@ -21,6 +20,7 @@
 * django-registration (tested with version 2.0.2)
 * JPype1-py3 (tested with version 0.5.5.2)
 * konlpy (tested with version 0.4.4)
+* python-social-auth (tested with version 0.2.13)
 
 #### Optional dependencies:
 
@@ -145,10 +145,11 @@ brew install redis
 brew install node
 npm install bower
 
+cd product_forder
+bower install
 cd product_folder/www
 mkdir logs
 python manage.py migrate
-python manage.py bower install
 python manage.py createsuperuser
 
 sudo redis-server
