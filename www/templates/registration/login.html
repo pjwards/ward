@@ -1,4 +1,9 @@
 {% extends "registration/base.html" %}
+{% load socialaccount %}
+
+{% block script %}
+    {% providers_media_js %}
+{% endblock %}
 
 {% block title %}Sign in{% endblock %}
 
@@ -62,7 +67,7 @@
 
 {% block content-related %}
     <div style="text-align: center;">
-        <a href="{% url 'password_reset' %}">Lost password?</a>
+        <a href="{% url 'auth_password_reset' %}">Lost password?</a>
 
         <p>If you don't have an account, you can <a href="/accounts/register/">sign up</a> for one.
     </div>
@@ -72,7 +77,7 @@
     <h3>...or sgin in with:</h3>
 
     <div class="social-login-buttons">
-        <a class="btn btn-link-2" href="{% url 'social:begin' 'facebook' %}">
+        <a class="btn btn-link-2" href="{% provider_login_url "facebook" method="js_sdk" %}">
             <i class="fa fa-facebook"></i> Facebook
         </a>
         <a class="btn btn-link-2" href="#">

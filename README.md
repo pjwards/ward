@@ -20,7 +20,7 @@
 * django-registration (tested with version 2.0.2)
 * JPype1-py3 (tested with version 0.5.5.2)
 * konlpy (tested with version 0.4.4)
-* python-social-auth (tested with version 0.2.13)
+* django-allauth (tested with version 0.24.1)
 
 #### Optional dependencies:
 
@@ -122,7 +122,7 @@ bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/me
 
 If you face unresolved reference issue in pycharm, you should make 'www' Source root. And you set 'add source roots to PYTHONPATH' in pycharm preference.
 
-[This site](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm) help you to set.
+[This site](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm) helps you to set.
 
 And set 'Django Support' in pycharm preference, such as 'Django project root', 'Settings' and 'manage.py'.
 
@@ -155,3 +155,9 @@ python manage.py createsuperuser
 sudo redis-server
 . run_celery.sh
 ```
+
+### OAuth Setting
+
+Go to admin sites and add social application.
+You need app id, app secret for facebook oauth.
+If you lean more, [this site](https://godjango.com/65-starting-with-django-allauth/) helps you.

@@ -1,0 +1,43 @@
+{% extends "socialaccount/base.html" %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block content-head-left %}
+    <h3>Sign up our site</h3>
+
+    <p>You are about to use your {{ account.get_provider.name }} account to login to {{ site.name }}. As a final step, please
+        complete the following form:</p>
+    {% if form.errors %}
+        <p style="color: #de615e;">This username or email is already registered. Please try again.</p>
+        <p style="color: #de615e;">{{ form.ValidationError }}</p>
+    {% endif %}
+{% endblock %}
+
+{% block content-head-right %}
+    <i class="fa fa-sign-in"></i>
+{% endblock %}
+
+{% block content %}
+    <form role="form" method="post" action="{% url 'socialaccount_signup' %}" class="login-form">
+        {% csrf_token %}
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+        {% endif %}
+
+        <div class="form-group">
+            <label class="sr-only" for="id_username">Username</label>
+            <input autofocus="autofocus" type="text" placeholder="{% if form.username.errors %}{{ form.username.errors.as_text }}
+            {% else %}Username...{% endif %}"
+                   class="form-username form-control"
+                   id="id_username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="id_email">Email</label>
+            <input type="email" placeholder="{% if form.email.errors %}{{ form.email.errors.as_text }}
+            {% else %}Email...{% endif %}"
+                   class="form-email form-control"
+                   id="id_email" name="email" value="{{ form.email.value }}" required>
+        </div>
+        <button type="submit" class="btn">Sign up!</button>
+    </form>
+{% endblock %}

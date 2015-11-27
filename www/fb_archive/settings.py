@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
-
 import os
-
 from django.utils.translation import ugettext_lazy as _
 
 ######################
@@ -83,7 +81,6 @@ from django.utils.translation import ugettext_lazy as _
 # INSTALLED_APPS setting.
 USE_MODELTRANSLATION = False
 
-
 ########################
 # MAIN DJANGO SETTINGS #
 ########################
@@ -130,22 +127,9 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = False
 
-AUTHENTICATION_BACKENDS = (
-    "mezzanine.core.auth_backends.MezzanineBackend",
-    'social.backends.open_id.OpenIdAuth',
-    'social.backends.google.GoogleOpenId',
-    'social.backends.google.GoogleOAuth2',
-    'social.backends.google.GoogleOAuth',
-    'social.backends.twitter.TwitterOAuth',
-    'social.backends.yahoo.YahooOpenId',
-    'social.backends.facebook.Facebook2OAuth2',
-    'django.contrib.auth.backends.ModelBackend',
-)
-
 # The numeric mode to set newly-uploaded files to. The value should be
 # a mode you'd pass directly to os.chmod.
 FILE_UPLOAD_PERMISSIONS = 0o644
-
 
 #########
 # PATHS #
@@ -172,9 +156,9 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = (
     os.path.join(PROJECT_ROOT, "static"),
 
-    os.path.join(PROJECT_ROOT, 'static/libraries'), # Commercial libraries not available on GitHub or via Bower
-    os.path.join(PROJECT_ROOT, 'static/custom'), # Custom frontend assets in css/js subfolders
-    os.path.join(PROJECT_ROOT, 'static/bower_components'), # Bower controlled assets
+    os.path.join(PROJECT_ROOT, 'static/libraries'),  # Commercial libraries not available on GitHub or via Bower
+    os.path.join(PROJECT_ROOT, 'static/custom'),  # Custom frontend assets in css/js subfolders
+    os.path.join(PROJECT_ROOT, 'static/bower_components'),  # Bower controlled assets
 )
 
 # Absolute path to the directory static files should be collected to.
@@ -229,7 +213,6 @@ DATABASES = {
     }
 }
 
-
 ################
 # APPLICATIONS #
 ################
@@ -256,10 +239,16 @@ INSTALLED_APPS = (
     # "mezzanine.accounts",
     # "mezzanine.mobile",
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # ... include the providers you want to enable:
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.google',
+
     'djcelery',
     'rest_framework',
     'registration',
-    'social.apps.django_app.default',
 
     'archive',
     'analysis',
@@ -328,6 +317,15 @@ MIDDLEWARE_CLASSES = (
     "mezzanine.core.middleware.FetchFromCacheMiddleware",
 )
 
+AUTHENTICATION_BACKENDS = (
+    "mezzanine.core.auth_backends.MezzanineBackend",
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
 ROOT_URLCONF = 'fb_archive.urls'
 WSGI_APPLICATION = 'fb_archive.wsgi.application'
 
@@ -349,21 +347,48 @@ OPTIONAL_APPS = (
     PACKAGE_NAME_GRAPPELLI,
 )
 
-
 ###############
 # SOCIAL AUTH #
 ###############
 
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
-SOCIAL_AUTH_LOGIN_URL = '/'
+SITE_ID = 1
+
+LOGIN_REDIRECT_URL = '/'
+SOCIALACCOUNT_QUERY_EMAIL = True
+ACCOUNT_UNIQUE_EMAIL = True
 
 # Facebook
-SOCIAL_AUTH_FACEBOOK_KEY = ''
-SOCIAL_AUTH_FACEBOOK_SECRET = ''
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
-SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
-  'locale': 'en_US',
-  'fields': 'id, name, email'
+# SOCIALACCOUNT_PROVIDERS = {
+#     'facebook': {
+#         'METHOD': 'js_sdk',
+#         # 'METHOD': 'oauth2',
+#         'SCOPE': ['email', 'public_profile', 'user_friends'],
+#         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+#         'FIELDS': [
+#             'id',
+#             'email',
+#             'name',
+#             'first_name',
+#             'last_name',
+#             'verified',
+#             'locale',
+#             'timezone',
+#             'link',
+#             'gender',
+#             'updated_time'],
+#         'EXCHANGE_TOKEN': True,
+#         'LOCALE_FUNC': 'path.to.callable',
+#         'VERIFIED_EMAIL': False,
+#         'VERSION': 'v2.4'
+#     }
+# }
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'SCOPE': ['email', 'public_profile', 'user_friends', 'user_managed_groups', 'user_posts'],
+        'METHOD': 'js_sdk',
+        # 'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+    }
 }
 
 #####################
@@ -374,7 +399,6 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
 FB_APP_ID = ''
 FB_APP_SECRET = ''
 FB_APP_VERSION = 2.4
-
 
 ###################
 # CELERY SETTINGS #
@@ -391,6 +415,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 from datetime import timedelta
 from archive.fb.fb_query import get_feed_query
+
 CELERYBEAT_SCHEDULE = {
     'add-every-30-seconds': {
         'task': 'archive.tasks.update_groups_feed',
@@ -398,7 +423,6 @@ CELERYBEAT_SCHEDULE = {
         'args': (get_feed_query(10, 100), False)
     },
 }
-
 
 ####################
 # LOGGING SETTINGS #
@@ -443,7 +467,6 @@ LOGGING = {
     }
 }
 
-
 #########################
 # DJANGO REST FRAMEWORK #
 #########################
@@ -454,7 +477,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 20,
 }
-
 
 #######################
 # DJANGO REGISTRATION #
@@ -467,7 +489,6 @@ EMAIL_HOST_PASSWORD = '1234'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "webmaster@localhost"
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 
 ##################
 # LOCAL SETTINGS #
@@ -483,7 +504,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 f = os.path.join(PROJECT_APP_PATH, "local_settings.py")
 if os.path.exists(f):
     exec(open(f, "rb").read())
-
 
 ####################
 # DYNAMIC SETTINGS #
