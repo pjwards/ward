@@ -471,7 +471,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getSearchUM(user_search_url, user_table, user_limit, user_search.val(), pNo);
+                        getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), pNo);
                     }
                 },
                 tpl: {
@@ -567,7 +567,7 @@
         $(function () {
             getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
             getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
-            getSearchUM(user_search_url, user_table, user_limit, user_search.val(), 1, user_paging);
+            getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), 1, user_paging);
             getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
 
             $("#post_limit").on("input", function () {
@@ -584,7 +584,7 @@
 
             $("#user_limit").on("input", function () {
                 user_limit = $("#user_limit").val();
-                getSearchUM(user_search_url, user_table, user_limit, user_search.val(), 1, user_paging);
+                getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), 1, user_paging);
                 user_paging.first();
             });
 
@@ -613,7 +613,7 @@
             $("#user_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getSearchUM(user_search_url, user_table, user_limit, user_search.val(), 1, user_paging);
+                    getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), 1, user_paging);
                     user_paging.first();
                 }
             });

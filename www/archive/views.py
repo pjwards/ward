@@ -148,9 +148,9 @@ def group_management(request, group_id):
     """
     _group = get_object_or_404(Group, pk=group_id)
     if not request.user.is_superuser:
-            social_account = SocialAccount.objects.filter(user=request.user)
-            if not social_account or _group.owner.id != SocialAccount.objects.filter(user=request.user)[0].uid:
-                return HttpResponseForbidden()
+        social_account = SocialAccount.objects.filter(user=request.user)
+        if not social_account or _group.owner.id != SocialAccount.objects.filter(user=request.user)[0].uid:
+            return HttpResponseForbidden()
 
     if request.method == "GET":
         _groups = Group.objects.all()
@@ -626,10 +626,15 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         _group = self.get_object()
 
         search = self.request.query_params.get('q', '')
+
         if search:
-            return self.response_models(_group.user_set.order_by('-blacklist__updated_time').search(search), request, BlacklistUserSerializer)
+            blacklist = _group.user_set.filter(blacklist__group=_group).exclude(blacklist=None).order_by(
+                '-blacklist__updated_time').search(search)
         else:
-            return self.response_models(_group.user_set.order_by('blacklist__updated_time'), request, BlacklistUserSerializer)
+            blacklist = _group.user_set.filter(blacklist__group=_group).exclude(blacklist=None).order_by(
+                '-blacklist__updated_time')
+
+        return self.response_models(blacklist, request, BlacklistUserSerializer)
 
     @detail_route()
     @renderer_classes((JSONRenderer,))
@@ -810,10 +815,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         for _user in _group.user_set.all():
             if model == 'post':
                 source[_user.id] = Post.objects.filter(group=_group, user=_user, created_time__gt=from_date,
-                                                 created_time__lt=to_date).count()
+                                                       created_time__lt=to_date).count()
             else:
                 source[_user.id] = Comment.objects.filter(group=_group, user=_user, created_time__gt=from_date,
-                                                 created_time__lt=to_date).count()
+                                                          created_time__lt=to_date).count()
         return self.dic_sorted(source, request)
 
     @staticmethod
@@ -838,7 +843,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
                 'count': sorted_x[x][1],
             }
         return source
-
 
     def group_search_by_check(self, model):
         """
@@ -892,6 +896,7 @@ class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
+
 
 class BlacklistViewSet(viewsets.ReadOnlyModelViewSet):
     """

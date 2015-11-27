@@ -38,14 +38,16 @@ var getAjaxResult = function (url, data, fun) {
 /**
  * Get Results by using async ajax
  */
-var getAnsyncAjaxResult = function (url, data) {
-    return JSON.parse($.ajax({
+var getAsyncAjaxResult = function (url, data) {
+    var response = $.ajax({
         url: url,
         type: "get",
         async: false,
         data: data,
         dataType: "JSON",
-    }).responseText);
+    }).responseText;
+
+    return response.includes("DoesNotExist")?undefined:JSON.parse(response);
 }
 
 /**
@@ -418,7 +420,7 @@ var getUserArchive = function (url, group_id, table, limit, page, search, paging
             var async_data = {
                 user_id: row["id"]
             }
-            var activity = getAnsyncAjaxResult(activity_url, async_data);
+            var activity = getAsyncAjaxResult(activity_url, async_data);
 
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
@@ -502,7 +504,7 @@ var getSearchU = function (url, group_id, table, limit, search, page, paging) {
             var async_data = {
                 user_id: row["id"]
             }
-            var activity = getAnsyncAjaxResult(activity_url, async_data);
+            var activity = getAsyncAjaxResult(activity_url, async_data);
 
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
@@ -760,15 +762,15 @@ var getSearchUM = function (url, group_id, table, limit, search, page, paging) {
     var fun = function (source) {
         var results = source["results"];
         var rows = []
-
-        var async_data = {
-            user_id: row["id"]
-        }
-        var activity = getAnsyncAjaxResult(activity_url, async_data);
-
         for (var i in results) {
             var row = results[i];
             var user_url = '/archive/user/' + row["id"] + '/';
+
+            var async_data = {
+                user_id: row["id"]
+            }
+            var activity = getAsyncAjaxResult(activity_url, async_data);
+
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
@@ -779,7 +781,7 @@ var getSearchUM = function (url, group_id, table, limit, search, page, paging) {
         }
         ;
 
-        table.reset()
+        table.reset();
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
@@ -817,8 +819,8 @@ var getSearchBM = function (url, group_id, table, limit, search, page, paging) {
             var async_data = {
                 user_id: row["id"]
             }
-            var blacklist = getAnsyncAjaxResult(blacklist_url, async_data);
-            var activity = getAnsyncAjaxResult(activity_url, async_data);
+            var blacklist = getAsyncAjaxResult(blacklist_url, async_data);
+            var activity = getAsyncAjaxResult(activity_url, async_data);
 
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
