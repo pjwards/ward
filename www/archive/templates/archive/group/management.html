@@ -371,6 +371,8 @@
 {% block script %}
     <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
     <script>
+        var group_id = "{{ group.id }}";
+
         var post_limit = 10;
         var comment_limit = 10;
         var user_limit = 10;
@@ -386,7 +388,6 @@
         var user_search_url = "/api/groups/{{ group.id }}/user_search/";
         var user_autocomplete_url = "/api/groups/{{ group.id }}/user_autocomplete/";
         var blacklist_search_url = "/api/groups/{{ group.id }}/blacklist_search/";
-        var blacklist_user_url = "/api/groups/{{ group.id }}/blacklist_user/";
 
         var post_search_check = 'text';
         var comment_search_check = 'text';
@@ -505,7 +506,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getSearchBM(blacklist_search_url, blacklist_user_url, blacklist_table, search_limit, blacklist_search.val(), pNo);
+                        getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), pNo);
                     }
                 },
                 tpl: {
@@ -567,7 +568,7 @@
             getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
             getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
             getSearchUM(user_search_url, user_table, user_limit, user_search.val(), 1, user_paging);
-            getSearchBM(blacklist_search_url, blacklist_user_url, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
+            getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
 
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();
@@ -589,7 +590,7 @@
 
             $("#blacklist_limit").on("input", function () {
                 user_limit = $("#blacklist_limit").val();
-                getSearchBM(blacklist_search_url, blacklist_user_url, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
+                getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
                 blacklist_paging.first();
             });
 
@@ -620,7 +621,7 @@
             $("#blacklist_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getSearchBM(blacklist_search_url, blacklist_user_url, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
+                    getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
                     blacklist_paging.first();
                 }
             });

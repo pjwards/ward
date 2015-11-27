@@ -36,6 +36,19 @@ var getAjaxResult = function (url, data, fun) {
 }
 
 /**
+ * Get Results by using async ajax
+ */
+var getAnsyncAjaxResult = function (url, data) {
+    return JSON.parse($.ajax({
+        url: url,
+        type: "get",
+        async: false,
+        data: data,
+        dataType: "JSON",
+    }).responseText);
+}
+
+/**
  * Get url from id
  */
 var getIdFromUrl = function (url) {
@@ -69,7 +82,7 @@ var pcDisplacM = function (rows, row, name) {
     var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
     rows.push({
-        "checkbox": '<input type="checkbox" name="del_' +name + '" value="' + row["id"] + '">',
+        "checkbox": '<input type="checkbox" name="del_' + name + '" value="' + row["id"] + '">',
         "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>',
         "message": message.length < 100 ? message + btn : message.substring(0, 100) + "..." + btn,
@@ -392,18 +405,26 @@ var getProportion = function (url, post_display, comment_display) {
 /**
  * Get user archive by using ajax
  */
-var getUserArchive = function (url, table, limit, page, search, paging) {
+var getUserArchive = function (url, group_id, table, limit, page, search, paging) {
+    var activity_url = "/api/groups/" + group_id + "/user_activity/";
+
     var fun = function (source) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
             var row = results[i];
             var user_url = '/archive/user/' + row["id"] + '/';
+
+            var async_data = {
+                user_id: row["id"]
+            }
+            var activity = getAnsyncAjaxResult(activity_url, async_data);
+
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
-                "post_count": row["posts"].length,
-                "comment_count": row["comments"].length,
+                "post_count": activity["post_count"],
+                "comment_count": activity["comment_count"],
             });
         }
         ;
@@ -468,18 +489,26 @@ var getSearchPC = function (url, table, limit, search, page, paging) {
 /**
  * Get search user by using ajax
  */
-var getSearchU = function (url, table, limit, search, page, paging) {
+var getSearchU = function (url, group_id, table, limit, search, page, paging) {
+    var activity_url = "/api/groups/" + group_id + "/user_activity/";
+
     var fun = function (source) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
             var row = results[i];
             var user_url = '/archive/user/' + row["id"] + '/';
+
+            var async_data = {
+                user_id: row["id"]
+            }
+            var activity = getAnsyncAjaxResult(activity_url, async_data);
+
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
-                "post_count": row["posts"].length,
-                "comment_count": row["comments"].length,
+                "post_count": activity["post_count"],
+                "comment_count": activity["comment_count"],
             });
         }
         ;
@@ -725,10 +754,18 @@ var getSearchPCM = function (url, table, limit, model, search, search_check, pag
 /**
  * Get search user for management by using ajax
  */
-var getSearchUM = function (url, table, limit, search, page, paging) {
+var getSearchUM = function (url, group_id, table, limit, search, page, paging) {
+    var activity_url = "/api/groups/" + group_id + "/user_activity/";
+
     var fun = function (source) {
         var results = source["results"];
         var rows = []
+
+        var async_data = {
+            user_id: row["id"]
+        }
+        var activity = getAnsyncAjaxResult(activity_url, async_data);
+
         for (var i in results) {
             var row = results[i];
             var user_url = '/archive/user/' + row["id"] + '/';
@@ -736,8 +773,8 @@ var getSearchUM = function (url, table, limit, search, page, paging) {
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
                 "id": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
-                "post_count": row["posts"].length,
-                "comment_count": row["comments"].length,
+                "post_count": activity["post_count"],
+                "comment_count": activity["comment_count"],
             });
         }
         ;
@@ -766,18 +803,9 @@ var getSearchUM = function (url, table, limit, search, page, paging) {
 /**
  * Get search blacklist for management by using ajax
  */
-var getSearchBM = function (url, burl, table, limit, search, page, paging) {
-    function getBlacklist(burl, user_id) {
-        return $.ajax({
-        url: burl,
-        type: "get",
-        async: false,
-        data: {
-            user_id: user_id,
-        },
-        dataType: "JSON",
-        }).responseText;
-    }
+var getSearchBM = function (url, group_id, table, limit, search, page, paging) {
+    var blacklist_url = "/api/groups/" + group_id + "/blacklist_user/";
+    var activity_url = "/api/groups/" + group_id + "/user_activity/";
 
     var fun = function (source) {
         var results = source["results"];
@@ -785,14 +813,20 @@ var getSearchBM = function (url, burl, table, limit, search, page, paging) {
         for (var i in results) {
             var row = results[i];
             var user_url = '/archive/user/' + row["id"] + '/';
-            var blacklist = JSON.parse(getBlacklist(burl, row["id"]));
+
+            var async_data = {
+                user_id: row["id"]
+            }
+            var blacklist = getAnsyncAjaxResult(blacklist_url, async_data);
+            var activity = getAnsyncAjaxResult(activity_url, async_data);
+
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
                 "id": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
                 "count": blacklist["count"],
-                "post_count": row["posts"].length,
-                "comment_count": row["comments"].length,
+                "post_count": activity["post_count"],
+                "comment_count": activity["comment_count"],
                 "updated_time": timeSince(blacklist["updated_time"]),
             });
         }

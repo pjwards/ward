@@ -263,6 +263,8 @@
 {% block script %}
     <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
     <script>
+        var group_id = "{{ group.id }}";
+
         var search = {% if search %}'{{ search }}'{% else %}''{% endif %};
         var post_limit = 10;
         var comment_limit = 10;
@@ -351,7 +353,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getSearchU(user_search_url, user_table, user_limit, search, pNo);
+                        getSearchU(user_search_url, group_id, user_table, user_limit, search, pNo);
                     }
                 },
                 tpl: {
@@ -389,7 +391,7 @@
             $("#group_search_input").val(search);
             getSearchPC(post_search_url, post_table, post_limit, search, 1, post_paging);
             getSearchPC(comment_search_url, comment_table, comment_limit, search, 1, comment_paging);
-            getSearchU(user_search_url, user_table, user_limit, search, 1, user_paging);
+            getSearchU(user_search_url, group_id, user_table, user_limit, search, 1, user_paging);
 
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();
@@ -405,7 +407,7 @@
 
             $("#user_limit").on("input", function () {
                 user_limit = $("#user_limit").val();
-                getSearchU(user_search_url, user_table, user_limit, search, 1, user_paging);
+                getSearchU(user_search_url, group_id, user_table, user_limit, search, 1, user_paging);
                 user_paging.first();
             });
         });

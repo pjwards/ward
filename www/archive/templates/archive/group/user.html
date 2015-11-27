@@ -244,6 +244,8 @@
 {% block script %}
     <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
     <script>
+        var group_id = "{{ group.id }}";
+
         var activity_url = "/api/groups/{{ group.id }}/activity/";
         var proportion_url = "/api/groups/{{ group.id }}/proportion/";
         var user_archive_url = "/api/groups/{{ group.id }}/user_archive/";
@@ -289,7 +291,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getUserArchive(user_archive_url, user_archive_table, user_archive_limit, pNo, user_archive_search.val());
+                        getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, pNo, user_archive_search.val());
                     }
                 },
                 tpl: {
@@ -328,18 +330,18 @@
             getActivity(activity_url, 10, "total", "comment", comment_activity_table);
 
             getProportion(proportion_url, "#post_proportion", "#comment_proportion");
-            getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
+            getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
 
             $("#user_archive_limit").on("input", function () {
                 user_archive_limit = $("#user_archive_limit").val();
-                getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
+                getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
                 user_archive_paging.first();
             });
 
             $("#user_archive_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getUserArchive(user_archive_url, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
+                    getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
                     user_archive_paging.first();
                 }
             })
