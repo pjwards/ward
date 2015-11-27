@@ -58,7 +58,11 @@
             <div class="vmenu ">
                 <a href="{% url 'archive:group_analysis' group.id %}"><i class="icon-profile"></i> Analysis</a>
                 <a href="{% url 'archive:group_user' group.id %}"><i class="icon-user"></i> User</a>
-                <a href="{% url 'archive:group_management' group.id %}"><i class="icon-gear"></i> Management</a>
+                {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}
+                    <a href="{% url 'archive:group_management' group.id %}"><i class="icon-gear"></i> Management</a>
+                {% else %}
+                    <a href="#" class="disabled"><i class="icon-gear"></i> Management</a>
+                {% endif %}
             </div>
 
         </div>

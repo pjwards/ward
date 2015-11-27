@@ -762,3 +762,60 @@ var getSearchUM = function (url, table, limit, search, page, paging) {
 
     getAjaxResult(url, data, fun);
 }
+
+/**
+ * Get search blacklist for management by using ajax
+ */
+var getSearchBM = function (url, burl, table, limit, search, page, paging) {
+    function getBlacklist(burl, user_id) {
+        return $.ajax({
+        url: burl,
+        type: "get",
+        async: false,
+        data: {
+            user_id: user_id,
+        },
+        dataType: "JSON",
+        }).responseText;
+    }
+
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var user_url = '/archive/user/' + row["id"] + '/';
+            var blacklist = JSON.parse(getBlacklist(burl, row["id"]));
+            rows.push({
+                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
+                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
+                "id": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
+                "count": blacklist["count"],
+                "post_count": row["posts"].length,
+                "comment_count": row["comments"].length,
+                "updated_time": timeSince(blacklist["updated_time"]),
+            });
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        q: search,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+

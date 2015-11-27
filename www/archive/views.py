@@ -1,9 +1,10 @@
 import collections
+from django.contrib.auth.decorators import login_required
 from operator import itemgetter
 import logging
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
@@ -12,6 +13,7 @@ from rest_framework.response import Response
 from archive.fb.fb_query import get_feed_query
 from archive.fb.fb_request import FBRequest
 from archive.fb.fb_lookup import lookup_id
+from allauth.socialaccount.models import SocialAccount
 from . import tasks
 from .models import User, Group, Post, Comment
 from .rest.serializer import *
@@ -135,6 +137,7 @@ def group_search(request, group_id):
     )
 
 
+@login_required
 def group_management(request, group_id):
     """
     Manage group
@@ -144,6 +147,10 @@ def group_management(request, group_id):
     :return: searched data
     """
     _group = get_object_or_404(Group, pk=group_id)
+    if not request.user.is_superuser:
+            social_account = SocialAccount.objects.filter(user=request.user)
+            if not social_account or _group.owner.id != SocialAccount.objects.filter(user=request.user)[0].uid:
+                return HttpResponseForbidden()
 
     if request.method == "GET":
         _groups = Group.objects.all()
@@ -196,7 +203,8 @@ def group_management(request, group_id):
         success = 0
         fail = 0
         for object_id in check_box:
-            res, e = tasks.delete_group_content(fb_request_del, object_id, model)
+            # res, e = tasks.delete_group_content(object_id, model)
+            res, e = tasks.delete_group_content(object_id, model, fb_request_del)
             if res:
                 success += 1
             else:
@@ -579,6 +587,69 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response({'users': users})
 
+    @detail_route()
+    def blacklist(self, request, pk=None):
+        """
+        Return blacklist
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        blacklist = self.get_object().blacklist.all().order_by('-updated_time')
+        return self.response_models(blacklist, request, BlacklistSerializer)
+
+    @detail_route()
+    def blacklist_user(self, request, pk=None):
+        """
+        Return blacklist for user
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        user_id = self.request.query_params.get('user_id', None)
+        _user = get_object_or_404(User, id=user_id)
+
+        blacklist = Blacklist.objects.get(group=self.get_object(), user=_user)
+        return Response(BlacklistSerializer(blacklist, context={'request': request}).data)
+
+    @detail_route()
+    def blacklist_search(self, request, pk=None):
+        """
+        Return blacklist search for group
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        _group = self.get_object()
+
+        search = self.request.query_params.get('q', '')
+        if search:
+            return self.response_models(_group.user_set.order_by('-blacklist__updated_time').search(search), request, BlacklistUserSerializer)
+        else:
+            return self.response_models(_group.user_set.order_by('blacklist__updated_time'), request, BlacklistUserSerializer)
+
+    @detail_route()
+    @renderer_classes((JSONRenderer,))
+    def user_activity(self, request, pk=None):
+        """
+        Return user activity about posts and comments
+
+        :param request: request
+        :param pk: pk
+        :return: json
+        """
+        _group = self.get_object()
+        user_id = self.request.query_params.get('user_id', None)
+        _user = get_object_or_404(User, id=user_id)
+
+        post_count = Post.objects.filter(group=_group, user=_user).count()
+        comment_count = Comment.objects.filter(group=_group, user=_user).count()
+
+        return Response({'post_count': post_count, 'comment_count': comment_count})
+
     def response_models(self, models, request, model_serializer):
         """
         Return response for models with pagination
@@ -821,6 +892,13 @@ class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
+
+class BlacklistViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Blacklist View Set
+    """
+    queryset = Blacklist.objects.all()
+    serializer_class = BlacklistSerializer
 
 
 def about(request):

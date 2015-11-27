@@ -356,7 +356,7 @@ def update_groups_feed(query, is_whole=False):
         update_group_feed(group.get('id'), query, is_whole)
 
 
-def delete_group_content(_fb_request, object_id, model):
+def delete_group_content(object_id, model, _fb_request=fb_request):
     """
     Delete group content
 

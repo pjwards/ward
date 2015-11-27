@@ -73,11 +73,12 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BlacklistSerializer(serializers.HyperlinkedModelSerializer):
-    group = serializers.HyperlinkedIdentityField(read_only=True, view_name='group-detail')
-    user = serializers.HyperlinkedIdentityField(read_only=True, view_name='user-detail')
 
     class Meta:
         model = Blacklist
         fields = '__all__'
         read_only_fields = '__all__'
-        depth = 1
+
+
+class BlacklistUserSerializer(UserSerializer):
+    blacklist = BlacklistSerializer(many=True, read_only=True)
