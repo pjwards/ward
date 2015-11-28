@@ -103,8 +103,10 @@
                 <div class="panel">
                     <div class="body">
                         <h1 class="title">
-                            <i class="icon-report"></i> <strong>Access Token</strong>
-
+                            <i class="icon-report"></i> <strong>Access Token </strong>
+                            <small class="focus_color"><i class="icon-help" id="tooltip_1"
+                                                          title="1. Go to this <a target='_blank' href='https://developers.facebook.com/tools/explorer/'>link</a>.<br>2. Copy the access token in graph api explorer.<br>3. Paste the access token in our site."></i>
+                            </small>
                         </h1>
 
                         <input type="text" class="input" id="access_token" name="access_token"
@@ -277,7 +279,8 @@
 
                 <div class="panel dashed">
                     <div class="body">
-                        <h1 class="title"><i class="icon-user" style="color: red;"></i> <strong>Blacklist</strong></h1>
+                        <h1 class="title"><i class="icon-user" style="color: #de615e;"></i> <strong>Blacklist</strong>
+                        </h1>
 
                         <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
                             <div class="head">
@@ -415,6 +418,15 @@
                     </div>
                 </div>
 
+                <script id="tpl_popover" type="text/template">
+                    <div class="popover <!= position !>" style="z-index: 10001;">
+                        <div class="head">How to get access token?</div>
+                        <div class="body">
+                            <div class="image"><i class="icon-caution"></i></div>
+                            <div class="message"><!= message !></div>
+                        </div>
+                    </div>
+                </script>
             </div>
         </div>
     </div>
@@ -625,11 +637,24 @@
             });
         });
 
-        jui.ready(["ui.modal"], function (modal) {
+        /**
+         * Generate Helper
+         */
+        jui.ready(["ui.modal", "ui.tooltip"], function (modal, tooltip) {
             $("#modal_1").appendTo("body");
 
             modal_1 = modal("#modal_1", {
                 color: "black"
+            });
+
+            tooltip_1 = tooltip("#tooltip_1", {
+                width: 300,
+                align: "left",
+                showType: "click",
+                hideType: "click",
+                tpl: {
+                    item: $("#tpl_popover").html()
+                }
             });
         });
 
