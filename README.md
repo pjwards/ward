@@ -37,6 +37,8 @@
 * JUI
 * Bootstrap
 * Bootstrap Social
+* js-cookie
+
 
 * wow
 * jquery-easing

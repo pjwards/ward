@@ -19,4 +19,8 @@ urlpatterns = [
     url(r'^group/(?P<group_id>[0-9]+)/update/$', views.group_update, name='group_update'),
 
     url(r'^user/(?P<user_id>[0-9]+)/$', views.user, name='user'),
+
+    url(r'^report/(?P<object_id>[0-9_]+)/$', views.report, name='report'),
+    url(r'^report/(?P<report_id>[0-9_]+)/(?P<action>[a-z]+)/$', views.report_action, name='report_action'),
+    url(r'^reports/$', views.reports, name='reports'),
 ]

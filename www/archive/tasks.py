@@ -356,21 +356,14 @@ def update_groups_feed(query, is_whole=False):
         update_group_feed(group.get('id'), query, is_whole)
 
 
-def delete_group_content(object_id, model, _fb_request=fb_request):
+def delete_group_content(object_id, model):
     """
     Delete group content
 
-    :param _fb_request: fb request
     :param object_id: object_id
     :param model: model (post or comment)
     :return:
     """
-    # Delete object in facebook
-    try:
-        _fb_request.delete_object(object_id)
-    except GraphAPIError as e:
-        return False, e.__str__()
-
     # Find object in our site
     try:
         if model == 'post':
@@ -418,3 +411,21 @@ def delete_group_content(object_id, model, _fb_request=fb_request):
     bl.save()
 
     return True, None
+
+
+def delete_group_content_by_fb(object_id, model, _fb_request=fb_request):
+    """
+    Delete group content by fb request
+
+    :param _fb_request: fb request
+    :param object_id: object_id
+    :param model: model (post or comment)
+    :return:
+    """
+    # Delete object in facebook
+    try:
+        _fb_request.delete_object(object_id)
+    except GraphAPIError as e:
+        return False, e.__str__()
+
+    return delete_group_content(object_id, model)

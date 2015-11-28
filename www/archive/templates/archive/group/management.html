@@ -132,7 +132,7 @@
                                             <a class="btn " value="text"><i class="icon-text"></i></a>
                                             <a class="btn " value="user"><i class="icon-user"></i></a>
                                             <input type="text" class="input" id="post_limit" placeholder="Limit"
-                                                   value="10" style="width: 60px; text-align: right;"/>
+                                                   value="50" style="width: 60px; text-align: right;"/>
                                             <input type="text" class="input" id="post_search" placeholder="Search"/>
                                         </div>
                                         <button id="post_del_btn" class="btn">
@@ -191,7 +191,7 @@
                                             <a class="btn " value="text"><i class="icon-text"></i></a>
                                             <a class="btn " value="user"><i class="icon-user"></i></a>
                                             <input type="text" class="input" id="comment_limit" placeholder="Limit"
-                                                   value="10" style="width: 60px; text-align: right;"/>
+                                                   value="50" style="width: 60px; text-align: right;"/>
                                             <input type="text" class="input" id="comment_search"
                                                    placeholder="Search"/>
                                         </div>
@@ -437,8 +437,8 @@
     <script>
         var group_id = "{{ group.id }}";
 
-        var post_limit = 10;
-        var comment_limit = 10;
+        var post_limit = 50;
+        var comment_limit = 50;
         var user_limit = 10;
         var search_limit = 10;
 
@@ -477,7 +477,7 @@
             post_table = table("#post_table", {
                 fields: ["", "", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 800,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -512,7 +512,7 @@
             comment_table = table("#comment_table", {
                 fields: ["", "", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 800,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -767,6 +767,9 @@
         });
 
         $(function () {
+            /**
+             * check all
+             */
             $("#check_all_post").click(function () {
                 if ($("#check_all_post").prop("checked")) {
                     $("input[name=del_post]").prop("checked", true);
@@ -783,9 +786,12 @@
                 }
             });
 
+            /**
+             * delete checked objects
+             */
             $("#post_del_btn").on("click", function () {
                 var data = $("#post_del_form").serialize();
-                data += "&access_token=" + encodeURIComponent($("#access_token").val());
+                data += "&access_token=" + encodeURIComponent($("#access_token").val());    // add access token in from
                 var answer = confirm("Are you sure delete?")
                 if (answer) {
                     deleteAjax(data);
@@ -799,7 +805,7 @@
 
             $("#comment_del_btn").on("click", function () {
                 var data = $("#comment_del_form").serialize();
-                data += "&access_token=" + encodeURIComponent($("#access_token").val());
+                data += "&access_token=" + encodeURIComponent($("#access_token").val());    // add access token in from
                 var answer = confirm("Are you sure delete?")
                 if (answer) {
                     deleteAjax(data);
@@ -809,6 +815,9 @@
             });
         });
 
+        /**
+         * Delete checked objects
+         */
         function deleteAjax(data) {
             $.ajax({
                 url: '{% url 'archive:group_management' group.id %}',
@@ -873,6 +882,9 @@
             });
         }
 
+        /**
+         * Reset posts and comments by seleced user.
+         */
         function searchUMSelect(user_id) {
             if (user_search_helper_check == "post") {
                 post_search.val(user_id);

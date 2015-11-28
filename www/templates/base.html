@@ -57,6 +57,9 @@
                             {% if user.is_staff %}
                                 <li value="/admin">Admin</li>
                             {% endif %}
+                            {% if user.is_superuser %}
+                                <li value="{% url 'archive:reports' %}">Reports</li>
+                            {% endif %}
                             <li value="{% url 'auth_password_change' %}">Password change</li>
                             <li class="divider"></li>
                             <li value="{% url 'auth_logout' %}">Sign out</li>
@@ -93,6 +96,9 @@
 
 <!-- JUI for Bootstrap -->
 <script src="{% static 'jui/dist/jui.min.js' %}"></script>
+
+<!-- JS Cookie -->
+<script src="{% static 'js-cookie/src/js.cookie.js' %}"></script>
 
 <!-- Custom Script -->
 <script src="{% static 'js/base.js' %}" type="text/javascript"></script>

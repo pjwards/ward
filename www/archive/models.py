@@ -90,6 +90,7 @@ class Post(models.Model):
     like_count = models.IntegerField(default=0)
     share_count = models.IntegerField(default=0)
     group = models.ForeignKey(Group, related_name='posts')
+    is_show = models.BooleanField(default=True)
 
     objects = SearchableManager()
     search_fields = ("message",)
@@ -133,6 +134,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, related_name='comments')
     parent = models.ForeignKey('Comment', null=True, related_name='comments')
     group = models.ForeignKey(Group, related_name='comments')
+    is_show = models.BooleanField(default=True)
 
     objects = SearchableManager()
     search_fields = ("message",)
@@ -173,6 +175,15 @@ class Blacklist(models.Model):
     group = models.ForeignKey(Group, related_name='blacklist')
     user = models.ForeignKey(User, related_name='blacklist')
     count = models.IntegerField(default=0)
+    updated_time = models.DateTimeField(auto_now=True)
+
+
+class Report(models.Model):
+    post = models.ForeignKey(Post, null=True, related_name='reports')
+    comment = models.ForeignKey(Comment, null=True, related_name='reports')
+    group = models.ForeignKey(Group, related_name='reports')
+    user = models.ForeignKey(User, related_name='reports')
+    status = models.CharField(max_length=30, default='new')
     updated_time = models.DateTimeField(auto_now=True)
 
 

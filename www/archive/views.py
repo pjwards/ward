@@ -1,5 +1,5 @@
 import collections
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from operator import itemgetter
 import logging
 from django.core.urlresolvers import reverse
@@ -15,7 +15,6 @@ from archive.fb.fb_request import FBRequest
 from archive.fb.fb_lookup import lookup_id
 from allauth.socialaccount.models import SocialAccount
 from . import tasks
-from .models import User, Group, Post, Comment
 from .rest.serializer import *
 from .utils import date_utils
 
@@ -166,13 +165,13 @@ def group_management(request, group_id):
         # Get a model and validate a model
         model = request.POST.get("model", None)
         if model is None:
-            error = 'Did not exist a model.'
+            error = 'Did not exist this model.'
             return JsonResponse({'error': error})
 
         # Get a access token and validate the access token
         access_token = request.POST.get("access_token", None)
         if not access_token:
-            error = 'Did not exist a access token.'
+            error = 'Did not exist this access token.'
             return JsonResponse({'error': error})
 
         # Get a check box by using model
@@ -204,7 +203,7 @@ def group_management(request, group_id):
         fail = 0
         for object_id in check_box:
             # res, e = tasks.delete_group_content(object_id, model)
-            res, e = tasks.delete_group_content(object_id, model, fb_request_del)
+            res, e = tasks.delete_group_content_by_fb(object_id, model, fb_request_del)
             if res:
                 success += 1
             else:
@@ -276,6 +275,122 @@ def user(request, user_id):
             'groups': _groups.all(),
         }
     )
+
+
+def report(request, object_id):
+    """
+    Report object
+
+    :param request: request
+    :param object_id: object id
+    :return: render
+    """
+
+    if request.method == "POST":
+        _report = Report()
+        is_exist = False   # report is already exist
+        try:
+            # Post id is bigger than 20
+            if len(object_id) > 20:
+                _object = Post.objects.get(pk=object_id)
+                if not Report.objects.filter(post=_object).exists():
+                    _report.post = _object
+                else:
+                    _report = Report.objects.filter(post=_object)[0]
+                    is_exist = True
+            else:
+                _object = Comment.objects.get(pk=object_id)
+                if not Report.objects.filter(comment=_object).exists():
+                    _report.comment = _object
+                else:
+                    _report = Report.objects.filter(comment=_object)[0]
+                    is_exist = True
+        except (Post.DoesNotExist, Comment.DoesNotExist):
+            error = 'Did not exist this object.'
+            return JsonResponse({'error': error})
+
+        # If report is already exist, renew the report.
+        if is_exist:
+            _report.status = 'new'
+            _report.updated_time = date_utils.timezone.now()
+            _report.save()
+        else:
+            _report.group = _object.group
+            _report.user = _object.user
+            _report.save()
+        return JsonResponse({'success': 'Report success'})
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def report_action(request, report_id, action):
+    """
+    Report action
+
+    :param request: request
+    :param report_id: report id
+    :param action: action
+    :return: render
+    """
+    if request.method == "POST":
+        _report = get_object_or_404(Report, id=report_id)
+
+        # report is already deleted.
+        if _report.status == 'deleted':
+            error = 'You could not this action when status is deleted.'
+            return JsonResponse({'error': error})
+
+        # Do actions
+        if action == 'hide':
+            _report.status = 'hide'
+            _report.save()
+            if _report.post:
+                _report.post.is_show = False
+                _report.post.save()
+            elif _report.comment:
+                _report.comment.is_show = False
+                _report.comment.save()
+        elif action == 'show':
+            _report.status = 'show'
+            _report.save()
+            if _report.post:
+                _report.post.is_show = True
+                _report.post.save()
+            elif _report.comment:
+                _report.comment.is_show = True
+                _report.comment.save()
+        elif action == 'checked':
+            if _report.status == 'hide':
+                error = 'You could not this action when status is hide.'
+                return JsonResponse({'error': error})
+            _report.status = 'checked'
+            _report.save()
+        elif action == 'delete':
+            if _report.post:
+                res, e = tasks.delete_group_content(_report.post.id, 'post')
+            elif _report.comment:
+                res, e = tasks.delete_group_content(_report.comment.id, 'comment')
+
+            if res:
+                _report.status = 'deleted'
+                _report.save()
+            else:
+                return JsonResponse({'error': e})
+        else:
+            error = 'Did not exist this action.'
+            return JsonResponse({'error': error})
+        return JsonResponse({'success': 'Report action success'})
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def reports(request):
+    """
+    Display reports
+
+    :param request: request
+    :return: render
+    """
+
+    return render(request, 'archive/reports.html', {})
 
 
 # ViewSets define the view behavior.
@@ -395,7 +510,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        posts = self.get_issue(Post)
+        posts = self.get_issue(Post).exclude(is_show=False)
         return self.response_models(posts, request, PostSerializer)
 
     @detail_route()
@@ -407,7 +522,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        comments = self.get_issue(Comment)
+        comments = self.get_issue(Comment).exclude(is_show=False)
         return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
@@ -419,7 +534,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        posts = self.get_archive(Post)
+        posts = self.get_archive(Post).exclude(is_show=False)
         return self.response_models(posts, request, PostSerializer)
 
     @detail_route()
@@ -431,7 +546,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        comments = self.get_archive(Comment)
+        comments = self.get_archive(Comment).exclude(is_show=False)
         return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
@@ -518,7 +633,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        posts = self.group_search_by_check(Post)
+        posts = self.group_search_by_check(Post).exclude(is_show=False)
         return self.response_models(posts, request, PostSerializer)
 
     @detail_route()
@@ -530,7 +645,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        comments = self.group_search_by_check(Comment)
+        comments = self.group_search_by_check(Comment).exclude(is_show=False)
         return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
@@ -904,6 +1019,14 @@ class BlacklistViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Blacklist.objects.all()
     serializer_class = BlacklistSerializer
+
+
+class ReportViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Report View Set
+    """
+    queryset = Report.objects.all().order_by('-updated_time')
+    serializer_class = ReportSerializer
 
 
 def about(request):

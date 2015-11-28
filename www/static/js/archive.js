@@ -47,7 +47,104 @@ var getAsyncAjaxResult = function (url, data) {
         dataType: "JSON",
     }).responseText;
 
-    return response.includes("DoesNotExist")?undefined:JSON.parse(response);
+    return response.includes("DoesNotExist") ? undefined : JSON.parse(response);
+}
+
+/**
+ * Get Results by using ajax
+ */
+var postAjax = function (url, data) {
+    var csrftoken = Cookies.get('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    $.ajax({
+        url: url,
+        type: "post",
+        data: data,
+        dataType: "JSON",
+        success: function (source) {
+            if (source["success"]) {
+                data = {
+                    title: source["success"],
+                    message: getToday(),
+                    color: 'success',
+                }
+                notify_top_submit(1, data);
+            }
+            else if (source["error"]) {
+                data = {
+                    title: source["error"],
+                    message: getToday(),
+                    color: 'danger',
+                }
+                notify_top_submit(1, data);
+            }
+        },
+        error: function (request, status, error) {
+            alert(status);
+        }
+    });
+}
+
+/**
+ * Get Results by using async ajax
+ */
+var postAsyncAjax = function (url, data) {
+    var csrftoken = Cookies.get('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    $.ajax({
+        url: url,
+        type: "post",
+        data: data,
+        async: false,
+        dataType: "JSON",
+        success: function (source) {
+            if (source["success"]) {
+                data = {
+                    title: source["success"],
+                    message: getToday(),
+                    color: 'success',
+                }
+                notify_top_submit(1, data);
+            }
+            else if (source["error"]) {
+                data = {
+                    title: source["error"],
+                    message: getToday(),
+                    color: 'danger',
+                }
+                notify_top_submit(1, data);
+            }
+        },
+        error: function (request, status, error) {
+            alert(status);
+        }
+    });
 }
 
 /**
@@ -59,17 +156,36 @@ var getIdFromUrl = function (url) {
 }
 
 /**
+ * Post report
+ */
+var postReport = function (object_id) {
+    var url = '/archive/report/' + object_id + '/';
+    var data = {};
+    postAjax(url, data);
+}
+
+/**
+ * Report action
+ */
+var reportAction = function (report_id, action) {
+    var url = '/archive/report/' + report_id + '/' + action + '/';
+    var data = {};
+    postAsyncAjax(url, data);
+}
+
+/**
  * Post and comment Display
  */
-var pcDisplac = function (rows, row) {
+var pcDisplay = function (rows, row) {
     var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
     var fb_url = "https://www.facebook.com/";
     var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
     rows.push({
         "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>',
-        "message": message.length < 100 ? message + btn : message.substring(0, 100) + "..." + btn,
+        "message": message.length < 100 ? message + btn + report_btn : message.substring(0, 100) + "..." + btn + report_btn,
         "like_count": row["like_count"],
         "comment_count": row["comment_count"],
     });
@@ -78,7 +194,7 @@ var pcDisplac = function (rows, row) {
 /**
  * Post and comment Display for management
  */
-var pcDisplacM = function (rows, row, name) {
+var pcDisplayM = function (rows, row, name) {
     var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
     var fb_url = "https://www.facebook.com/";
     var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
@@ -94,6 +210,34 @@ var pcDisplacM = function (rows, row, name) {
 }
 
 /**
+ * Post and comment Display for management
+ */
+var pcDisplayR = function (rows, row) {
+    var object = row["post"]? row["post"]: row["comment"]? row["comment"]:undefined;
+    var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+    var group_url = '/archive/group/' + getIdFromUrl(row["group"].url) + '/';
+    var fb_url = "https://www.facebook.com/";
+    if (object) {
+        var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + object["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+        var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
+    }
+    var checked_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'checked\'); reload()" style="color:#ffa500;">checked</btn>';
+    var hide_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'hide\'); reload()" style="color:#2f4f4f;">hide</btn>';
+    var show_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'show\'); reload()" style="color:#6495ed;">show</btn>';
+    var delete_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Are you sure delete?\')) reportAction(\'' + row["id"] + '\', \'delete\'); reload()" style="color:#ff1493;">deleted</btn>';
+    rows.push({
+        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
+        "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a>' + (object? '<div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>':''),
+        "message": object? message.length < 100 ? message + btn : message.substring(0, 100) + "..." + btn : 'deleted',
+        "like_count": object? object["like_count"] : 'deleted',
+        "comment_count": object? object["comment_count"] : 'deleted',
+        "group": '<div class="more-link"><a href="' + group_url + '"><div class="h5">' + row["group"]["name"] + '</div></a></div>',
+        "status": row["status"],
+        "action": row["status"] == 'deleted'? '':  (row["status"] == 'hide'? show_btn : (row["status"] == 'checked'? '': checked_btn) + hide_btn) + delete_btn,
+    });
+}
+
+/**
  * Get issue by using ajax
  */
 var getIssue = function (url, table, limit, from, to, page, paging) {
@@ -101,7 +245,7 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            pcDisplac(rows, results[i]);
+            pcDisplay(rows, results[i]);
         }
         ;
 
@@ -135,7 +279,7 @@ var getArchive = function (url, table, limit, from, page, paging) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            pcDisplac(rows, results[i]);
+            pcDisplay(rows, results[i]);
         }
         ;
 
@@ -463,7 +607,7 @@ var getSearchPC = function (url, table, limit, search, page, paging) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            pcDisplac(rows, results[i]);
+            pcDisplay(rows, results[i]);
         }
         ;
 
@@ -544,7 +688,7 @@ var getArchiveByUser = function (url, user_id, table, limit, from, page, paging)
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            pcDisplac(rows, results[i]);
+            pcDisplay(rows, results[i]);
         }
         ;
 
@@ -727,7 +871,7 @@ var getSearchPCM = function (url, table, limit, model, search, search_check, pag
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            pcDisplacM(rows, results[i], model);
+            pcDisplayM(rows, results[i], model);
         }
         ;
 
@@ -892,6 +1036,38 @@ var getSearchUM2 = function (url, table, limit, search, page, paging) {
         limit: limit,
         offset: (page - 1) * limit,
         q: search,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Get reports
+ */
+var getReports = function (url, table, limit, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            pcDisplayR(rows, results[i]);
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
     }
 
     getAjaxResult(url, data, fun);
