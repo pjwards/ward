@@ -855,3 +855,44 @@ var getSearchBM = function (url, group_id, table, limit, search, page, paging) {
     getAjaxResult(url, data, fun);
 }
 
+/**
+ * Get search user for management by using ajax
+ */
+var getSearchUM2 = function (url, table, limit, search, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var user_url = '/archive/user/' + row["id"] + '/';
+
+            var from = '<div class=" more-link"><a href="' + user_url + '"><div class="h4">' + row["name"] + '</div></a></div>';
+            var id = '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["id"] + '</div></a></div>';
+            rows.push({
+                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
+                "from": from + id,
+                "select": '<button class="btn mini" onclick="searchUMSelect(' + row["id"] + ')"><i class="icon-pin"></i></button>'
+            });
+        }
+        ;
+
+        table.reset();
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        q: search,
+    }
+
+    getAjaxResult(url, data, fun);
+}

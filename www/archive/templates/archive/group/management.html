@@ -102,7 +102,10 @@
 
                 <div class="panel">
                     <div class="body">
-                        <h1 class="title"><i class="icon-report"></i> <strong>Access Token</strong></h1>
+                        <h1 class="title">
+                            <i class="icon-report"></i> <strong>Access Token</strong>
+
+                        </h1>
 
                         <input type="text" class="input" id="access_token" name="access_token"
                                placeholder="Please Input Access Token"
@@ -112,8 +115,11 @@
 
                 <div class="panel dashed">
                     <div class="body">
+
                         <div class="col col-6">
-                            <h1 class="title"><i class="icon-report"></i> <strong>Post</strong></h1>
+                            <h1 class="title">
+                                <i class="icon-report"></i> <strong>Post</strong>
+                            </h1>
 
                             <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
                                 <div class="head">
@@ -170,7 +176,9 @@
                             </div>
                         </div>
                         <div class="col col-6">
-                            <h1 class="title"><i class="icon-message"></i> <strong>Comment</strong></h1>
+                            <h1 class="title">
+                                <i class="icon-message"></i> <strong>Comment</strong>
+                            </h1>
 
                             <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
                                 <div class="head">
@@ -290,7 +298,7 @@
                                     <th style="text-align: center;"><i class="icon-caution"></i> Spam</th>
                                     <th style="text-align: center;"><i class="icon-report"></i> Post</th>
                                     <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                    <th style="text-align: center;"><i class="icon-realtime"></i> Comment</th>
+                                    <th style="text-align: center;"><i class="icon-realtime"></i> Updated Time</th>
                                 </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -363,6 +371,50 @@
                     </tr>
                 </script>
 
+                <div id="modal_1" class="msgbox" style="display: none; width: 500px;">
+                    <div class="head" style="text-align: center;">
+                        User Search
+                    </div>
+                    <div class="body">
+                        <div>
+                            <table id="user_search_helper_table" class="table simple hover borderless">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th><i class="icon-user"></i> User</th>
+                                    <th style="text-align: center;"><i class="icon-pin"></i></th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <div id="user_search_helper_paging" class="paging" style="margin-top: 3px;">
+                                <a href="#" class="prev">Previous</a>
+
+                                <div class="list"></div>
+                                <a href="#" class="next">Next</a>
+                            </div>
+                        </div>
+
+                        <script id="tpl_row4" type="text/template">
+                            <tr>
+                                <td style="text-align: right;"><!= picture !></td>
+                                <td><!= from !></td>
+                                <td style="text-align: center;"><!= select !></td>
+                            </tr>
+                        </script>
+
+                        <script id="tpl_none4" type="text/template">
+                            <tr>
+                                <td colspan="3" class="none" align="center">Data does not exist.</td>
+                            </tr>
+                        </script>
+                    </div>
+                    <div class="foot">
+                        <input id="user_search_helper_search" type="text" class="input small" placeholder="Search"
+                               style="text-align: center; width: 100%;"/>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -382,15 +434,16 @@
         var comment_search = $('#comment_search');
         var user_search = $('#user_search');
         var blacklist_search = $('#blacklist_search');
+        var user_search_helper_search = $('#user_search_helper_search');
 
         var post_search_url = "/api/groups/{{ group.id }}/post_search/";
         var comment_search_url = "/api/groups/{{ group.id }}/comment_search/";
         var user_search_url = "/api/groups/{{ group.id }}/user_search/";
-        var user_autocomplete_url = "/api/groups/{{ group.id }}/user_autocomplete/";
         var blacklist_search_url = "/api/groups/{{ group.id }}/blacklist_search/";
 
         var post_search_check = 'text';
         var comment_search_check = 'text';
+        var user_search_helper_check = 'post';
 
         /**
          * Generate Archive
@@ -515,7 +568,7 @@
             });
 
             blacklist_table = table("#blacklist_table", {
-                fields: ["", "from", "id", "count","post_count", "comment_count", "updated_time"],
+                fields: ["", "from", "id", "count", "post_count", "comment_count", "updated_time"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
@@ -535,18 +588,70 @@
                     none: $("#tpl_none3").html()
                 }
             });
+
+            user_search_helper_paging = paging("#user_search_helper_paging", {
+                pageCount: 10,
+                screenCount: 5,
+                event: {
+                    page: function (pNo) {
+                        getSearchUM2(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html()
+                }
+            });
+
+            user_search_helper_table = table("#user_search_helper_table", {
+                fields: ["", "from", "select"],
+                scroll: true,
+                scrollHeight: 500,
+                resize: true,
+                event: {
+                    sort: function (column, e) {
+                        var className = {
+                            "desc": "icon-arrow1",
+                            "asc": "icon-arrow3"
+                        }[column.order];
+
+                        $(column.element).children("i").remove();
+                        $(column.element).append("<i class='" + className + "'></i>");
+                    }
+                },
+                tpl: {
+                    row: $("#tpl_row4").html(),
+                    none: $("#tpl_none4").html()
+                }
+            });
+        });
+
+        jui.ready(["ui.modal"], function (modal) {
+            $("#modal_1").appendTo("body");
+
+            modal_1 = modal("#modal_1", {
+                color: "black"
+            });
         });
 
         /**
          * Generate Button
          */
         jui.ready(["ui.button"], function (button) {
+            function user_clicked(model) {
+                user_search_helper_check = model;
+
+                modal_1.show();
+                getSearchUM2(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), 1, user_search_helper_paging);
+                user_search_helper_paging.first();
+            }
+
             post_radio = button("#post_radio", {
                 type: "radio",
                 index: 0,
                 event: {
                     change: function (data) {
                         post_search_check = data.value;
+                        if (data.value == 'user') user_clicked('post');
                     }
                 }
             });
@@ -556,6 +661,7 @@
                 event: {
                     change: function (data) {
                         comment_search_check = data.value;
+                        if (data.value == 'user') user_clicked('comment');
                     }
                 }
             });
@@ -623,6 +729,14 @@
                 if (key_code == 13) {
                     getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
                     blacklist_paging.first();
+                }
+            });
+
+            $("#user_search_helper_search").keypress(function (event) {
+                var key_code = event.keyCode || window.event.keyCode;
+                if (key_code == 13) {
+                    getSearchUM2(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), 1, user_search_helper_paging);
+                    user_search_helper_paging.first();
                 }
             });
         });
@@ -732,6 +846,20 @@
                     notify_top_submit(1, data);
                 }
             });
+        }
+
+        function searchUMSelect(user_id) {
+            if (user_search_helper_check == "post") {
+                post_search.val(user_id);
+                getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), 'user', 1, post_paging);
+                post_paging.first();
+            }
+            else {
+                comment_search.val(user_id);
+                getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), 'user', 1, comment_paging);
+                comment_paging.first();
+            }
+
         }
     </script>
 {% endblock %}
