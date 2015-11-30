@@ -15,16 +15,17 @@ class Spam:
         self.analyzer = core.AnalysisDiction(True, True)
         self.group = group
 
-    def compare_and_count(self, string_data):
+    def compare_and_count(self, message, spam_db=None):
         """
         Analyze string data with compare and count words
-        :param string_data: string data that have to be analyzed
+        :param message: message of post or comment
         :return: analyzed data list
         """
-        spam_db = SpamWordList.objects.filter(group=self.group)     # all spamlist data loads in list
+        if spam_db is None:
+            spam_db = SpamWordList.objects.filter(group=self.group)     # all spamlist data loads in list
         data_set = [sp.word for sp in spam_db]
-        twitter_posmore = self.analyzer.analyzer_twitter(string_data, 'posmore')
-        kkma_nouns = self.analyzer.analyzer_kkma(string_data, 'nouns')
+        twitter_posmore = self.analyzer.analyzer_twitter(message, 'posmore')
+        kkma_nouns = self.analyzer.analyzer_kkma(message, 'nouns')
 
         result_twi = core.compare_and_make_words(twitter_posmore, data_set)
         result_kkma = core.compare_and_make_words(kkma_nouns, data_set)
@@ -33,12 +34,13 @@ class Spam:
 
         return analyzed_words
 
-    def update_analysis_level(self, analyzed_words):
+    def update_analysis_level(self, message):
         """
         Add words or update count of words in database
-        :param analyzed_words: analyzed data set
+        :param message: message of post or comment
         """
         spam_db = SpamWordList.objects.filter(group=self.group)
+        analyzed_words = self.compare_and_count(message, spam_db)
         words_s = sorted(analyzed_words)
         temp = []
         for i in words_s:
@@ -77,7 +79,7 @@ class Spam:
 
     def update_standard_word(self):
         """
-        update spam words in database and this procedure is based on spam.txt
+        add spam.txt words in database of words if those are not in it
         """
         data_set = [line.strip() for line in open("analysis/texts/spam.txt", 'r')]
         db_all = SpamWordList.objects.filter(group=self.group)
@@ -89,7 +91,7 @@ class Spam:
 
     def improve_analysis_level(self):           # plus url
         """
-        Add words that duplicated in deleted state texts
+        Add words that duplicated in deleted state texts in DB
         """
         spam_db = SpamContentList.objects.filter(status='deleted')
         db_text_list = [sp.text for sp in spam_db]
@@ -121,12 +123,36 @@ class Spam:
         #urls = core.get_url_from_string(string_data)
         #url_list = core.url_duplication_check(data_set,urls)
 
+
+def add_spam_list(message, group):
+    """
+    add to spam list
+    :param message: message of post or comment
+    :param group: group data set
+    """
+    try:
+        spam_data = SpamContentList(group=group, text=message)
+        spam_data.save()
+    except Exception as expt:
+        print("error occurred:"+expt)
+
+        
+def delete_spam_list(message, group):
+    try:
+        spam_data = SpamContentList.objects.get(group=group, text=message)
+        spam_data.status = 'deleted'
+        spam_data.save()
+        Spam(group).update_analysis_level(message)
+    except Exception as expt:
+        print("error occurred:"+expt)
+
     ##alarm about spam that deleted in other group
     ##remmadation function
 
 
 def run_app():      # test-only method
     string = '''slack 에서는 팀초대 api 만 제공하고 있고 이를 쓸려면 써드파티 솔루션들을 써야하는 데. 이를 쓸려면 배포하는 수고를 거쳐야되고. 각 팀마다 배포하는 수고를 거치기보다, 나 혼자 수고하면 되지 않나 싶어서. slack 초대 서비스를 간단히 만들어봤습니다. 물론 Django 로 만들었죠. ㅎㅎ http://festi.kr/zlack/ 에 로그인하고, 그 팀에 대한 slack token 만 등록하면 끝 ~ !!! 현재 2개의 팀이 등록되어있습니다. - django korea, django-girls-seoul'''
+    group = ''
     #spam = Spam()
     #spam.init_db()
     '''
@@ -142,7 +168,7 @@ def run_app():      # test-only method
     print(analyzed_words)
     spam.update_standard_word()
     if total > 10:       #evaluate whether a content is spam or not
-        spam.update_analysis_level(analyzed_words)
+        add_spam_list(string, group)
     '''
     a = SpamWordList.objects.filter(status='temp')
     print(a)
