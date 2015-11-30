@@ -1,6 +1,6 @@
 [![Stories in Ready](https://badge.waffle.io/egaoneko/fb_archive.png?label=ready&title=Ready)](https://waffle.io/egaoneko/fb_archive)
 
-# Facebook Archive
+# Ward
 
 ## Requirements
 
@@ -21,11 +21,7 @@
 * JPype1-py3 (tested with version 0.5.5.2)
 * konlpy (tested with version 0.4.4)
 * django-allauth (tested with version 0.24.1)
-
-#### Optional dependencies:
-
 * redis (tested with version 2.10.3)
-* rabbitmq-server
 * redis-server
 * MeCab
 
@@ -37,9 +33,10 @@
 * JUI
 * Bootstrap
 * Bootstrap Social
+
+####
+
 * js-cookie
-
-
 * wow
 * jquery-easing
 * animate.css
@@ -49,30 +46,6 @@
 ## Installation
 
 ### Celery
-
-#### rabbitmq-server
-
-##### Ubuntu
-
-```bash
-sudo apt-get install rabbitmq-server
-```
-##### Mac
-
-```bash
-brew install rabbitmq-server
-```
-
-The RabbitMQ server scripts are installed into /usr/local/sbin. This is not automatically added to your path, so you may wish to add
-PATH=$PATH:/usr/local/sbin to your .bash_profile or .profile.
-
-```bash
-sudo rabbitmq-server
-sudo rabbitmqctl add_user user password
-sudo rabbitmqctl add_vhost vir_host
-sudo rabbitmqctl set_permissions -p vir_host user ".*" ".*" ".*"
-```
-
 
 #### redis-server
 
