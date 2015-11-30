@@ -60,6 +60,12 @@ class AnalysisDiction:
 
 
 def analyze_text(string_data, db_data):
+    """
+    Make list about duplicated words
+    :param string_data: text list
+    :param db_data: list of words in database
+    :return: return list that have tuples of words and count value
+    """
     val_words = [item for item, count in Counter(string_data).items() if count > 1]
     res = []
     for i in val_words:
