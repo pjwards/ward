@@ -60,6 +60,7 @@
                             {% if user.is_superuser %}
                                 <li value="{% url 'archive:reports' %}">Reports</li>
                             {% endif %}
+                            <li value="{% url 'archive:wards' %}">Wards</li>
                             <li value="{% url 'auth_password_change' %}">Password change</li>
                             <li class="divider"></li>
                             <li value="{% url 'auth_logout' %}">Sign out</li>

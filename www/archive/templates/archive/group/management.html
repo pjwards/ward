@@ -667,7 +667,6 @@
 
                 modal_1.show();
                 getSearchUM2(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), 1, user_search_helper_paging);
-                user_search_helper_paging.first();
             }
 
             post_radio = button("#post_radio", {
@@ -704,32 +703,27 @@
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();
                 getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
-                post_paging.first();
             });
 
             $("#comment_limit").on("input", function () {
                 comment_limit = $("#comment_limit").val();
                 getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
-                comment_paging.first();
             });
 
             $("#user_limit").on("input", function () {
                 user_limit = $("#user_limit").val();
                 getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), 1, user_paging);
-                user_paging.first();
             });
 
             $("#blacklist_limit").on("input", function () {
                 user_limit = $("#blacklist_limit").val();
                 getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
-                blacklist_paging.first();
             });
 
             $("#post_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
-                    post_paging.first();
                 }
             });
 
@@ -737,7 +731,6 @@
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
-                    comment_paging.first();
                 }
             });
 
@@ -745,7 +738,6 @@
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), 1, user_paging);
-                    user_paging.first();
                 }
             });
 
@@ -753,7 +745,6 @@
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
-                    blacklist_paging.first();
                 }
             });
 
@@ -761,7 +752,6 @@
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     getSearchUM2(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), 1, user_search_helper_paging);
-                    user_search_helper_paging.first();
                 }
             });
         });
@@ -796,9 +786,7 @@
                 if (answer) {
                     deleteAjax(data);
                     getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
-                    post_paging.first();
                     getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
-                    comment_paging.first();
                 }
 
             });
@@ -810,7 +798,6 @@
                 if (answer) {
                     deleteAjax(data);
                     getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
-                    comment_paging.first();
                 }
             });
         });
@@ -889,14 +876,11 @@
             if (user_search_helper_check == "post") {
                 post_search.val(user_id);
                 getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), 'user', 1, post_paging);
-                post_paging.first();
             }
             else {
                 comment_search.val(user_id);
                 getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), 'user', 1, comment_paging);
-                comment_paging.first();
             }
-
         }
     </script>
 {% endblock %}

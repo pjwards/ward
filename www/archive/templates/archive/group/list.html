@@ -140,13 +140,11 @@
 
             $("#groups_run").on("click", function () {
                 getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
-                groups_paging.first();
             });
 
             $("#groups_limit").on("input", function () {
                 groups_limit = $("#groups_limit").val();
                 getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
-                groups_paging.first();
             });
 
             $("#groups_search").keypress(function (event) {
@@ -182,7 +180,6 @@
                             notify_top_submit(1, data);
                         }
                         getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
-                        groups_paging.first();
                     },
                     error: function (request, status, error) {
                         data = {

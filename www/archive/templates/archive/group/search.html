@@ -396,19 +396,16 @@
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();
                 getSearchPC(post_search_url, post_table, post_limit, search, 1, post_paging);
-                post_paging.first();
             });
 
             $("#comment_limit").on("input", function () {
                 comment_limit = $("#comment_limit").val();
                 getSearchPC(comment_search_url, comment_table, comment_limit, search, 1, comment_paging);
-                comment_paging.first();
             });
 
             $("#user_limit").on("input", function () {
                 user_limit = $("#user_limit").val();
                 getSearchU(user_search_url, group_id, user_table, user_limit, search, 1, user_paging);
-                user_paging.first();
             });
         });
     </script>

@@ -335,14 +335,12 @@
             $("#user_archive_limit").on("input", function () {
                 user_archive_limit = $("#user_archive_limit").val();
                 getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
-                user_archive_paging.first();
             });
 
             $("#user_archive_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
-                    user_archive_paging.first();
                 }
             })
         });

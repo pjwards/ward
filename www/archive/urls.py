@@ -23,4 +23,8 @@ urlpatterns = [
     url(r'^report/(?P<object_id>[0-9_]+)/$', views.report, name='report'),
     url(r'^report/(?P<report_id>[0-9_]+)/(?P<action>[a-z]+)/$', views.report_action, name='report_action'),
     url(r'^reports/$', views.reports, name='reports'),
+
+    url(r'^ward/(?P<object_id>[0-9_]+)/$', views.ward, name='ward'),
+    url(r'^ward/(?P<ward_id>[0-9_]+)/update/$', views.ward_update, name='ward_update'),
+    url(r'^wards/$', views.wards, name='wards'),
 ]

@@ -174,18 +174,38 @@ var reportAction = function (report_id, action) {
 }
 
 /**
+ * Post ward
+ */
+var postWard = function (object_id) {
+    var url = '/archive/ward/' + object_id + '/';
+    var data = {};
+    postAjax(url, data);
+}
+
+/**
+ * update ward
+ */
+var updateWard = function (ward_id, fb_url) {
+    var url = '/archive/ward/' + ward_id + '/update/';
+    var data = {};
+    postAjax(url, data);
+    window.open(fb_url, '_blank');
+}
+
+/**
  * Post and comment Display
  */
 var pcDisplay = function (rows, row) {
     var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
     var fb_url = "https://www.facebook.com/";
     var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+    var ward_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postWard(\'' + row["id"] + '\')" style="color:#ffa500;"><i class="icon-pin"></i></btn>';
     var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
     rows.push({
         "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>',
-        "message": message.length < 100 ? message + btn + report_btn : message.substring(0, 100) + "..." + btn + report_btn,
+        "message": message.length < 100 ? message + btn + ward_btn + report_btn : message.substring(0, 100) + "..." + btn + ward_btn + report_btn,
         "like_count": row["like_count"],
         "comment_count": row["comment_count"],
     });
@@ -218,7 +238,8 @@ var pcDisplayR = function (rows, row) {
     var group_url = '/archive/group/' + getIdFromUrl(row["group"].url) + '/';
     var fb_url = "https://www.facebook.com/";
     if (object) {
-        var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + object["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
+        var object_id = getIdFromUrl(object.url);
+        var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + object_id + '" target="_blank"><span class="fa fa-facebook"></span></a>';
         var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
     }
     var checked_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'checked\'); reload()" style="color:#ffa500;">checked</btn>';
@@ -234,6 +255,27 @@ var pcDisplayR = function (rows, row) {
         "group": '<div class="more-link"><a href="' + group_url + '"><div class="h5">' + row["group"]["name"] + '</div></a></div>',
         "status": row["status"],
         "action": row["status"] == 'deleted'? '':  (row["status"] == 'hide'? show_btn : (row["status"] == 'checked'? '': checked_btn) + hide_btn) + delete_btn,
+    });
+}
+
+/**
+ * Post and comment Display for ward
+ */
+var pcDisplayW = function (rows, row) {
+    var object = row["post"]? row["post"]: row["comment"]? row["comment"]:undefined;
+    var user_url = '/archive/user/' + getIdFromUrl(object["user"].url) + '/';
+    var object_id = getIdFromUrl(object.url);
+    var fb_url = "https://www.facebook.com/";
+    var new_label = row["updated_time"]<object["updated_time"]? '<span class="label mini success">New</span> &nbsp; &nbsp;' : '';
+    var btn = '&nbsp; &nbsp;<btn class="btn btn-block btn-social-icon btn-facebook mini" onclick="updateWard(' + row["id"] + ',\'' + fb_url + object_id + '\')"><span class="fa fa-facebook"></span></btn>';
+    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
+    var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+    rows.push({
+        "picture": '<img src="' + object["user"].picture + '" style="border-radius: 10px;">',
+        "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + object["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>',
+        "message": new_label + (message.length < 100 ? message + btn + report_btn : message.substring(0, 100) + "..." + btn + report_btn),
+        "like_count": object["like_count"],
+        "comment_count": object["comment_count"],
     });
 }
 
@@ -254,6 +296,7 @@ var getIssue = function (url, table, limit, from, to, page, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -288,6 +331,7 @@ var getArchive = function (url, table, limit, from, page, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -477,7 +521,6 @@ var getHourTotalStatistics = function (url, display, from, to) {
 var getActivity = function (url, limit, method, model, table) {
 
     var fun = function (source) {
-        console.dir(source);
         var results = source;
         var rows = []
         for (var i in results) {
@@ -580,6 +623,7 @@ var getUserArchive = function (url, group_id, table, limit, page, search, paging
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -616,6 +660,7 @@ var getSearchPC = function (url, table, limit, search, page, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -664,6 +709,7 @@ var getSearchU = function (url, group_id, table, limit, search, page, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -688,6 +734,7 @@ var getArchiveByUser = function (url, user_id, table, limit, from, page, paging)
         var results = source["results"];
         var rows = []
         for (var i in results) {
+            console.dir('test');
             pcDisplay(rows, results[i]);
         }
         ;
@@ -697,6 +744,7 @@ var getArchiveByUser = function (url, user_id, table, limit, from, page, paging)
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -747,6 +795,7 @@ var getGroups = function (url, table, limit, page, search, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -880,6 +929,7 @@ var getSearchPCM = function (url, table, limit, model, search, search_check, pag
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -930,6 +980,7 @@ var getSearchUM = function (url, group_id, table, limit, search, page, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -983,6 +1034,7 @@ var getSearchBM = function (url, group_id, table, limit, search, page, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -1025,6 +1077,7 @@ var getSearchUM2 = function (url, table, limit, search, page, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -1058,6 +1111,7 @@ var getReports = function (url, table, limit, page, paging) {
         if (paging) {
             paging.setOption("pageCount", limit);
             paging.reload(source["count"]);
+            paging.first();
         }
     }
 
@@ -1068,6 +1122,44 @@ var getReports = function (url, table, limit, page, paging) {
     data = {
         limit: limit,
         offset: (page - 1) * limit,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+/**
+ * Get wards
+ */
+var getWards = function (url, user_id, table, limit, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            pcDisplayW(rows, results[i]);
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+            paging.first();
+        }
+    }
+
+    if (!user_id) {
+        return;
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        user_id: user_id,
     }
 
     getAjaxResult(url, data, fun);

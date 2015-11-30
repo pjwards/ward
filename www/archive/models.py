@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User as DjangoUser
 from mezzanine.core.managers import SearchableManager
 
 __author__ = "Donghyun Seo"
@@ -272,3 +273,21 @@ class DeletedComment(models.Model):
         return cls(id=comment.id, user=comment.user, created_time=comment.created_time, message=comment.message,
                    like_count=comment.like_count, comment_count=comment.comment_count, post=comment.post.id,
                    parent=parent, group=comment.group)
+
+
+class Ward(models.Model):
+    user = models.ForeignKey(DjangoUser, related_name='wards')
+    group = models.ForeignKey(Group, related_name='wards')
+    post = models.ForeignKey(Post, null=True, related_name='wards')
+    comment = models.ForeignKey(Comment, null=True, related_name='wards')
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now_add=True)
+
+    def is_updated(self, new_updated_time):
+        """
+        Check post is updated.
+
+        :param new_updated_time: json datetime
+        :return: True is updated and False is not updated
+        """
+        return self.updated_time.strftime('%Y-%m-%dT%H:%M:%S') != new_updated_time.split('+')[0]

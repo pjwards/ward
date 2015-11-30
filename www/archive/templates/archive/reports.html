@@ -150,13 +150,11 @@
             $("#reports_limit").on("input", function () {
                 reports_limit = $("#reports_limit").val();
                 getReports(reports_url, reports_table, reports_limit, 1, reports_paging);
-                reports_paging.first();
             });
         });
 
         function reload () {
             getReports(reports_url, reports_table, reports_limit, 1, reports_paging);
-            reports_paging.first();
         }
     </script>
 {% endblock %}

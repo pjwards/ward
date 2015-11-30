@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment, Report
+from .models import User, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment, Report, Ward
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -92,6 +92,10 @@ class DeletedCommentAdmin(admin.ModelAdmin):
     search_fields = ['user']
 
 
+class WardAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'group', 'post', 'comment', 'created_time', 'updated_time')
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
@@ -102,3 +106,4 @@ admin.site.register(Blacklist, BlacklistAdmin)
 admin.site.register(Report, ReportAdmin)
 admin.site.register(DeletedPost, DeletedPostAdmin)
 admin.site.register(DeletedComment, DeletedCommentAdmin)
+admin.site.register(Ward, WardAdmin)

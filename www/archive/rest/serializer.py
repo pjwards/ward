@@ -1,4 +1,4 @@
-from archive.models import User, Group, Post, Comment, Media, Attachment, Blacklist, Report
+from archive.models import User, Group, Post, Comment, Media, Attachment, Blacklist, Report, Ward
 from rest_framework import serializers
 
 __author__ = "Donghyun Seo"
@@ -92,3 +92,14 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
 
 class BlacklistUserSerializer(UserSerializer):
     blacklist = BlacklistSerializer(many=True, read_only=True)
+
+
+class WardSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Ward
+        # fields = '__all__'
+        read_only_fields = '__all__'
+        exclude = ('user',)
+        depth = 2

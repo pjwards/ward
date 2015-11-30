@@ -590,46 +590,38 @@
 
             $("#post_issue_run").on("click", function () {
                 getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
-                post_issue_paging.first();
             });
 
             $("#comment_issue_run").on("click", function () {
                 getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
-                comment_issue_paging.first();
             });
 
             $("#post_archive_run").on("click", function () {
                 getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
-                post_archive_paging.first();
             });
 
             $("#comment_archive_run").on("click", function () {
                 getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
-                comment_archive_paging.first();
             });
 
             $("#post_issue_limit").on("input", function () {
                 post_issue_limit = $("#post_issue_limit").val();
                 getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
-                post_issue_paging.first();
             });
 
             $("#comment_issue_limit").on("input", function () {
                 comment_issue_limit = $("#comment_issue_limit").val();
                 getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
-                comment_issue_paging.first();
             })
 
             $("#post_archive_limit").on("input", function () {
                 post_archive_limit = $("#post_archive_limit").val();
                 getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
-                post_archive_paging.first();
             });
 
             $("#comment_archive_limit").on("input", function () {
                 comment_archive_limit = $("#comment_archive_limit").val();
                 getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
-                comment_archive_paging.first();
             });
         });
     </script>

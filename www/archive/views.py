@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User as DjangoUser
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
@@ -393,6 +394,88 @@ def reports(request):
     return render(request, 'archive/reports.html', {})
 
 
+@login_required()
+def ward(request, object_id):
+    """
+    Report object
+
+    :param request: request
+    :param object_id: object id
+    :return: render
+    """
+
+    if request.method == "POST":
+        _user = request.user
+        _ward = Ward()
+        is_exist = False   # report is already exist
+        try:
+            # Post id is bigger than 20
+            if len(object_id) > 20:
+                _object = Post.objects.get(pk=object_id)
+                if not Ward.objects.filter(user=_user, post=_object).exists():
+                    _ward.post = _object
+                else:
+                    _ward = Ward.objects.filter(user=_user, post=_object)[0]
+                    is_exist = True
+            else:
+                _object = Comment.objects.get(pk=object_id)
+                if not Ward.objects.filter(user=_user, comment=_object).exists():
+                    _ward.comment = _object
+                else:
+                    _ward = Ward.objects.filter(user=_user, comment=_object)[0]
+                    is_exist = True
+        except (Post.DoesNotExist, Comment.DoesNotExist):
+            error = 'Did not exist this object.'
+            return JsonResponse({'error': error})
+
+        # If report is already exist, renew the report.
+        if is_exist:
+            _ward.created_time = date_utils.timezone.now()
+            _ward.updated_time = date_utils.timezone.now()
+            _ward.save()
+        else:
+            _ward.group = _object.group
+            _ward.user = _user
+            _ward.save()
+        return JsonResponse({'success': 'Ward success'})
+
+
+@login_required()
+def ward_update(request, ward_id):
+    """
+    Update Ward
+
+    :param request: request
+    :param ward_id: ward id
+    :return: render
+    """
+    if request.method == "POST":
+        _ward = get_object_or_404(Ward, id=ward_id)
+        _ward.updated_time = date_utils.timezone.now()
+        _ward.save()
+        return JsonResponse({'success': 'Ward open success'})
+
+
+@login_required()
+def wards(request):
+    """
+    Display wards
+
+    :param request: request
+    :return: render
+    """
+    _user = request.user
+    _groups = list(set(Group.objects.filter(wards__user=_user).all()))
+
+    return render(
+        request,
+        'archive/wards.html',
+        {
+            'groups': _groups,
+        }
+    )
+
+
 # ViewSets define the view behavior.
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -770,6 +853,36 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response({'post_count': post_count, 'comment_count': comment_count})
 
+    @detail_route()
+    def post_ward(self, request, pk=None):
+        """
+        Return post wards
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        _group = self.get_object()
+        user_id = self.request.query_params.get('user_id', None)
+        _user = get_object_or_404(DjangoUser, id=user_id)
+        _wards = Ward.objects.filter(group=_group, user=_user).exclude(post=None).order_by('-created_time')
+        return self.response_models(_wards, request, WardSerializer)
+
+    @detail_route()
+    def comment_ward(self, request, pk=None):
+        """
+        Return comment wards
+
+        :param request: request
+        :param pk: pk
+        :return: response model
+        """
+        _group = self.get_object()
+        user_id = self.request.query_params.get('user_id', None)
+        _user = get_object_or_404(DjangoUser, id=user_id)
+        _wards = Ward.objects.filter(group=_group, user=_user).exclude(comment=None).order_by('-created_time')
+        return self.response_models(_wards, request, WardSerializer)
+
     def response_models(self, models, request, model_serializer):
         """
         Return response for models with pagination
@@ -1027,6 +1140,14 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Report.objects.all().order_by('-updated_time')
     serializer_class = ReportSerializer
+
+
+class WardViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Ward View Set
+    """
+    queryset = Ward.objects.all().order_by('-created_time')
+    serializer_class = WardSerializer
 
 
 def about(request):
