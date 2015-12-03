@@ -1,5 +1,8 @@
 from __future__ import absolute_import
 import logging
+from time import sleep
+
+from django.utils import timezone
 from facebook import GraphAPIError
 from celery import shared_task
 from archive.fb.fb_request import FBRequest
@@ -274,26 +277,42 @@ def store_group_feed(group_id, query, is_whole=False):
     :param is_whole: whole or parts
     :return:
     """
-    logger.info('Saving %s feed', group_id)
+    logger.info('=== Start saving %s feed ===', group_id)
+    start_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('Start time : %s', start_time)
+
     group = Group.objects.filter(id=group_id)[0]
 
     if group.privacy == "CLOSED":
+        logger.info('=== Fail to save %s feed (Group is closed) ===', group_id)
         return False
 
     feeds = []
 
-    if is_whole:
-        while query is not None:
-            query = fb_request.feed(group, query, feeds)
-    else:
-        fb_request.feed(group, query, feeds)
+    while query is not None:
+        query = fb_request.feed(group, query, feeds)
+        sleep(1)
+        if not is_whole:
+            break
 
     for feed in feeds:
-        store_feed(feed, group)
+        try:
+            store_feed(feed, group)
+        except Exception as e:
+            logger.info('Fail to store by exception : %s', e)
+            try:
+                store_feed(feed, group)
+            except Exception as e:
+                logger.info('Fail to store again by exception : %s', e)
 
     group.is_stored = True
     group.save()
     check_cp_cnt_group(group)
+
+    end_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('End time : %s', end_time)
+    logger.info('Time difference : %s', end_time - start_time)
+    logger.info('=== End saving %s feed ===', group_id)
 
 
 @shared_task
@@ -307,36 +326,59 @@ def update_group_feed(group_id, query, is_whole=False):
     :param is_whole: whole or parts
     :return: success?
     """
-    logger.info('Updating %s feed', group_id)
-    group_data = fb_request.group(group_id)
+    logger.info('=== Start updating %s feed ===', group_id)
+    start_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('Start time : %s', start_time)
+
+    try:
+        group_data = fb_request.group(group_id)
+    except Exception as e:
+        logger.info('Fail to get group data by exception : %s', e)
+        try:
+            group_data = fb_request.group(group_id)
+        except Exception as e:
+            logger.info('Fail to get group data again by exception : %s', e)
+            return False
+
     updated_time = group_data.get('updated_time')
     group = Group.objects.filter(id=group_id)[0]
 
     if not group.is_updated(updated_time):
+        logger.info('=== Fail to update %s feed (Already updated) ===', group_id)
         return False
 
     if group.privacy == "CLOSED":
+        logger.info('=== Fail to update %s feed (Group is closed) ===', group_id)
         return False
 
     store_group(group_data)
 
     feeds = []
 
-    if is_whole:
-        while query is not None:
-            query = fb_request.feed(group, query, feeds)
-            for feed in feeds:
-                if not store_feed(feed, group):
-                    check_cp_cnt_group(group)
-                    return True
-            feeds = []
-    else:
-        fb_request.feed(group, query, feeds)
+    while query is not None:
+        query = fb_request.feed(group, query, feeds)
         for feed in feeds:
-            if not store_feed(feed, group):
+            try:
+                res = store_feed(feed, group)
+            except Exception as e:
+                logger.info('Fail to update by exception : %s', e)
+                try:
+                    res = store_feed(feed, group)
+                except Exception as e:
+                    logger.info('Fail to update again by exception : %s', e)
+            if not res:
                 check_cp_cnt_group(group)
                 return True
+        feeds = []
+        if not is_whole:
+            break
+
     check_cp_cnt_group(group)
+
+    end_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('End time : %s', end_time)
+    logger.info('Time difference : %s', end_time - start_time)
+    logger.info('=== End updating %s feed ===', group_id)
     return True
 
 
@@ -350,10 +392,18 @@ def update_groups_feed(query, is_whole=False):
     :param is_whole: whole or parts
     :return:
     """
+    logger.info('=== Start updating groups ===')
+    start_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('Start time : %s', start_time)
     groups = Group.objects.values('id')
 
     for group in groups:
         update_group_feed(group.get('id'), query, is_whole)
+
+    end_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('End time : %s', end_time)
+    logger.info('Time difference : %s', end_time - start_time)
+    logger.info('=== End updating groups ===')
 
 
 def delete_group_content(object_id, model):

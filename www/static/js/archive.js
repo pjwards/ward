@@ -230,7 +230,7 @@ var pcDisplayM = function (rows, row, name) {
 }
 
 /**
- * Post and comment Display for management
+ * Post and comment Display for report
  */
 var pcDisplayR = function (rows, row) {
     var object = row["post"]? row["post"]: row["comment"]? row["comment"]:undefined;

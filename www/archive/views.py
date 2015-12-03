@@ -60,7 +60,7 @@ def groups(request):
 
         # Store the group
         _group = tasks.store_group(group_data)
-        tasks.store_group_feed.delay(_group.id, get_feed_query(100, 100))
+        tasks.store_group_feed.delay(_group.id, get_feed_query(), True)
 
         return JsonResponse({'success': 'Success to enroll ' + _group.id})
 
@@ -223,6 +223,7 @@ def group_management(request, group_id):
             })
 
 
+@user_passes_test(lambda u: u.is_superuser)
 def group_store(request, group_id):
     """
     Store group method
@@ -236,7 +237,7 @@ def group_store(request, group_id):
         error = 'Does not exist group.'
         return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.store_group_feed.delay(group_id, get_feed_query(100, 100))
+    tasks.store_group_feed.delay(group_id, get_feed_query(), True)
     return HttpResponseRedirect(reverse('archive:groups'))
 
 
@@ -253,7 +254,7 @@ def group_update(request, group_id):
         error = 'Does not exist group.'
         return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, 'error': error})
 
-    if tasks.update_group_feed.delay(group_id, get_feed_query(100, 100)):
+    if tasks.update_group_feed.delay(group_id, get_feed_query(), True):
         return HttpResponseRedirect(reverse('archive:groups'))
 
 

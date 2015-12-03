@@ -34,7 +34,6 @@
 * Bootstrap
 * Bootstrap Social
 
-####
 
 * js-cookie
 * wow
