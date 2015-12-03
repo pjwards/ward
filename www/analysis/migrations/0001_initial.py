@@ -7,23 +7,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('archive', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SpamContent',
+            name='SpamContentList',
             fields=[
-                ('id', models.CharField(max_length=50, serialize=False, primary_key=True)),
-                ('text', models.TextField(null=True, blank=True)),
-                ('status', models.CharField(max_length=10, default='temp')),
+                ('id', models.CharField(serialize=False, max_length=50, primary_key=True)),
+                ('text', models.TextField(blank=True, null=True)),
+                ('status', models.CharField(default='temp', max_length=10)),
+                ('group', models.ForeignKey(to='archive.Group')),
             ],
         ),
         migrations.CreateModel(
-            name='SpamList',
+            name='SpamWordList',
             fields=[
-                ('word', models.CharField(max_length=255, serialize=False, primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
+                ('word', models.CharField(max_length=255)),
                 ('count', models.IntegerField(default=1)),
-                ('status', models.CharField(max_length=10, default='temp')),
+                ('status', models.CharField(default='temp', max_length=10)),
+                ('group', models.ForeignKey(to='archive.Group')),
             ],
         ),
     ]

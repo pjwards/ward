@@ -14,17 +14,17 @@ NEVERCACHE_KEY = "^)h*m1byrat2%jcaool9n@fc%=%%#97k0$qrh7yn2p^g-qw)ku"
 DATABASES = {
     "default": {
         # Ends with "postgresql_psycopg2", "mysql", "sqlite3" or "oracle".
-        "ENGINE": "django.db.backends.sqlite3",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
         # DB name or path to database file if using sqlite3.
-        "NAME": "dev.db",
+        "NAME": "ward",
         # Not used with sqlite3.
-        "USER": "",
+        "USER": "donghyun",
         # Not used with sqlite3.
         "PASSWORD": "",
         # Set to empty string for localhost. Not used with sqlite3.
-        "HOST": "",
+        "HOST": "localhost",
         # Set to empty string for default. Not used with sqlite3.
-        "PORT": "",
+        "PORT": "5432",
     }
 }
 
@@ -69,5 +69,6 @@ SOCIAL_AUTH_FACEBOOK_SECRET = FB_APP_SECRET
 ###################
 
 # BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+# BROKER_URL = 'ec2-52-192-224-80.ap-northeast-1.compute.amazonaws.com'
 BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'db+sqlite:///results.db'

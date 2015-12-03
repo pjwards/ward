@@ -525,17 +525,17 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Method Dictionary for group by time
         dic = {
-            'year': 'strftime("%%Y", created_time)',
-            'month': 'strftime("%%Y-%%m", created_time)',
-            'day': 'strftime("%%Y-%%m-%%d", created_time)',
-            'hour': 'strftime("%%Y-%%m-%%d-%%H", created_time)',
-            'hour_total': 'strftime("%%H", created_time)',
+            'year': "date_trunc('year', created_time at time zone 'UTC' AT TIME ZONE '+9')",
+            'month': "date_trunc('month', created_time at time zone 'UTC' AT TIME ZONE '+9')",
+            'day': "date_trunc('day', created_time at time zone 'UTC' AT TIME ZONE '+9')",
+            'hour': "date_trunc('hour', created_time at time zone 'UTC' AT TIME ZONE '+9')",
+            'hour_total': "date_part('hour', created_time at time zone 'UTC' AT TIME ZONE '+9')",
         }
 
         # Get posts and comment count in some date
-        all_posts = all_posts.extra({'date': dic[method]}).order_by().values('date') \
+        all_posts = all_posts.extra(select={'date': dic[method]}).order_by().values('date') \
             .annotate(p_count=Count('created_time'))
-        all_comments = all_comments.extra({'date': dic[method]}).order_by().values('date') \
+        all_comments = all_comments.extra(select={'date': dic[method]}).order_by().values('date') \
             .annotate(c_count=Count('created_time'))
 
         # Max count in above data
@@ -563,21 +563,29 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         data_source = {}
 
         for comment in all_comments:
+            if method == "hour_total":
+                date = '{0:0.0f}'.format(comment.get('date')).zfill(2)
+            else:
+                date = comment.get("date").isoformat()[:13].replace('T', '-')
             dic = dict()
-            dic["date"] = comment.get("date")[date_start_len:date_end_len]
+            dic["date"] = date[date_start_len:date_end_len]
             dic["posts"] = 0
             dic["comments"] = comment.get("c_count")
-            data_source[comment.get("date")] = dic
+            data_source[date] = dic
 
         for post in all_posts:
-            if post.get("date") in data_source:
-                data_source[post.get("date")]["posts"] = post.get("p_count")
+            if method == "hour_total":
+                date = '{0:0.0f}'.format(post.get('date')).zfill(2)
+            else:
+                date = post.get("date").isoformat()[:13].replace('T', '-')
+            if date in data_source:
+                data_source[date]["posts"] = post.get("p_count")
             else:
                 dic = dict()
-                dic["date"] = post.get("date")[date_start_len:date_end_len]
+                dic["date"] = date[date_start_len:date_end_len]
                 dic["posts"] = post.get("p_count")
                 dic["comments"] = 0
-                data_source[post.get("date")] = dic
+                data_source[date] = dic
 
         # Return json data after rearranging data
         return Response({

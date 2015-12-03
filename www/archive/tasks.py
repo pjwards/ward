@@ -23,6 +23,7 @@ def store_user(user_id, user_name, group):
 
     :param user_id: user id
     :param user_name:  user name
+    :param group: user group
     :return: user model
     """
     user = User.objects.filter(id=user_id)
@@ -41,19 +42,21 @@ def store_user(user_id, user_name, group):
 
 
 @shared_task
-def store_attachment(attachment_data, post=None, comment=None):
+def store_attachment(attachment_data, post_id=None, comment_id=None):
     """
     This method stores a attachment. You must put one of post or comment.
 
     :param attachment_data: attachment data(dictionary)
-    :param post: post model for foreign key
-    :param comment: comment model for foreign key
+    :param post_id: post id for foreign key
+    :param comment_id: comment id for foreign key
     :return:
     """
     attachment = Attachment()
-    if post is not None:
+    if post_id is not None:
+        post = Post.objects.filter(id=post_id)[0]
         attachment.post = post
-    if comment is not None:
+    if comment_id is not None:
+        comment = Comment.objects.filter(id=comment_id)[0]
         attachment.comment = comment
     if 'url' in attachment_data:
         attachment.url = attachment_data.get('url')
@@ -76,26 +79,30 @@ def store_attachment(attachment_data, post=None, comment=None):
     # store sub attachments
     if 'subattachments' in attachment_data:
         for subattachment_data in attachment_data.get('subattachments').get('data'):
-            if post is not None:
-                attachment.post = post
-                store_attachment(attachment_data=subattachment_data, post=post)
+            if post_id is not None:
+                store_attachment.delay(attachment_data=subattachment_data, post_id=post_id)
 
-            if comment is not None:
-                attachment.comment = comment
-                store_attachment(attachment_data=subattachment_data, comment=comment)
+            if comment_id is not None:
+                store_attachment.delay(attachment_data=subattachment_data, comment_id=comment_id)
 
 
 @shared_task
-def store_comment(comment_data, post, group, parent=None):
+def store_comment(comment_data, post_id, group_id, parent_id=None):
     """
     This method stores a comment. If you want to store reply, put parent.
 
     :param comment_data: comment data(dictionary)
-    :param post: post model for foreign key
-    :param group: comment's group
-    :param parent: comment model for parent
+    :param post_id: post id for foreign key
+    :param group_id: comment's group id
+    :param parent_id: comment model for parent id
     :return:
     """
+    post = Post.objects.filter(id=post_id)[0]
+    group = Group.objects.filter(id=group_id)[0]
+    parent = None
+    if parent_id is not None:
+        parent = Comment.objects.filter(id=parent_id)[0]
+
     comment_id = comment_data.get('id')
     if not Comment.objects.filter(id=comment_id).exists():
         comment = Comment(id=comment_id)
@@ -122,7 +129,7 @@ def store_comment(comment_data, post, group, parent=None):
         logger.info('Saved comment: %s', comment.id)
 
         if 'attachment' in comment_data:
-            store_attachment(attachment_data=comment_data.get('attachment'), comment=comment)
+            store_attachment.delay(attachment_data=comment_data.get('attachment'), comment_id=comment.id)
     else:
         comment = Comment.objects.filter(id=comment_id)[0]
         comment.like_count = comment_data.get('like_count')
@@ -140,19 +147,20 @@ def store_comment(comment_data, post, group, parent=None):
     if 'comments' in comment_data:
         for reply_comment_data in comment_data.get('comments').get('data'):
             comment = Comment.objects.filter(id=comment_id)[0]
-            store_comment(comment_data=reply_comment_data, post=post, group=group, parent=comment)
+            store_comment.delay(comment_data=reply_comment_data, post_id=post.id, group_id=group.id, parent_id=comment.id)
 
 
 @shared_task
-def store_feed(feed_data, group):
+def store_feed(feed_data, group_id):
     """
     This method stores a feed.
 
     :param feed_data: feed data(dictionary)
-    :param group: post's group
+    :param group_id: post's group id
     :return:
     """
     # save post from feeds
+    group = Group.objects.filter(id=group_id)[0]
     post_id = feed_data.get('id')
     if not Post.objects.filter(id=post_id).exists():
         post = Post(id=post_id)
@@ -182,7 +190,7 @@ def store_feed(feed_data, group):
         post_attachments = feed_data.get('attachments')
         if post_attachments:
             for attachment_data in post_attachments.get('data'):
-                store_attachment(attachment_data=attachment_data, post=post)
+                store_attachment.delay(attachment_data=attachment_data, post_id=post.id)
     else:
         post = Post.objects.filter(id=post_id)[0]
 
@@ -216,7 +224,7 @@ def store_feed(feed_data, group):
 
     # save comments
     for comment_data in post_comments_data:
-        store_comment(comment_data=comment_data, post=post, group=group)
+        store_comment.delay(comment_data=comment_data, post_id=post_id, group_id=group.id)
 
     return True
 
@@ -297,11 +305,11 @@ def store_group_feed(group_id, query, is_whole=False):
 
     for feed in feeds:
         try:
-            store_feed(feed, group)
+            store_feed.delay(feed, group.id)
         except Exception as e:
             logger.info('Fail to store by exception : %s', e)
             try:
-                store_feed(feed, group)
+                store_feed.delay(feed, group.id)
             except Exception as e:
                 logger.info('Fail to store again by exception : %s', e)
 
@@ -343,6 +351,8 @@ def update_group_feed(group_id, query, is_whole=False):
     updated_time = group_data.get('updated_time')
     group = Group.objects.filter(id=group_id)[0]
 
+    check_cp_cnt_group(group)
+
     if not group.is_updated(updated_time):
         logger.info('=== Fail to update %s feed (Already updated) ===', group_id)
         return False
@@ -359,21 +369,18 @@ def update_group_feed(group_id, query, is_whole=False):
         query = fb_request.feed(group, query, feeds)
         for feed in feeds:
             try:
-                res = store_feed(feed, group)
+                res = store_feed(feed, group.id)
             except Exception as e:
                 logger.info('Fail to update by exception : %s', e)
                 try:
-                    res = store_feed(feed, group)
+                    res = store_feed(feed, group.id)
                 except Exception as e:
                     logger.info('Fail to update again by exception : %s', e)
             if not res:
-                check_cp_cnt_group(group)
                 return True
         feeds = []
         if not is_whole:
             break
-
-    check_cp_cnt_group(group)
 
     end_time = timezone.datetime.now().replace(microsecond=0)
     logger.info('End time : %s', end_time)
@@ -398,7 +405,7 @@ def update_groups_feed(query, is_whole=False):
     groups = Group.objects.values('id')
 
     for group in groups:
-        update_group_feed(group.get('id'), query, is_whole)
+        update_group_feed.delay(group.get('id'), query, is_whole)
 
     end_time = timezone.datetime.now().replace(microsecond=0)
     logger.info('End time : %s', end_time)

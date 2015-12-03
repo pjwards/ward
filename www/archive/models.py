@@ -70,7 +70,7 @@ class Group(models.Model):
 class User(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=50)
-    picture = models.CharField(max_length=255, null=True, blank=True)
+    picture = models.CharField(max_length=2083, null=True, blank=True)
     groups = models.ManyToManyField(Group)
 
     objects = SearchableManager()
@@ -86,7 +86,7 @@ class Post(models.Model):
     created_time = models.DateTimeField()
     updated_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
-    picture = models.CharField(max_length=255, null=True, blank=True)
+    picture = models.CharField(max_length=2083, null=True, blank=True)
     comment_count = models.IntegerField(default=0)
     like_count = models.IntegerField(default=0)
     share_count = models.IntegerField(default=0)
@@ -155,13 +155,13 @@ class Comment(models.Model):
 class Media(models.Model):
     height = models.IntegerField(null=True)
     width = models.IntegerField(null=True)
-    src = models.CharField(max_length=255, null=True, blank=True)
+    src = models.CharField(max_length=2083, null=True, blank=True)
 
 
 class Attachment(models.Model):
     post = models.ForeignKey(Post, null=True, related_name='attachments')
     comment = models.ForeignKey(Comment, null=True, related_name='attachments')
-    url = models.CharField(max_length=255, null=True, blank=True)
+    url = models.CharField(max_length=2083, null=True, blank=True)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=30, null=True, blank=True)
@@ -194,7 +194,7 @@ class DeletedPost(models.Model):
     created_time = models.DateTimeField()
     updated_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
-    picture = models.CharField(max_length=255, null=True, blank=True)
+    picture = models.CharField(max_length=2083, null=True, blank=True)
     comment_count = models.IntegerField(default=0)
     like_count = models.IntegerField(default=0)
     share_count = models.IntegerField(default=0)
