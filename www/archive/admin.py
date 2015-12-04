@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment, Report, Ward
+from .models import FBUser, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment, Report, Ward
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -96,7 +96,7 @@ class WardAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'group', 'post', 'comment', 'created_time', 'updated_time')
 
 
-admin.site.register(User, UserAdmin)
+admin.site.register(FBUser, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)

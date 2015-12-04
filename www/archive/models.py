@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.models import User
 from mezzanine.core.managers import SearchableManager
 
 __author__ = "Donghyun Seo"
@@ -41,7 +41,7 @@ class Group(models.Model):
     is_stored = models.BooleanField(default=False)
     post_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
-    owner = models.ForeignKey('User', null=True, related_name='group_owner')
+    owner = models.ForeignKey('FBUser', null=True, related_name='group_owner')
 
     objects = SearchableManager()
     search_fields = ("name",)
@@ -67,7 +67,7 @@ class Group(models.Model):
         return get_different_time(self.updated_time)
 
 
-class User(models.Model):
+class FBUser(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=50)
     picture = models.CharField(max_length=2083, null=True, blank=True)
@@ -82,7 +82,7 @@ class User(models.Model):
 
 class Post(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
-    user = models.ForeignKey(User, related_name='posts')
+    user = models.ForeignKey(FBUser, related_name='posts')
     created_time = models.DateTimeField()
     updated_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
@@ -127,7 +127,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
-    user = models.ForeignKey(User, related_name='comments')
+    user = models.ForeignKey(FBUser, related_name='comments')
     created_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
     like_count = models.IntegerField(default=0)
@@ -174,7 +174,7 @@ class Attachment(models.Model):
 
 class Blacklist(models.Model):
     group = models.ForeignKey(Group, related_name='blacklist')
-    user = models.ForeignKey(User, related_name='blacklist')
+    user = models.ForeignKey(FBUser, related_name='blacklist')
     count = models.IntegerField(default=0)
     updated_time = models.DateTimeField(auto_now=True)
 
@@ -183,14 +183,14 @@ class Report(models.Model):
     post = models.ForeignKey(Post, null=True, related_name='reports')
     comment = models.ForeignKey(Comment, null=True, related_name='reports')
     group = models.ForeignKey(Group, related_name='reports')
-    user = models.ForeignKey(User, related_name='reports')
+    user = models.ForeignKey(FBUser, related_name='reports')
     status = models.CharField(max_length=30, default='new')
     updated_time = models.DateTimeField(auto_now=True)
 
 
 class DeletedPost(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
-    user = models.ForeignKey(User, related_name='delete_posts')
+    user = models.ForeignKey(FBUser, related_name='delete_posts')
     created_time = models.DateTimeField()
     updated_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
@@ -240,7 +240,7 @@ class DeletedPost(models.Model):
 
 class DeletedComment(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
-    user = models.ForeignKey(User, related_name='delete_comments')
+    user = models.ForeignKey(FBUser, related_name='delete_comments')
     created_time = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
     like_count = models.IntegerField(default=0)
@@ -276,7 +276,7 @@ class DeletedComment(models.Model):
 
 
 class Ward(models.Model):
-    user = models.ForeignKey(DjangoUser, related_name='wards')
+    user = models.ForeignKey(User, related_name='wards')
     group = models.ForeignKey(Group, related_name='wards')
     post = models.ForeignKey(Post, null=True, related_name='wards')
     comment = models.ForeignKey(Comment, null=True, related_name='wards')

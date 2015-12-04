@@ -266,7 +266,7 @@ def user(request, user_id):
     :param user_id: user id
     :return: render
     """
-    _user = get_object_or_404(User, id=user_id)
+    _user = get_object_or_404(FBUser, id=user_id)
     _groups = _user.groups
 
     return render(
@@ -482,8 +482,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     User View Set
     """
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    queryset = FBUser.objects.all()
+    serializer_class = FBUserSerializer
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -667,10 +667,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Count posts and comments about user in group
         posts = {}
-        p_counts = _group.user_set.annotate(p_count=Count('posts')).values('p_count')
+        p_counts = _group.fbuser_set.annotate(p_count=Count('posts')).values('p_count')
 
         comments = {}
-        c_counts = _group.user_set.annotate(c_count=Count('comments')).values('c_count')
+        c_counts = _group.fbuser_set.annotate(c_count=Count('comments')).values('c_count')
 
         # Count user about counted number
         for p_count in p_counts:
@@ -695,9 +695,9 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         search = self.request.query_params.get('q', '')
 
         if search:
-            return self.response_models(_group.user_set.order_by('name').search(search), request, UserSerializer)
+            return self.response_models(_group.fbuser_set.order_by('name').search(search), request, FBUserSerializer)
         else:
-            return self.response_models(_group.user_set.order_by('name'), request, UserSerializer)
+            return self.response_models(_group.fbuser_set.order_by('name'), request, FBUserSerializer)
 
     @detail_route()
     def user_search(self, request, pk=None):
@@ -712,9 +712,9 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         search = self.request.query_params.get('q', '')
         if search:
-            return self.response_models(_group.user_set.order_by('name').search(search), request, UserSerializer)
+            return self.response_models(_group.fbuser_set.order_by('name').search(search), request, FBUserSerializer)
         else:
-            return self.response_models(_group.user_set.order_by('name'), request, UserSerializer)
+            return self.response_models(_group.fbuser_set.order_by('name'), request, FBUserSerializer)
 
     @detail_route()
     def post_search(self, request, pk=None):
@@ -790,7 +790,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :return: json
         """
         _group = self.get_object()
-        users = _group.user_set.values('id', 'name')
+        users = _group.fbuser_set.values('id', 'name')
 
         return Response({'users': users})
 
@@ -816,7 +816,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :return: response model
         """
         user_id = self.request.query_params.get('user_id', None)
-        _user = get_object_or_404(User, id=user_id)
+        _user = get_object_or_404(FBUser, id=user_id)
 
         blacklist = Blacklist.objects.get(group=self.get_object(), user=_user)
         return Response(BlacklistSerializer(blacklist, context={'request': request}).data)
@@ -835,13 +835,13 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         search = self.request.query_params.get('q', '')
 
         if search:
-            blacklist = _group.user_set.filter(blacklist__group=_group).exclude(blacklist=None).order_by(
+            blacklist = _group.fbuser_set.filter(blacklist__group=_group).exclude(blacklist=None).order_by(
                 '-blacklist__updated_time').search(search)
         else:
-            blacklist = _group.user_set.filter(blacklist__group=_group).exclude(blacklist=None).order_by(
+            blacklist = _group.fbuser_set.filter(blacklist__group=_group).exclude(blacklist=None).order_by(
                 '-blacklist__updated_time')
 
-        return self.response_models(blacklist, request, BlacklistUserSerializer)
+        return self.response_models(blacklist, request, BlacklistFBUserSerializer)
 
     @detail_route()
     @renderer_classes((JSONRenderer,))
@@ -855,7 +855,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         _group = self.get_object()
         user_id = self.request.query_params.get('user_id', None)
-        _user = get_object_or_404(User, id=user_id)
+        _user = get_object_or_404(FBUser, id=user_id)
 
         post_count = Post.objects.filter(group=_group, user=_user).count()
         comment_count = Comment.objects.filter(group=_group, user=_user).count()
@@ -1001,7 +1001,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         from_date = self.request.query_params.get('from', None)
         to_date = None
         user_id = self.request.query_params.get('user_id', None)
-        _user = get_object_or_404(User, id=user_id)
+        _user = get_object_or_404(FBUser, id=user_id)
 
         if from_date:
             from_date = date_utils.get_date_from_str(from_date)
@@ -1031,7 +1031,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Check method and return source by total or generate date
         if method == 'total':
-            for _user in _group.user_set.all():
+            for _user in _group.fbuser_set.all():
                 if model == 'post':
                     source[_user.id] = Post.objects.filter(group=_group, user=_user).count()
                 else:
@@ -1049,7 +1049,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             to_date = date_utils.combine_max_time(to_date)
 
         # Return source by special date
-        for _user in _group.user_set.all():
+        for _user in _group.fbuser_set.all():
             if model == 'post':
                 source[_user.id] = Post.objects.filter(group=_group, user=_user, created_time__gt=from_date,
                                                        created_time__lt=to_date).count()
@@ -1076,7 +1076,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         source = {}
         for x in range(max_len):
             source[x] = {
-                'user': UserSerializer(User.objects.get(id=sorted_x[x][0]), context={'request': request}).data,
+                'user': FBUserSerializer(FBUser.objects.get(id=sorted_x[x][0]), context={'request': request}).data,
                 'count': sorted_x[x][1],
             }
         return source
@@ -1094,7 +1094,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         search_check = self.request.query_params.get('c', None)
 
         if search_check == 'user':
-            _user = User.objects.filter(id=search)
+            _user = FBUser.objects.filter(id=search)
             return model.objects.filter(group=_group, user=_user).order_by('-created_time')
 
         if search:

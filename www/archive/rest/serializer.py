@@ -1,4 +1,4 @@
-from archive.models import User, Group, Post, Comment, Media, Attachment, Blacklist, Report, Ward
+from archive.models import FBUser, Group, Post, Comment, Media, Attachment, Blacklist, Report, Ward
 from rest_framework import serializers
 
 __author__ = "Donghyun Seo"
@@ -7,18 +7,18 @@ __email__ = "egaoneko@naver.com"
 
 
 # Serializers define the API representation.
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class FBUserSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
     posts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='post-detail')
 
     class Meta:
-        model = User
+        model = FBUser
         fields = '__all__'
         read_only_fields = '__all__'
 
 
-class ActivityUserSerializer(UserSerializer):
+class ActivityFBUserSerializer(FBUserSerializer):
     count = serializers.IntegerField()
 
 
@@ -90,7 +90,7 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
         depth = 1
 
 
-class BlacklistUserSerializer(UserSerializer):
+class BlacklistFBUserSerializer(FBUserSerializer):
     blacklist = BlacklistSerializer(many=True, read_only=True)
 
 

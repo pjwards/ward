@@ -6,7 +6,7 @@ from django.utils import timezone
 from facebook import GraphAPIError
 from celery import shared_task
 from archive.fb.fb_request import FBRequest
-from .models import User, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment
+from .models import FBUser, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -26,10 +26,10 @@ def store_user(user_id, user_name, group):
     :param group: user group
     :return: user model
     """
-    user = User.objects.filter(id=user_id)
+    user = FBUser.objects.filter(id=user_id)
     if not user:
         # save user
-        user = User(id=user_id, name=user_name)
+        user = FBUser(id=user_id, name=user_name)
         user.picture = fb_request.user_picture(user_id)
         user.save()
         logger.info('Saved user: %s', user.id)
