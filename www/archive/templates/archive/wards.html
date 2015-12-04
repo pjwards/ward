@@ -260,8 +260,10 @@
          * Init analysis.html
          */
         $(function () {
-            getWards(post_ward_url, user_id, post_ward_table, post_ward_limit, 1, post_ward_paging);
-            getWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, 1, comment_ward_paging);
+            {% if groups %}
+                getWards(post_ward_url, user_id, post_ward_table, post_ward_limit, 1, post_ward_paging);
+                getWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, 1, comment_ward_paging);
+            {% endif %}
 
             $("#post_ward_limit").on("input", function () {
                 post_ward_limit = $("#post_ward_limit").val();
