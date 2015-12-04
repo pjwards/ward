@@ -22,7 +22,10 @@
 * konlpy (tested with version 0.4.4)
 * django-allauth (tested with version 0.24.1)
 * redis (tested with version 2.10.3)
-* redis-server
+* uwsgi (tested with version 2.0.11.2)
+
+
+* psycopg2 (tested with version 2.6.1)
 * MeCab
 
 #### Front-End

@@ -69,6 +69,6 @@ SOCIAL_AUTH_FACEBOOK_SECRET = FB_APP_SECRET
 ###################
 
 # BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-# BROKER_URL = 'ec2-52-192-224-80.ap-northeast-1.compute.amazonaws.com'
+# BROKER_URL = 'ward.dszwip.0001.apne1.cache.amazonaws.com:6379'
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'db+sqlite:///results.db'
