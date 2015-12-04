@@ -73,5 +73,8 @@ www/logs
 # Local Settings
 local_settings.py
 
-#bower
+# bower
 bower_components
+
+# statics
+collected_statics
