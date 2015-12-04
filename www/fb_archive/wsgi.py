@@ -14,7 +14,7 @@ from django.core.wsgi import get_wsgi_application
 
 from mezzanine.utils.conf import real_project_name
 
-site.addsitedir('/home/ubuntu/.virtualenvs/pjwards/lib/python3.4/site-packages')
+site.addsitedir('/home/ubuntu/.virtualenvs/fb_archive/lib/python3.4/site-packages')
 sys.path.insert(0, '/home/ubuntu/workspace/ward')
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE",
