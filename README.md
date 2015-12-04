@@ -138,3 +138,41 @@ sudo redis-server
 Go to admin sites and add social application.
 You need app id, app secret for facebook oauth.
 If you lean more, [this site](https://godjango.com/65-starting-with-django-allauth/) helps you.
+
+
+### Ubuntu
+
+```bash
+# JPype1-py3
+sudo apt-get install default-jdk
+sudo apt-get install g++ python3-dev
+
+# lxml
+sudo apt-get install python3-lxml
+sudo apt-get install libxml2-dev libxslt-dev python-dev
+sudo apt-get build-dep python3-lxml
+
+# Pillow
+sudo apt-get build-dep python-imaging
+sudo apt-get install libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
+
+# psycopg2
+sudo apt-get install python-psycopg2
+sudo apt-get install libpq-dev python-dev
+
+# npm
+sudo apt-get install nodejs
+sudo apt-get install npm
+sudo npm install -g bower
+
+# redis
+sudo apt-get install redis-server
+
+cd product_forder
+bower install
+cd product_folder/www
+mkdir logs
+python manage.py migrate
+python manage.py createsuperuser
+
+```
