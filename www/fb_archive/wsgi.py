@@ -10,14 +10,15 @@ import site
 
 import os
 import sys
-from django.core.wsgi import get_wsgi_application
+
+
+site.addsitedir('/home/ubuntu/.virtualenvs/fb_archive/lib/python3.4/site-packages')
 
 from mezzanine.utils.conf import real_project_name
-
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE",
                       "%s.settings" % real_project_name("fb_archive"))
 
 sys.path.insert(0, '/home/ubuntu/workspace/ward')
-site.addsitedir('/home/ubuntu/.virtualenvs/fb_archive/lib/python3.4/site-packages')
+
+from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()

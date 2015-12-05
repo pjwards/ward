@@ -78,3 +78,6 @@ bower_components
 
 # statics
 collected_statics
+
+# virtualenv
+venv
