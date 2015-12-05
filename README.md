@@ -161,12 +161,18 @@ sudo apt-get install python-psycopg2
 sudo apt-get install libpq-dev python-dev
 
 # npm
+sudo apt-get install -y python-software-properties python g++ make
+sudo add-apt-repository ppa:chris-lea/node.js
+sudo apt-get update
 sudo apt-get install nodejs
 sudo apt-get install npm
 sudo npm install -g bower
 
 # redis
 sudo apt-get install redis-server
+
+cd workspace
+sudo chown www-data:www-data -R *
 
 cd product_forder
 bower install
