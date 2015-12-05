@@ -133,13 +133,6 @@ sudo redis-server
 . run_celery.sh
 ```
 
-### OAuth Setting
-
-Go to admin sites and add social application.
-You need app id, app secret for facebook oauth.
-If you lean more, [this site](https://godjango.com/65-starting-with-django-allauth/) helps you.
-
-
 ### Ubuntu
 
 ```bash
@@ -182,3 +175,9 @@ python manage.py migrate
 python manage.py createsuperuser
 
 ```
+
+### OAuth Setting
+
+Go to admin sites and add social application.
+You need app id, app secret for facebook oauth.
+If you lean more, [this site](https://godjango.com/65-starting-with-django-allauth/) helps you.
