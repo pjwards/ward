@@ -390,9 +390,9 @@ from datetime import timedelta
 from archive.fb.fb_query import get_feed_query
 
 CELERYBEAT_SCHEDULE = {
-    'add-every-120-seconds': {
+    'add-every-30-seconds': {
         'task': 'archive.tasks.update_groups_feed',
-        'schedule': timedelta(seconds=120),
+        'schedule': timedelta(seconds=30),
         'args': (get_feed_query(), True)
     },
 }
