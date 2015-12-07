@@ -518,7 +518,7 @@ var getHourTotalStatistics = function (url, display, from, to) {
 /**
  * Get active by using ajax
  */
-var getActivity = function (url, limit, method, model, table) {
+var getActivity = function (url, limit, method, model, table, loading) {
 
     var fun = function (source) {
         var results = source;
@@ -536,6 +536,7 @@ var getActivity = function (url, limit, method, model, table) {
 
         table.reset()
         table.append(rows);
+        loading.hide();
     }
 
     data = {
@@ -563,7 +564,6 @@ var getProportion = function (url, post_display, comment_display) {
             brush: {
                 type: "pie",
                 showText: true,
-                active: "ie",
                 activeEvent: "click",
             },
             widget: [{
@@ -572,8 +572,6 @@ var getProportion = function (url, post_display, comment_display) {
             }, {
                 type: "tooltip",
                 orient: "left",
-            }, {
-                type: "legend",
             }]
         });
     }
@@ -734,7 +732,6 @@ var getArchiveByUser = function (url, user_id, table, limit, from, page, paging)
         var results = source["results"];
         var rows = []
         for (var i in results) {
-            console.dir('test');
             pcDisplay(rows, results[i]);
         }
         ;

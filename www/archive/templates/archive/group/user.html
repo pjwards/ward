@@ -236,6 +236,22 @@
                     <a href="#" class="page"><!= pages[i] !></a>
                     <! } !>
                 </script>
+
+                <div id="loading_activity_post_msg" style="display: none; font-size: 20px; color: red;">
+                    NOW LOADING...
+                </div>
+
+                <div id="loading_activity_comment_msg" style="display: none; font-size: 20px; color: red;">
+                    NOW LOADING...
+                </div>
+
+                <div id="loading_proportion_post_msg" style="display: none; font-size: 20px; color: red;">
+                    NOW LOADING...
+                </div>
+
+                <div id="loading_proportion_comment_msg" style="display: none; font-size: 20px; color: red;">
+                    NOW LOADING...
+                </div>
             </div>
         </div>
     </div>
@@ -259,8 +275,10 @@
             activity_tab = tab("#activity_tab", {
                 event: {
                     change: function (data) {
-                        getActivity(activity_url, 10, data.text.toLowerCase(), "post", post_activity_table);
-                        getActivity(activity_url, 10, data.text.toLowerCase(), "comment", comment_activity_table);
+                        loading_activity_post.show();
+                        loading_activity_comment.show();
+                        getActivity(activity_url, 10, data.text.toLowerCase(), "post", post_activity_table, loading_activity_post);
+                        getActivity(activity_url, 10, data.text.toLowerCase(), "comment", comment_activity_table, loading_activity_comment);
                     }
                 },
                 target: "#activity_tab_contents",
@@ -323,12 +341,49 @@
         });
 
         /**
+         * Loading message
+         */
+        jui.ready(["ui.modal"], function (modal) {
+            loading_activity_post = modal("#loading_activity_post_msg", {
+                target: "#post_activity_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_activity_comment = modal("#loading_activity_comment_msg", {
+                target: "#comment_activity_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_proportion_post = modal("#loading_proportion_post_msg", {
+                target: "#post_proportion",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_proportion_comment = modal("#loading_proportion_comment_msg", {
+                target: "#comment_proportion",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+        });
+
+        /**
          * Init user.html
          */
         $(function () {
-            getActivity(activity_url, 10, "total", "post", post_activity_table);
-            getActivity(activity_url, 10, "total", "comment", comment_activity_table);
+            loading_activity_post.show();
+            loading_activity_comment.show();
+            getActivity(activity_url, 10, "total", "post", post_activity_table, loading_activity_post);
+            getActivity(activity_url, 10, "total", "comment", comment_activity_table, loading_activity_comment);
 
+            loading_proportion_post.show();
+            loading_proportion_comment.show();
             getProportion(proportion_url, "#post_proportion", "#comment_proportion");
             getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
 
