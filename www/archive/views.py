@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
+from django.conf import settings
 from django.contrib.auth.models import User as DjangoUser
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
@@ -60,9 +61,25 @@ def groups(request):
 
         # Store the group
         _group = tasks.store_group(group_data)
-        tasks.store_group_feed.delay(_group.id, get_feed_query(), True)
+
+        if settings.ARCHIVE_GROUP_AUTO_SAVE:
+            tasks.store_group_feed.delay(_group.id, get_feed_query(), True, settings.ARCHIVE_USE_CELERY)
 
         return JsonResponse({'success': 'Success to enroll ' + _group.id})
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def groups_admin(request):
+    """
+    Get a group list by HTTP GET Method and enter a group by HTTP POST METHOD For Admin
+
+    :param request: request
+    :return: render
+    """
+    latest_group_list = Group.objects.order_by('name')
+
+    if request.method == "GET":
+        return render(request, 'archive/group/list_admin.html', {'latest_group_list': latest_group_list, })
 
 
 def group_analysis(request, group_id):
@@ -235,10 +252,10 @@ def group_store(request, group_id):
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
         error = 'Does not exist group.'
-        return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, 'error': error})
+        return render(request, 'archive/group/list_admin.html', {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.store_group_feed.delay(group_id, get_feed_query(), True)
-    return HttpResponseRedirect(reverse('archive:groups'))
+    tasks.store_group_feed.delay(group_id, get_feed_query(), True, settings.ARCHIVE_USE_CELERY)
+    return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
 def group_update(request, group_id):
@@ -254,8 +271,26 @@ def group_update(request, group_id):
         error = 'Does not exist group.'
         return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, 'error': error})
 
-    if tasks.update_group_feed.delay(group_id, get_feed_query(), True):
+    if tasks.update_group_feed.delay(group_id, get_feed_query(), True, True):
         return HttpResponseRedirect(reverse('archive:groups'))
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def group_check(request, group_id):
+    """
+    Check group method
+
+    :param request: request
+    :param group_id: group id
+    :return: if you succeed, redirect groups page
+    """
+    if not Group.objects.filter(id=group_id).exists():
+        latest_group_list = Group.objects.order_by('name')
+        error = 'Does not exist group.'
+        return render(request, 'archive/group/list_admin.html', {'latest_group_list': latest_group_list, 'error': error})
+
+    tasks.check_group_feed.delay(group_id, get_feed_query(), True, settings.ARCHIVE_USE_CELERY)
+    return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
 def user(request, user_id):

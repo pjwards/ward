@@ -242,7 +242,7 @@ var pcDisplayR = function (rows, row) {
         var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + object_id + '" target="_blank"><span class="fa fa-facebook"></span></a>';
         var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
     }
-    var checked_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'checked\'); reload()" style="color:#ffa500;">checked</btn>';
+    var checked_btn = '<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'checked\'); reload()" style="color:#ffa500;">checked</btn>';
     var hide_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'hide\'); reload()" style="color:#2f4f4f;">hide</btn>';
     var show_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'show\'); reload()" style="color:#6495ed;">show</btn>';
     var delete_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Are you sure delete?\')) reportAction(\'' + row["id"] + '\', \'delete\'); reload()" style="color:#ff1493;">deleted</btn>';
@@ -785,7 +785,7 @@ var getGroups = function (url, table, limit, page, search, paging) {
                 "comment_count": '<div class="h5">' + row["comment_count"] + '</div>',
                 "privacy": '<div class="h5">' + row["privacy"] + '</div>',
                 "is_stored": row["is_stored"] ? '<i class="icon-check"></i>' : '<i class="icon-close"></i>',
-                "update": '<a class="btn ' + privacy_btn + '" href="/archive/group/' + row["id"] + '/update/">Update</a>',
+                "update": '<a class="btn mini ' + privacy_btn + '" href="/archive/group/' + row["id"] + '/update/" style="color:#ffa500;">Update</a>',
             });
         }
         ;
@@ -811,6 +811,57 @@ var getGroups = function (url, table, limit, page, search, paging) {
 
     getAjaxResult(url, data, fun);
 }
+
+
+/**
+ * Get groups admin by using ajax
+ */
+var getGroupsAdmin = function (url, table, limit, page, search, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var group_url = '/archive/group/' + row["id"] + '/';
+            var privacy_btn = row["privacy"] == "CLOSED" ? 'disable' : '';
+            var update_btn = '<a class="btn mini ' + privacy_btn + '" href="/archive/group/' + row["id"] + '/update/" style="color:#ffa500;">Update</a>';
+            var store_btn = '&nbsp; &nbsp;<a class="btn mini ' + privacy_btn + '" href="/archive/group/' + row["id"] + '/store/" style="color:#6495ed;">Store</a>';
+            var check_btn = '&nbsp; &nbsp;<a class="btn mini ' + privacy_btn + '" href="/archive/group/' + row["id"] + '/check/" style="color:#ff1493;">Check</a>';
+            rows.push({
+                "id": '<div class=" more-link"><a href="' + group_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
+                "name": '<div class=" more-link"><a href="' + group_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
+                "updated_time": '<div class="h5"><i class="icon-realtime"></i> ' + timeSince(row["updated_time"]) + '</div>',
+                "post_count": '<div class="h5">' + row["post_count"] + '</div>',
+                "comment_count": '<div class="h5">' + row["comment_count"] + '</div>',
+                "privacy": '<div class="h5">' + row["privacy"] + '</div>',
+                "is_stored": row["is_stored"] ? '<i class="icon-check"></i>' : '<i class="icon-close"></i>',
+                "action": update_btn + store_btn + check_btn,
+            });
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+            paging.first();
+        }
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        q: search,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
 
 /**
  * Generate Notify

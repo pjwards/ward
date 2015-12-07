@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import logging
 from time import sleep
-
 from django.utils import timezone
 from facebook import GraphAPIError
 from celery import shared_task
@@ -42,13 +41,14 @@ def store_user(user_id, user_name, group):
 
 
 @shared_task
-def store_attachment(attachment_data, post_id=None, comment_id=None):
+def store_attachment(attachment_data, post_id=None, comment_id=None, use_celery=False):
     """
     This method stores a attachment. You must put one of post or comment.
 
     :param attachment_data: attachment data(dictionary)
     :param post_id: post id for foreign key
     :param comment_id: comment id for foreign key
+    :param use_celery: use celery?
     :return:
     """
     attachment = Attachment()
@@ -80,14 +80,20 @@ def store_attachment(attachment_data, post_id=None, comment_id=None):
     if 'subattachments' in attachment_data:
         for subattachment_data in attachment_data.get('subattachments').get('data'):
             if post_id is not None:
-                store_attachment.delay(attachment_data=subattachment_data, post_id=post_id)
-
+                if use_celery:
+                    store_attachment.delay(attachment_data=subattachment_data, post_id=post_id, use_celery=use_celery)
+                else:
+                    store_attachment(attachment_data=subattachment_data, post_id=post_id, use_celery=use_celery)
             if comment_id is not None:
-                store_attachment.delay(attachment_data=subattachment_data, comment_id=comment_id)
+                if use_celery:
+                    store_attachment.delay(attachment_data=subattachment_data, comment_id=comment_id,
+                                           use_celery=use_celery)
+                else:
+                    store_attachment(attachment_data=subattachment_data, comment_id=comment_id, use_celery=use_celery)
 
 
 @shared_task
-def store_comment(comment_data, post_id, group_id, parent_id=None):
+def store_comment(comment_data, post_id, group_id, parent_id=None, use_celery=False):
     """
     This method stores a comment. If you want to store reply, put parent.
 
@@ -95,6 +101,7 @@ def store_comment(comment_data, post_id, group_id, parent_id=None):
     :param post_id: post id for foreign key
     :param group_id: comment's group id
     :param parent_id: comment model for parent id
+    :param use_celery: use celery?
     :return:
     """
     post = Post.objects.filter(id=post_id)[0]
@@ -129,7 +136,12 @@ def store_comment(comment_data, post_id, group_id, parent_id=None):
         logger.info('Saved comment: %s', comment.id)
 
         if 'attachment' in comment_data:
-            store_attachment.delay(attachment_data=comment_data.get('attachment'), comment_id=comment.id)
+            if use_celery:
+                store_attachment.delay(attachment_data=comment_data.get('attachment'), comment_id=comment.id,
+                                       use_celery=use_celery)
+            else:
+                store_attachment(attachment_data=comment_data.get('attachment'), comment_id=comment.id,
+                                 use_celery=use_celery)
     else:
         comment = Comment.objects.filter(id=comment_id)[0]
         comment.like_count = comment_data.get('like_count')
@@ -147,16 +159,19 @@ def store_comment(comment_data, post_id, group_id, parent_id=None):
     if 'comments' in comment_data:
         for reply_comment_data in comment_data.get('comments').get('data'):
             comment = Comment.objects.filter(id=comment_id)[0]
-            store_comment.delay(comment_data=reply_comment_data, post_id=post.id, group_id=group.id, parent_id=comment.id)
+            store_comment.delay(comment_data=reply_comment_data, post_id=post.id, group_id=group.id,
+                                parent_id=comment.id, use_celery=use_celery)
 
 
 @shared_task
-def store_feed(feed_data, group_id):
+def store_feed(feed_data, group_id, use_celery=False, is_check=False):
     """
     This method stores a feed.
 
     :param feed_data: feed data(dictionary)
     :param group_id: post's group id
+    :param use_celery: use celery?
+    :param is_check: is check?
     :return:
     """
     # save post from feeds
@@ -190,11 +205,14 @@ def store_feed(feed_data, group_id):
         post_attachments = feed_data.get('attachments')
         if post_attachments:
             for attachment_data in post_attachments.get('data'):
-                store_attachment.delay(attachment_data=attachment_data, post_id=post.id)
+                if use_celery:
+                    store_attachment.delay(attachment_data=attachment_data, post_id=post.id, use_celery=use_celery)
+                else:
+                    store_attachment(attachment_data=attachment_data, post_id=post.id, use_celery=use_celery)
     else:
         post = Post.objects.filter(id=post_id)[0]
 
-        if post.is_updated(feed_data.get('updated_time')):
+        if is_check or post.is_updated(feed_data.get('updated_time')):
 
             post.message = feed_data.get('message')
             post.updated_time = feed_data.get('updated_time')
@@ -224,12 +242,14 @@ def store_feed(feed_data, group_id):
 
     # save comments
     for comment_data in post_comments_data:
-        store_comment.delay(comment_data=comment_data, post_id=post_id, group_id=group.id)
+        if use_celery:
+            store_comment.delay(comment_data=comment_data, post_id=post_id, group_id=group.id, use_celery=use_celery)
+        else:
+            store_comment(comment_data=comment_data, post_id=post_id, group_id=group.id, use_celery=use_celery)
 
     return True
 
 
-@shared_task
 def store_group(group_data):
     """
     This method stores a group.
@@ -261,7 +281,6 @@ def store_group(group_data):
     return group
 
 
-@shared_task
 def check_cp_cnt_group(group):
     """
     Check comment and post count in group.
@@ -275,13 +294,14 @@ def check_cp_cnt_group(group):
 
 
 @shared_task
-def store_group_feed(group_id, query, is_whole=False):
+def store_group_feed(group_id, query, use_celery=False, is_whole=False):
     """
     This method is storing group's feeds by using facebook group api.
     If you want to get whole data, put that 'is_whole' is true.
 
     :param group_id: param group_id: group id for getting feeds
     :param query: query for facebook graph api
+    :param use_celery: use celery?
     :param is_whole: whole or parts
     :return:
     """
@@ -298,19 +318,27 @@ def store_group_feed(group_id, query, is_whole=False):
     feeds = []
 
     while query is not None:
-        query = fb_request.feed(group, query, feeds)
+        try:
+            query = fb_request.feed(group, query, feeds)
+        except Exception as e:
+            logger.error('Fail to request by exception : %s', e)
+            try:
+                query = fb_request.feed(group, query, feeds)
+            except Exception as e:
+                logger.error('Fail to request again by exception : %s', e)
+
         for feed in feeds:
             try:
-                store_feed(feed, group.id)
+                store_feed(feed, group.id, use_celery)
             except Exception as e:
-                logger.info('Fail to store by exception : %s', e)
+                logger.error('Fail to store by exception : %s', e)
                 try:
-                    store_feed(feed, group.id)
+                    store_feed(feed, group.id, use_celery)
                 except Exception as e:
-                    logger.info('Fail to store again by exception : %s', e)
+                    logger.error('Fail to store again by exception : %s', e)
+        feeds = []
         if not is_whole:
             break
-        feeds = []
 
     group.is_stored = True
     group.save()
@@ -323,13 +351,14 @@ def store_group_feed(group_id, query, is_whole=False):
 
 
 @shared_task
-def update_group_feed(group_id, query, is_whole=False):
+def update_group_feed(group_id, query, use_celery=False, is_whole=False):
     """
     This method is updating group's feeds by using facebook group api.
     If you want to get whole data, put that 'is_whole' is true.
 
     :param group_id: param group_id: group id for getting feeds
     :param query: query for facebook graph api
+    :param use_celery: use celery?
     :param is_whole: whole or parts
     :return: success?
     """
@@ -365,16 +394,24 @@ def update_group_feed(group_id, query, is_whole=False):
     feeds = []
 
     while query is not None:
-        query = fb_request.feed(group, query, feeds)
+        try:
+            query = fb_request.feed(group, query, feeds)
+        except Exception as e:
+            logger.error('Fail to request by exception : %s', e)
+            try:
+                query = fb_request.feed(group, query, feeds)
+            except Exception as e:
+                logger.error('Fail to request again by exception : %s', e)
+
         for feed in feeds:
             try:
                 res = store_feed(feed, group.id)
             except Exception as e:
-                logger.info('Fail to update by exception : %s', e)
+                logger.error('Fail to update by exception : %s', e)
                 try:
                     res = store_feed(feed, group.id)
                 except Exception as e:
-                    logger.info('Fail to update again by exception : %s', e)
+                    logger.error('Fail to update again by exception : %s', e)
             if not res:
                 return True
         feeds = []
@@ -389,12 +426,13 @@ def update_group_feed(group_id, query, is_whole=False):
 
 
 @shared_task
-def update_groups_feed(query, is_whole=False):
+def update_groups_feed(query, use_celery=False, is_whole=False):
     """
     This method is updating group's feeds by using facebook group api for celery schedule.
     If you want to get whole data, put that 'is_whole' is true.
 
     :param query: query for facebook graph api
+    :param use_celery: use celery?
     :param is_whole: whole or parts
     :return:
     """
@@ -404,12 +442,69 @@ def update_groups_feed(query, is_whole=False):
     groups = Group.objects.values('id')
 
     for group in groups:
-        update_group_feed.delay(group.get('id'), query, is_whole)
+        update_group_feed.delay(group.get('id'), query, use_celery, is_whole)
 
     end_time = timezone.datetime.now().replace(microsecond=0)
     logger.info('End time : %s', end_time)
     logger.info('Time difference : %s', end_time - start_time)
     logger.info('=== End updating groups ===')
+
+
+@shared_task
+def check_group_feed(group_id, query, use_celery=False, is_whole=False):
+    """
+    This method is checking group's feeds by using facebook group api.
+    If you want to get whole data, put that 'is_whole' is true.
+
+    :param group_id: param group_id: group id for getting feeds
+    :param query: query for facebook graph api
+    :param use_celery: use celery?
+    :param is_whole: whole or parts
+    :return:
+    """
+    logger.info('=== Start checking %s feed ===', group_id)
+    start_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('Start time : %s', start_time)
+
+    group = Group.objects.filter(id=group_id)[0]
+
+    if group.privacy == "CLOSED":
+        logger.info('=== Fail to check %s feed (Group is closed) ===', group_id)
+        return False
+
+    feeds = []
+
+    while query is not None:
+        try:
+            query = fb_request.feed(group, query, feeds)
+        except Exception as e:
+            logger.error('Fail to request by exception : %s', e)
+            try:
+                query = fb_request.feed(group, query, feeds)
+            except Exception as e:
+                logger.error('Fail to request again by exception : %s', e)
+
+        for feed in feeds:
+            try:
+                store_feed(feed, group.id, use_celery, True)
+            except Exception as e:
+                logger.error('Fail to check by exception : %s', e)
+                try:
+                    store_feed(feed, group.id, use_celery, True)
+                except Exception as e:
+                    logger.error('Fail to check again by exception : %s', e)
+        feeds = []
+        if not is_whole:
+            break
+
+    group.is_stored = True
+    group.save()
+    check_cp_cnt_group(group)
+
+    end_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('End time : %s', end_time)
+    logger.info('Time difference : %s', end_time - start_time)
+    logger.info('=== End check %s feed ===', group_id)
 
 
 def delete_group_content(object_id, model):

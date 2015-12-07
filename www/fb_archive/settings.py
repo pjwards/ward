@@ -270,22 +270,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "mezzanine.pages.context_processors.page",
 )
 
-# TEMPLATES = [
-#     {
-#         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-#         'DIRS': [],
-#         'APP_DIRS': True,
-#         'OPTIONS': {
-#             'context_processors': [
-#                 'django.template.context_processors.debug',
-#                 'django.template.context_processors.request',
-#                 'django.contrib.auth.context_processors.auth',
-#                 'django.contrib.messages.context_processors.messages',
-#             ],
-#         },
-#     },
-# ]
-
 # List of middleware classes to use. Order is important; in the request phase,
 # these middleware classes will be applied in the order given, and in the
 # response phase the middleware will be applied in reverse order.
@@ -373,11 +357,17 @@ FB_APP_ID = ''
 FB_APP_SECRET = ''
 FB_APP_VERSION = 2.4
 
+####################
+# ARCHIVE SETTINGS #
+####################
+
+ARCHIVE_USE_CELERY = False
+ARCHIVE_GROUP_AUTO_SAVE = False
+
 ###################
 # CELERY SETTINGS #
 ###################
 
-# BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
@@ -393,7 +383,7 @@ CELERYBEAT_SCHEDULE = {
     'add-every-30-seconds': {
         'task': 'archive.tasks.update_groups_feed',
         'schedule': timedelta(seconds=30),
-        'args': (get_feed_query(), True)
+        'args': (get_feed_query(), True, True)
     },
 }
 

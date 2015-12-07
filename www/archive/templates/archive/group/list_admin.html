@@ -54,7 +54,7 @@
                         <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
                         <th style="text-align: center;"><i class="icon-caution"></i> Privacy</th>
                         <th style="text-align: center;"><i class="icon-save"></i> Stored</th>
-                        <th style="text-align: center;"><i class="icon-refresh"></i> Update</th>
+                        <th style="text-align: center;"><i class="icon-refresh"></i> Action</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
@@ -79,7 +79,7 @@
             <td style="text-align: center;"><!= comment_count !></td>
             <td style="text-align: center;"><!= privacy !></td>
             <td style="text-align: center;"><!= is_stored !></td>
-            <td style="text-align: center;"><!= update !></td>
+            <td style="text-align: center;"><!= action !></td>
         </tr>
     </script>
 
@@ -112,7 +112,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getGroups(groups_url, groups_table, groups_limit, pNo, groups_search.val());
+                        getGroupsAdmin(groups_url, groups_table, groups_limit, pNo, groups_search.val());
                     }
                 },
                 tpl: {
@@ -121,7 +121,7 @@
             });
 
             groups_table = table("#groups_table", {
-                fields: ["id", "name", "updated_time", "post_count", "comment_count", "privacy", "is_stored", "update"],
+                fields: ["id", "name", "updated_time", "post_count", "comment_count", "privacy", "is_stored", "action"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
@@ -136,15 +136,15 @@
          * Init user.html
          */
         $(function () {
-            getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
+            getGroupsAdmin(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
 
             $("#groups_run").on("click", function () {
-                getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
+                getGroupsAdmin(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
             });
 
             $("#groups_limit").on("input", function () {
                 groups_limit = $("#groups_limit").val();
-                getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
+                getGroupsAdmin(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
             });
 
             $("#groups_search").keypress(function (event) {
@@ -179,7 +179,7 @@
                             }
                             notify_top_submit(1, data);
                         }
-                        getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
+                        getGroupsAdmin(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
                     },
                     error: function (request, status, error) {
                         data = {
