@@ -252,7 +252,8 @@ def group_store(request, group_id):
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
         error = 'Does not exist group.'
-        return render(request, 'archive/group/list_admin.html', {'latest_group_list': latest_group_list, 'error': error})
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
 
     tasks.store_group_feed.delay(group_id, get_feed_query(), True, settings.ARCHIVE_USE_CELERY)
     return HttpResponseRedirect(reverse('archive:groups_admin'))
@@ -287,7 +288,8 @@ def group_check(request, group_id):
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
         error = 'Does not exist group.'
-        return render(request, 'archive/group/list_admin.html', {'latest_group_list': latest_group_list, 'error': error})
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
 
     tasks.check_group_feed.delay(group_id, get_feed_query(), True, settings.ARCHIVE_USE_CELERY)
     return HttpResponseRedirect(reverse('archive:groups_admin'))
@@ -325,7 +327,7 @@ def report(request, object_id):
 
     if request.method == "POST":
         _report = Report()
-        is_exist = False   # report is already exist
+        is_exist = False  # report is already exist
         try:
             # Post id is bigger than 20
             if len(object_id) > 20:
@@ -443,7 +445,7 @@ def ward(request, object_id):
     if request.method == "POST":
         _user = request.user
         _ward = Ward()
-        is_exist = False   # report is already exist
+        is_exist = False  # report is already exist
         try:
             # Post id is bigger than 20
             if len(object_id) > 20:
@@ -677,16 +679,15 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return self.response_models(comments, request, CommentSerializer)
 
     @detail_route()
-    @renderer_classes((JSONRenderer,))
     def activity(self, request, pk=None):
         """
         Return User for group activity
-
         :param request: request
         :param pk: pk
-        :return: json
+        :return: response model
         """
-        return Response(self.get_activity(request))
+        users_activity = self.get_activity()
+        return self.response_models(users_activity, request, ActivityFBUserSerializer)
 
     @detail_route()
     @renderer_classes((JSONRenderer,))
@@ -727,6 +728,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :return: response model
         """
         _group = self.get_object()
+
         search = self.request.query_params.get('q', '')
 
         if search:
@@ -1045,17 +1047,13 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         models = self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
         return models
 
-    def get_activity(self, request):
+    def get_activity(self):
         """
         Get user activity
-
-        :param request: request
-        :return: source
+        :return: result models
         """
         _group = self.get_object()
-        source = {}
 
-        # Check params
         method = self.request.query_params.get('method', 'total')
         model = self.request.query_params.get('model', None)
 
@@ -1064,57 +1062,26 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if model != 'post' and model != 'comment':
             raise ValueError("Model can be used 'post' or 'comment'. Input model:" + model)
 
-        # Check method and return source by total or generate date
         if method == 'total':
-            for _user in _group.fbuser_set.all():
-                if model == 'post':
-                    source[_user.id] = Post.objects.filter(group=_group, user=_user).count()
-                else:
-                    source[_user.id] = Comment.objects.filter(group=_group, user=_user).count()
+            if model == 'post':
+                return _group.fbuser_set.filter(posts__group=_group).annotate(count=Count('posts')).order_by('-count')
+            else:
+                return _group.fbuser_set.filter(comments__group=_group).annotate(count=Count('comments')).order_by(
+                    '-count')
 
-            return self.dic_sorted(source, request)
         elif method == 'month':
             to_date, from_date = date_utils.date_range(date_utils.get_today(), -30)
         else:
             to_date, from_date = date_utils.date_range(date_utils.get_today(), -7)
 
-        if from_date:
-            from_date = date_utils.combine_min_time(from_date)
-        if to_date:
-            to_date = date_utils.combine_max_time(to_date)
-
-        # Return source by special date
-        for _user in _group.fbuser_set.all():
-            if model == 'post':
-                source[_user.id] = Post.objects.filter(group=_group, user=_user, created_time__gt=from_date,
-                                                       created_time__lt=to_date).count()
-            else:
-                source[_user.id] = Comment.objects.filter(group=_group, user=_user, created_time__gt=from_date,
-                                                          created_time__lt=to_date).count()
-        return self.dic_sorted(source, request)
-
-    @staticmethod
-    def dic_sorted(dic, request):
-        """
-        Sort dictionary and return top 10
-
-        :param dic: raw source
-        :param request: request
-        :return: sorted source
-        """
-        max_len = 10
-        sorted_x = sorted(dic.items(), key=itemgetter(1), reverse=True)
-
-        if max_len > len(sorted_x):
-            max_len = len(sorted_x)
-
-        source = {}
-        for x in range(max_len):
-            source[x] = {
-                'user': FBUserSerializer(FBUser.objects.get(id=sorted_x[x][0]), context={'request': request}).data,
-                'count': sorted_x[x][1],
-            }
-        return source
+        if model == 'post':
+            return _group.fbuser_set.filter(posts__group=_group, posts__created_time__gt=from_date,
+                                            posts__created_time__lt=to_date) \
+                .annotate(count=Count('posts')).order_by('-count')
+        else:
+            return _group.fbuser_set.filter(comments__group=_group, comments__created_time__gt=from_date,
+                                            comments__created_time__lt=to_date) \
+                .annotate(count=Count('comments')).order_by('-count')
 
     def group_search_by_check(self, model):
         """

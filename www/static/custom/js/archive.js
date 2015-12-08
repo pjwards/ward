@@ -521,14 +521,14 @@ var getHourTotalStatistics = function (url, display, from, to) {
 var getActivity = function (url, limit, method, model, table, loading) {
 
     var fun = function (source) {
-        var results = source;
+        var results = source["results"];
         var rows = []
         for (var i in results) {
             var row = results[i];
-            var user_url = '/archive/user/' + row["user"]["id"] + '/';
+            var user_url = '/archive/user/' + row["id"] + '/';
             rows.push({
-                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px;">',
-                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["user"]["name"] + '</div></a></div>',
+                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
+                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
                 "count": row["count"],
             });
         }
