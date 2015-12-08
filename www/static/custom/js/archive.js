@@ -30,7 +30,12 @@ var getAjaxResult = function (url, data, fun) {
             fun(source);
         },
         error: function (request, status, error) {
-            alert(status);
+            data = {
+                title: status,
+                message: getToday(),
+                color: 'danger',
+            }
+            notify_top_submit(1, data);
         }
     });
 }
@@ -93,7 +98,12 @@ var postAjax = function (url, data) {
             }
         },
         error: function (request, status, error) {
-            alert(status);
+            data = {
+                title: status,
+                message: getToday(),
+                color: 'danger',
+            }
+            notify_top_submit(1, data)
         }
     });
 }
@@ -142,7 +152,12 @@ var postAsyncAjax = function (url, data) {
             }
         },
         error: function (request, status, error) {
-            alert(status);
+            data = {
+                title: status,
+                message: getToday(),
+                color: 'danger',
+            }
+            notify_top_submit(1, data)
         }
     });
 }
@@ -233,7 +248,7 @@ var pcDisplayM = function (rows, row, name) {
  * Post and comment Display for report
  */
 var pcDisplayR = function (rows, row) {
-    var object = row["post"]? row["post"]: row["comment"]? row["comment"]:undefined;
+    var object = row["post"] ? row["post"] : row["comment"] ? row["comment"] : undefined;
     var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
     var group_url = '/archive/group/' + getIdFromUrl(row["group"].url) + '/';
     var fb_url = "https://www.facebook.com/";
@@ -248,13 +263,13 @@ var pcDisplayR = function (rows, row) {
     var delete_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Are you sure delete?\')) reportAction(\'' + row["id"] + '\', \'delete\'); reload()" style="color:#ff1493;">deleted</btn>';
     rows.push({
         "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
-        "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a>' + (object? '<div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>':''),
-        "message": object? message.length < 100 ? message + btn : message.substring(0, 100) + "..." + btn : 'deleted',
-        "like_count": object? object["like_count"] : 'deleted',
-        "comment_count": object? object["comment_count"] : 'deleted',
+        "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a>' + (object ? '<div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>' : ''),
+        "message": object ? message.length < 100 ? message + btn : message.substring(0, 100) + "..." + btn : 'deleted',
+        "like_count": object ? object["like_count"] : 'deleted',
+        "comment_count": object ? object["comment_count"] : 'deleted',
         "group": '<div class="more-link"><a href="' + group_url + '"><div class="h5">' + row["group"]["name"] + '</div></a></div>',
         "status": row["status"],
-        "action": row["status"] == 'deleted'? '':  (row["status"] == 'hide'? show_btn : (row["status"] == 'checked'? '': checked_btn) + hide_btn) + delete_btn,
+        "action": row["status"] == 'deleted' ? '' : (row["status"] == 'hide' ? show_btn : (row["status"] == 'checked' ? '' : checked_btn) + hide_btn) + delete_btn,
     });
 }
 
@@ -262,11 +277,11 @@ var pcDisplayR = function (rows, row) {
  * Post and comment Display for ward
  */
 var pcDisplayW = function (rows, row) {
-    var object = row["post"]? row["post"]: row["comment"]? row["comment"]:undefined;
+    var object = row["post"] ? row["post"] : row["comment"] ? row["comment"] : undefined;
     var user_url = '/archive/user/' + getIdFromUrl(object["user"].url) + '/';
     var object_id = getIdFromUrl(object.url);
     var fb_url = "https://www.facebook.com/";
-    var new_label = row["updated_time"]<object["updated_time"]? '<span class="label mini success">New</span> &nbsp; &nbsp;' : '';
+    var new_label = row["updated_time"] < object["updated_time"] ? '<span class="label mini success">New</span> &nbsp; &nbsp;' : '';
     var btn = '&nbsp; &nbsp;<btn class="btn btn-block btn-social-icon btn-facebook mini" onclick="updateWard(' + row["id"] + ',\'' + fb_url + object_id + '\')"><span class="fa fa-facebook"></span></btn>';
     var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
