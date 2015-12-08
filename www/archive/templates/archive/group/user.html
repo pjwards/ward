@@ -252,6 +252,10 @@
                 <div id="loading_proportion_comment_msg" style="display: none; font-size: 20px; color: red;">
                     NOW LOADING...
                 </div>
+
+                <div id="loading_archive_user_msg" style="display: none; font-size: 20px; color: red;">
+                    NOW LOADING...
+                </div>
             </div>
         </div>
     </div>
@@ -309,7 +313,8 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, pNo, user_archive_search.val());
+                        loading_archive_user.show();
+                        getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, pNo);
                     }
                 },
                 tpl: {
@@ -371,6 +376,13 @@
                 color: 'white',
                 autoHide: false,
             });
+
+            loading_archive_user = modal("#loading_archive_user_msg", {
+                target: "#user_archive_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
         });
 
         /**
@@ -385,17 +397,21 @@
             loading_proportion_post.show();
             loading_proportion_comment.show();
             getProportion(proportion_url, "#post_proportion", "#comment_proportion");
-            getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
+
+            loading_archive_user.show();
+            getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
 
             $("#user_archive_limit").on("input", function () {
                 user_archive_limit = $("#user_archive_limit").val();
-                getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
+                loading_archive_user.show();
+                getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
             });
 
             $("#user_archive_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, 1, user_archive_search.val(), user_archive_paging);
+                    loading_archive_user.show();
+                    getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
                 }
             })
         });

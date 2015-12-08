@@ -731,27 +731,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         search = self.request.query_params.get('q', '')
 
+        _users = _group.fbuser_set.filter(posts__group=_group, comments__group=_group) \
+            .annotate(p_count=Count('posts', distinct=True), c_count=Count('comments', distinct=True))
+
         if search:
-            return self.response_models(_group.fbuser_set.order_by('name').search(search), request, FBUserSerializer)
+            return self.response_models(_users.order_by('name').search(search), request,
+                                        ActivityForArchiveFBUserSerializer)
         else:
-            return self.response_models(_group.fbuser_set.order_by('name'), request, FBUserSerializer)
-
-    @detail_route()
-    def user_search(self, request, pk=None):
-        """
-        Return user search for group
-
-        :param request: request
-        :param pk: pk
-        :return: response model
-        """
-        _group = self.get_object()
-
-        search = self.request.query_params.get('q', '')
-        if search:
-            return self.response_models(_group.fbuser_set.order_by('name').search(search), request, FBUserSerializer)
-        else:
-            return self.response_models(_group.fbuser_set.order_by('name'), request, FBUserSerializer)
+            return self.response_models(_users.order_by('name'), request, ActivityForArchiveFBUserSerializer)
 
     @detail_route()
     def post_search(self, request, pk=None):
@@ -879,25 +866,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
                 '-blacklist__updated_time')
 
         return self.response_models(blacklist, request, BlacklistFBUserSerializer)
-
-    @detail_route()
-    @renderer_classes((JSONRenderer,))
-    def user_activity(self, request, pk=None):
-        """
-        Return user activity about posts and comments
-
-        :param request: request
-        :param pk: pk
-        :return: json
-        """
-        _group = self.get_object()
-        user_id = self.request.query_params.get('user_id', None)
-        _user = get_object_or_404(FBUser, id=user_id)
-
-        post_count = Post.objects.filter(group=_group, user=_user).count()
-        comment_count = Comment.objects.filter(group=_group, user=_user).count()
-
-        return Response({'post_count': post_count, 'comment_count': comment_count})
 
     @detail_route()
     def post_ward(self, request, pk=None):

@@ -132,7 +132,7 @@
                                             <a class="btn " value="text"><i class="icon-text"></i></a>
                                             <a class="btn " value="user"><i class="icon-user"></i></a>
                                             <input type="text" class="input" id="post_limit" placeholder="Limit"
-                                                   value="50" style="width: 60px; text-align: right;"/>
+                                                   value="20" style="width: 60px; text-align: right;"/>
                                             <input type="text" class="input" id="post_search" placeholder="Search"/>
                                         </div>
                                         <button id="post_del_btn" class="btn">
@@ -191,7 +191,7 @@
                                             <a class="btn " value="text"><i class="icon-text"></i></a>
                                             <a class="btn " value="user"><i class="icon-user"></i></a>
                                             <input type="text" class="input" id="comment_limit" placeholder="Limit"
-                                                   value="50" style="width: 60px; text-align: right;"/>
+                                                   value="20" style="width: 60px; text-align: right;"/>
                                             <input type="text" class="input" id="comment_search"
                                                    placeholder="Search"/>
                                         </div>
@@ -259,7 +259,6 @@
                                 <tr>
                                     <th></th>
                                     <th><i class="icon-user"></i> User</th>
-                                    <th style="text-align: center;"><i class="icon-orderedlist"></i> Id</th>
                                     <th style="text-align: center;"><i class="icon-report"></i> Post</th>
                                     <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
                                 </tr>
@@ -344,7 +343,6 @@
                     <tr>
                         <td style="text-align: right;"><!= picture !></td>
                         <td><!= from !></td>
-                        <td style="text-align: center;"><!= id !></td>
                         <td style="text-align: center;"><!= post_count !></td>
                         <td style="text-align: center;"><!= comment_count !></td>
                     </tr>
@@ -373,6 +371,10 @@
                         <td colspan="7" class="none" align="center">Data does not exist.</td>
                     </tr>
                 </script>
+
+                <div id="loading_user_msg" style="display: none; font-size: 20px; color: red;">
+                    NOW LOADING...
+                </div>
 
                 <div id="modal_1" class="msgbox" style="display: none; width: 500px;">
                     <div class="head" style="text-align: center;">
@@ -437,8 +439,8 @@
     <script>
         var group_id = "{{ group.id }}";
 
-        var post_limit = 50;
-        var comment_limit = 50;
+        var post_limit = 20;
+        var comment_limit = 20;
         var user_limit = 10;
         var search_limit = 10;
 
@@ -450,7 +452,7 @@
 
         var post_search_url = "/api/groups/{{ group.id }}/post_search/";
         var comment_search_url = "/api/groups/{{ group.id }}/comment_search/";
-        var user_search_url = "/api/groups/{{ group.id }}/user_search/";
+        var user_search_url = "/api/groups/{{ group.id }}/user_archive/";
         var blacklist_search_url = "/api/groups/{{ group.id }}/blacklist_search/";
 
         var post_search_check = 'text';
@@ -536,7 +538,8 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), pNo);
+                        loading_user.show();
+                        getUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, pNo);
                     }
                 },
                 tpl: {
@@ -545,7 +548,7 @@
             });
 
             user_table = table("#user_table", {
-                fields: ["", "from", "id", "post_count", "comment_count"],
+                fields: ["", "from", "post_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
@@ -692,12 +695,26 @@
         });
 
         /**
+         * Loading message
+         */
+        jui.ready(["ui.modal"], function (modal) {
+            loading_user = modal("#loading_user_msg", {
+                target: "#user_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+        });
+
+        /**
          * Init analysis.html
          */
         $(function () {
             getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
             getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
-            getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), 1, user_paging);
+
+            loading_user.show();
+            getUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
             getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
 
             $("#post_limit").on("input", function () {
@@ -712,7 +729,8 @@
 
             $("#user_limit").on("input", function () {
                 user_limit = $("#user_limit").val();
-                getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), 1, user_paging);
+                loading_user.show();
+                getUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
             });
 
             $("#blacklist_limit").on("input", function () {
@@ -737,7 +755,8 @@
             $("#user_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getSearchUM(user_search_url, group_id, user_table, user_limit, user_search.val(), 1, user_paging);
+                    loading_user.show();
+                    getUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
                 }
             });
 

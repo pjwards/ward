@@ -255,6 +255,10 @@
                     </tr>
                 </script>
 
+                <div id="loading_user_msg" style="display: none; font-size: 20px; color: red;">
+                    NOW LOADING...
+                </div>
+
             </div>
         </div>
     </div>
@@ -272,7 +276,7 @@
 
         var post_search_url = "/api/groups/{{ group.id }}/post_search/";
         var comment_search_url = "/api/groups/{{ group.id }}/comment_search/";
-        var user_search_url = "/api/groups/{{ group.id }}/user_search/";
+        var user_search_url = "/api/groups/{{ group.id }}/user_archive/";
 
         /**
          * Generate Archive
@@ -353,7 +357,8 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getSearchU(user_search_url, group_id, user_table, user_limit, search, pNo);
+                        loading_user.show();
+                        getUserArchive(user_search_url, group_id, user_table, user_limit, search, loading_user, pNo);
                     }
                 },
                 tpl: {
@@ -385,13 +390,27 @@
         });
 
         /**
+         * Loading message
+         */
+        jui.ready(["ui.modal"], function (modal) {
+            loading_user = modal("#loading_user_msg", {
+                target: "#user_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+        });
+
+        /**
          * Init analysis.html
          */
         $(function () {
             $("#group_search_input").val(search);
             getSearchPC(post_search_url, post_table, post_limit, search, 1, post_paging);
             getSearchPC(comment_search_url, comment_table, comment_limit, search, 1, comment_paging);
-            getSearchU(user_search_url, group_id, user_table, user_limit, search, 1, user_paging);
+
+            loading_user.show();
+            getUserArchive(user_search_url, group_id, user_table, user_limit, search, loading_user, 1, user_paging);
 
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();
@@ -405,7 +424,8 @@
 
             $("#user_limit").on("input", function () {
                 user_limit = $("#user_limit").val();
-                getSearchU(user_search_url, group_id, user_table, user_limit, search, 1, user_paging);
+                loading_user.show();
+                getUserArchive(user_search_url, group_id, user_table, user_limit, search, loading_user, 1, user_paging);
             });
         });
     </script>

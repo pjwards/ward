@@ -21,6 +21,21 @@ class FBUserSerializer(serializers.HyperlinkedModelSerializer):
 class ActivityFBUserSerializer(FBUserSerializer):
     count = serializers.IntegerField()
 
+    class Meta:
+        model = FBUser
+        exclude = ('posts', 'comments')
+        read_only_fields = '__all__'
+
+
+class ActivityForArchiveFBUserSerializer(FBUserSerializer):
+    p_count = serializers.IntegerField()
+    c_count = serializers.IntegerField()
+
+    class Meta:
+        model = FBUser
+        exclude = ('posts', 'comments')
+        read_only_fields = '__all__'
+
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()

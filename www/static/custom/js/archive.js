@@ -592,9 +592,7 @@ var getProportion = function (url, post_display, comment_display) {
 /**
  * Get user archive by using ajax
  */
-var getUserArchive = function (url, group_id, table, limit, page, search, paging) {
-    var activity_url = "/api/groups/" + group_id + "/user_activity/";
-
+var getUserArchive = function (url, group_id, table, limit, search, loading, page, paging) {
     var fun = function (source) {
         var results = source["results"];
         var rows = []
@@ -602,16 +600,11 @@ var getUserArchive = function (url, group_id, table, limit, page, search, paging
             var row = results[i];
             var user_url = '/archive/user/' + row["id"] + '/';
 
-            var async_data = {
-                user_id: row["id"]
-            }
-            var activity = getAsyncAjaxResult(activity_url, async_data);
-
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
-                "post_count": activity["post_count"],
-                "comment_count": activity["comment_count"],
+                "post_count": row["p_count"],
+                "comment_count": row["c_count"],
             });
         }
         ;
@@ -623,6 +616,7 @@ var getUserArchive = function (url, group_id, table, limit, page, search, paging
             paging.reload(source["count"]);
             paging.first();
         }
+        loading.hide();
     }
 
     if (!page) {
@@ -650,55 +644,6 @@ var getSearchPC = function (url, table, limit, search, page, paging) {
         var rows = []
         for (var i in results) {
             pcDisplay(rows, results[i]);
-        }
-        ;
-
-        table.reset()
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.reload(source["count"]);
-            paging.first();
-        }
-    }
-
-    if (!page) {
-        page = 1;
-    }
-
-    data = {
-        limit: limit,
-        offset: (page - 1) * limit,
-        q: search,
-    }
-
-    getAjaxResult(url, data, fun);
-}
-
-/**
- * Get search user by using ajax
- */
-var getSearchU = function (url, group_id, table, limit, search, page, paging) {
-    var activity_url = "/api/groups/" + group_id + "/user_activity/";
-
-    var fun = function (source) {
-        var results = source["results"];
-        var rows = []
-        for (var i in results) {
-            var row = results[i];
-            var user_url = '/archive/user/' + row["id"] + '/';
-
-            var async_data = {
-                user_id: row["id"]
-            }
-            var activity = getAsyncAjaxResult(activity_url, async_data);
-
-            rows.push({
-                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
-                "post_count": activity["post_count"],
-                "comment_count": activity["comment_count"],
-            });
         }
         ;
 
@@ -990,56 +935,6 @@ var getSearchPCM = function (url, table, limit, model, search, search_check, pag
         offset: (page - 1) * limit,
         q: search,
         c: search_check,
-    }
-
-    getAjaxResult(url, data, fun);
-}
-
-/**
- * Get search user for management by using ajax
- */
-var getSearchUM = function (url, group_id, table, limit, search, page, paging) {
-    var activity_url = "/api/groups/" + group_id + "/user_activity/";
-
-    var fun = function (source) {
-        var results = source["results"];
-        var rows = []
-        for (var i in results) {
-            var row = results[i];
-            var user_url = '/archive/user/' + row["id"] + '/';
-
-            var async_data = {
-                user_id: row["id"]
-            }
-            var activity = getAsyncAjaxResult(activity_url, async_data);
-
-            rows.push({
-                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
-                "id": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
-                "post_count": activity["post_count"],
-                "comment_count": activity["comment_count"],
-            });
-        }
-        ;
-
-        table.reset();
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.reload(source["count"]);
-            paging.first();
-        }
-    }
-
-    if (!page) {
-        page = 1;
-    }
-
-    data = {
-        limit: limit,
-        offset: (page - 1) * limit,
-        q: search,
     }
 
     getAjaxResult(url, data, fun);
