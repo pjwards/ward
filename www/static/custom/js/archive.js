@@ -587,6 +587,8 @@ var getProportion = function (url, post_display, comment_display) {
             }, {
                 type: "tooltip",
                 orient: "left",
+            }, {
+                type: "legend",
             }]
         });
     }

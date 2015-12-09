@@ -700,24 +700,58 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: json respomse
         """
+        cursor = connection.cursor()
         _group = self.get_object()
 
         # Count posts and comments about user in group
+        user_count = _group.fbuser_set.count()
+
+        # Get post proportion
         posts = {}
-        p_counts = _group.fbuser_set.annotate(p_count=Count('posts')).values('p_count')
-
-        comments = {}
-        c_counts = _group.fbuser_set.annotate(c_count=Count('comments')).values('c_count')
-
-        # Count user about counted number
+        cursor.execute("""
+                SELECT T.count, count(*) FROM
+                (SELECT
+                  count(user_id) as count
+                FROM
+                  archive_post
+                WHERE
+                  group_id = %s
+                GROUP BY user_id) AS T
+                GROUP BY T.count
+                ORDER BY count(*) DESC
+                LIMIT 9;
+        """, [_group.id])
+        p_counts = cursor.fetchall()
+        s = 0
         for p_count in p_counts:
-            posts[p_count.get('p_count')] = posts.get(p_count.get('p_count'), 0) + 1
+            posts[p_count[0]] = p_count[1]
+            s += p_count[1]
+        posts["others"] = user_count - s
 
+        # Get comment proportion
+        comments = {}
+        cursor.execute("""
+                SELECT T.count, count(*) FROM
+                (SELECT
+                  count(user_id) as count
+                FROM
+                  archive_comment
+                WHERE
+                  group_id = %s
+                GROUP BY user_id) AS T
+                GROUP BY T.count
+                ORDER BY count(*) DESC
+                LIMIT 9;
+        """, [_group.id])
+        c_counts = cursor.fetchall()
+        s = 0
         for c_count in c_counts:
-            comments[c_count.get('c_count')] = comments.get(c_count.get('c_count'), 0) + 1
+            comments[c_count[0]] = c_count[1]
+            s += c_count[1]
+        comments["others"] = user_count - s
 
-        return Response({'posts': collections.OrderedDict(sorted(posts.items())),
-                         'comments': collections.OrderedDict(sorted(comments.items()))})
+        return Response({'posts': posts,
+                         'comments': comments})
 
     @detail_route()
     def user_archive(self, request, pk=None):
@@ -735,7 +769,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if search:
             cursor.execute(
-                """SELECT
+                """
+                SELECT
                     UG.fbuser_id as id,
                     U.name as name,
                     U.picture as picture,
@@ -746,10 +781,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
                 INNER JOIN archive_fbuser as U
                 ON UG.fbuser_id = U.id
                 WHERE UG.group_id = %s AND U.name @@ %s
-                ORDER BY U.name;""", [_group.id, _group.id, _group.id, search])
+                ORDER BY U.name;
+                """, [_group.id, _group.id, _group.id, search])
         else:
             cursor.execute(
-                """SELECT
+                """
+                SELECT
                     UG.fbuser_id as id,
                     U.name as name,
                     U.picture as picture,
@@ -760,7 +797,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
                 INNER JOIN archive_fbuser as U
                 ON UG.fbuser_id = U.id
                 WHERE UG.group_id = %s
-                ORDER BY U.name;""", [_group.id, _group.id, _group.id])
+                ORDER BY U.name;
+                """, [_group.id, _group.id, _group.id])
         row = self.dictfetchall(cursor)
 
         return self.response_models(row, request, ActivityForArchiveFBUserSerializer)
@@ -776,7 +814,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return [
             dict(zip(columns, row))
             for row in cursor.fetchall()
-        ]
+            ]
 
     @detail_route()
     def post_search(self, request, pk=None):
