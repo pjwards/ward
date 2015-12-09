@@ -1,5 +1,6 @@
 import collections
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import connection
 from operator import itemgetter
 import logging
 from django.core.urlresolvers import reverse
@@ -727,18 +728,55 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
+        cursor = connection.cursor()
         _group = self.get_object()
 
         search = self.request.query_params.get('q', '')
 
-        _users = _group.fbuser_set.filter(posts__group=_group, comments__group=_group) \
-            .annotate(p_count=Count('posts', distinct=True), c_count=Count('comments', distinct=True))
-
         if search:
-            return self.response_models(_users.order_by('name').search(search), request,
-                                        ActivityForArchiveFBUserSerializer)
+            cursor.execute(
+                """SELECT
+                    UG.fbuser_id as id,
+                    U.name as name,
+                    U.picture as picture,
+                    (SELECT count(*) FROM archive_post WHERE group_id = %s AND user_id = UG.fbuser_id) as p_count,
+                    (SELECT count(*) FROM archive_comment WHERE group_id = %s AND user_id = UG.fbuser_id) as c_count
+                FROM
+                    archive_fbuser_groups as UG
+                INNER JOIN archive_fbuser as U
+                ON UG.fbuser_id = U.id
+                WHERE UG.group_id = %s AND U.name @@ %s
+                ORDER BY U.name;""", [_group.id, _group.id, _group.id, search])
         else:
-            return self.response_models(_users.order_by('name'), request, ActivityForArchiveFBUserSerializer)
+            cursor.execute(
+                """SELECT
+                    UG.fbuser_id as id,
+                    U.name as name,
+                    U.picture as picture,
+                    (SELECT count(*) FROM archive_post WHERE group_id = %s AND user_id = UG.fbuser_id) as p_count,
+                    (SELECT count(*) FROM archive_comment WHERE group_id = %s AND user_id = UG.fbuser_id) as c_count
+                FROM
+                    archive_fbuser_groups as UG
+                INNER JOIN archive_fbuser as U
+                ON UG.fbuser_id = U.id
+                WHERE UG.group_id = %s
+                ORDER BY U.name;""", [_group.id, _group.id, _group.id])
+        row = self.dictfetchall(cursor)
+
+        return self.response_models(row, request, ActivityForArchiveFBUserSerializer)
+
+    @staticmethod
+    def dictfetchall(cursor):
+        """
+        Return all rows from a cursor as a dict
+
+        :param cursor: cursor
+        """
+        columns = [col[0] for col in cursor.description]
+        return [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
 
     @detail_route()
     def post_search(self, request, pk=None):

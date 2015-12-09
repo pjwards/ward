@@ -27,14 +27,12 @@ class ActivityFBUserSerializer(FBUserSerializer):
         read_only_fields = '__all__'
 
 
-class ActivityForArchiveFBUserSerializer(FBUserSerializer):
+class ActivityForArchiveFBUserSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    picture = serializers.CharField()
     p_count = serializers.IntegerField()
     c_count = serializers.IntegerField()
-
-    class Meta:
-        model = FBUser
-        exclude = ('posts', 'comments')
-        read_only_fields = '__all__'
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):

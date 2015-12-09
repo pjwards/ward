@@ -381,6 +381,10 @@ def update_group_feed(group_id, query, use_celery=False, is_whole=False):
 
     check_cp_cnt_group(group)
 
+    if not group.is_stored:
+        logger.info('=== Fail to update %s feed (Group is not stored) ===', group_id)
+        return False
+
     if not group.is_updated(updated_time):
         logger.info('=== Fail to update %s feed (Already updated) ===', group_id)
         return False
