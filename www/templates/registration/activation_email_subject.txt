@@ -1,1 +1,1 @@
-Activate your djangoproject.com account - you have {{ expiration_days }} days!
+Activate your pjwards.com account - you have {{ expiration_days }} days!

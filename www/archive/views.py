@@ -30,10 +30,8 @@ def groups(request):
     :param request: request
     :return: render
     """
-    latest_group_list = Group.objects.order_by('name')
-
     if request.method == "GET":
-        return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, })
+        return render(request, 'archive/group/list.html', {})
     elif request.method == "POST":
         # Get a url and validate the url
         fb_url = request.POST.get("fb_url", None)
@@ -75,10 +73,8 @@ def groups_admin(request):
     :param request: request
     :return: render
     """
-    latest_group_list = Group.objects.order_by('name')
-
     if request.method == "GET":
-        return render(request, 'archive/group/list_admin.html', {'latest_group_list': latest_group_list, })
+        return render(request, 'archive/group/list_admin.html', {})
 
 
 def group_analysis(request, group_id):
@@ -89,7 +85,7 @@ def group_analysis(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all()
+    _groups = Group.objects.all().order_by('-updated_time')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -889,12 +885,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param request: request
         :return: response model
         """
-        _groups = self.get_queryset()
+        _groups = self.get_queryset().order_by('-updated_time')
         search = self.request.query_params.get('q', '')
         if search:
-            return self.response_models(_groups.order_by('name').search(search), request, GroupSerializer)
+            return self.response_models(_groups.search(search), request, GroupSerializer)
         else:
-            return self.response_models(_groups.order_by('name'), request, GroupSerializer)
+            return self.response_models(_groups, request, GroupSerializer)
 
     @detail_route()
     @renderer_classes((JSONRenderer,))

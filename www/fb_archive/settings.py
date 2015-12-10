@@ -345,6 +345,10 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['email', 'public_profile', 'user_friends'],
         'METHOD': 'js_sdk',
         # 'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+    },
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'}
     }
 }
 
@@ -451,7 +455,6 @@ EMAIL_HOST_USER = 'webmaster'
 EMAIL_HOST_PASSWORD = '1234'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "webmaster@localhost"
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ##################
 # LOCAL SETTINGS #
