@@ -164,7 +164,7 @@ def store_comment(comment_data, post_id, group_id, parent_id=None, use_celery=Fa
 
 
 @shared_task
-def store_feed(feed_data, group_id, use_celery=False, is_check=False):
+def store_feed(feed_data, group_id, use_celery=False, is_check=False, is_check_comment=False):
     """
     This method stores a feed.
 
@@ -172,6 +172,7 @@ def store_feed(feed_data, group_id, use_celery=False, is_check=False):
     :param group_id: post's group id
     :param use_celery: use celery?
     :param is_check: is check?
+    :param is_check_comment: is check comment?
     :return:
     """
     # save post from feeds
@@ -228,6 +229,8 @@ def store_feed(feed_data, group_id, use_celery=False, is_check=False):
 
             post.save()
             logger.info('Updated post: %s', post.id)
+        elif is_check_comment:
+            post_comments = feed_data.get('comments')
         else:
             return False
 
@@ -315,9 +318,8 @@ def store_group_feed(group_id, query, use_celery=False, is_whole=False):
         logger.info('=== Fail to save %s feed (Group is closed) ===', group_id)
         return False
 
-    feeds = []
-
     while query is not None:
+        feeds = []
         try:
             query = fb_request.feed(group, query, feeds)
         except Exception as e:
@@ -336,7 +338,6 @@ def store_group_feed(group_id, query, use_celery=False, is_whole=False):
                     store_feed(feed, group.id, use_celery)
                 except Exception as e:
                     logger.error('Fail to store again by exception : %s', e)
-        feeds = []
         if not is_whole:
             break
 
@@ -395,9 +396,8 @@ def update_group_feed(group_id, query, use_celery=False, is_whole=False):
 
     store_group(group_data)
 
-    feeds = []
-
     while query is not None:
+        feeds = []
         try:
             query = fb_request.feed(group, query, feeds)
         except Exception as e:
@@ -418,7 +418,6 @@ def update_group_feed(group_id, query, use_celery=False, is_whole=False):
                     logger.error('Fail to update again by exception : %s', e)
             if not res:
                 return True
-        feeds = []
         if not is_whole:
             break
 
@@ -476,9 +475,8 @@ def check_group_feed(group_id, query, use_celery=False, is_whole=False):
         logger.info('=== Fail to check %s feed (Group is closed) ===', group_id)
         return False
 
-    feeds = []
-
     while query is not None:
+        feeds = []
         try:
             query = fb_request.feed(group, query, feeds)
         except Exception as e:
@@ -497,7 +495,6 @@ def check_group_feed(group_id, query, use_celery=False, is_whole=False):
                     store_feed(feed, group.id, use_celery, True)
                 except Exception as e:
                     logger.error('Fail to check again by exception : %s', e)
-        feeds = []
         if not is_whole:
             break
 
@@ -584,3 +581,58 @@ def delete_group_content_by_fb(object_id, model, _fb_request=fb_request):
         return False, e.__str__()
 
     return delete_group_content(object_id, model)
+
+
+@shared_task
+def check_group_comments(group_id, query, use_celery=False, is_whole=False):
+    """
+    This method is storing group's comments by using facebook group api.
+    If you want to get whole data, put that 'is_whole' is true.
+
+    :param group_id: param group_id: group id for getting feeds
+    :param query: query for facebook graph api
+    :param use_celery: use celery?
+    :param is_whole: whole or parts
+    :return:
+    """
+    logger.info('=== Start checking %s comments ===', group_id)
+    start_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('Start time : %s', start_time)
+
+    group = Group.objects.filter(id=group_id)[0]
+
+    if group.privacy == "CLOSED":
+        logger.info('=== Fail to check %s comments (Group is closed) ===', group_id)
+        return False
+
+    while query is not None:
+        feeds = []
+        try:
+            query = fb_request.feed(group, query, feeds)
+        except Exception as e:
+            logger.error('Fail to request by exception : %s', e)
+            try:
+                query = fb_request.feed(group, query, feeds)
+            except Exception as e:
+                logger.error('Fail to request again by exception : %s', e)
+
+        for feed in feeds:
+            try:
+                store_feed(feed, group.id, use_celery, False, True)
+            except Exception as e:
+                logger.error('Fail to check by exception : %s', e)
+                try:
+                    store_feed(feed, group.id, use_celery, False, True)
+                except Exception as e:
+                    logger.error('Fail to check again by exception : %s', e)
+        if not is_whole:
+            break
+
+    group.is_stored = True
+    group.save()
+    check_cp_cnt_group(group)
+
+    end_time = timezone.datetime.now().replace(microsecond=0)
+    logger.info('End time : %s', end_time)
+    logger.info('Time difference : %s', end_time - start_time)
+    logger.info('=== End checking %s comments ===', group_id)

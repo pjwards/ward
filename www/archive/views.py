@@ -1,7 +1,5 @@
-import collections
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import connection
-from operator import itemgetter
 import logging
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
@@ -13,7 +11,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from archive.fb.fb_query import get_feed_query
+from archive.fb.fb_query import get_feed_query, get_comment_query
 from archive.fb.fb_request import FBRequest
 from archive.fb.fb_lookup import lookup_id
 from allauth.socialaccount.models import SocialAccount
@@ -64,7 +62,7 @@ def groups(request):
         _group = tasks.store_group(group_data)
 
         if settings.ARCHIVE_GROUP_AUTO_SAVE:
-            tasks.store_group_feed.delay(_group.id, get_feed_query(), True, settings.ARCHIVE_USE_CELERY)
+            tasks.store_group_feed.delay(_group.id, get_feed_query(), settings.ARCHIVE_USE_CELERY, True)
 
         return JsonResponse({'success': 'Success to enroll ' + _group.id})
 
@@ -256,7 +254,7 @@ def group_store(request, group_id):
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.store_group_feed.delay(group_id, get_feed_query(), True, settings.ARCHIVE_USE_CELERY)
+    tasks.store_group_feed.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY, True)
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
@@ -292,7 +290,26 @@ def group_check(request, group_id):
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.check_group_feed.delay(group_id, get_feed_query(), True, settings.ARCHIVE_USE_CELERY)
+    tasks.check_group_feed.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY, True)
+    return HttpResponseRedirect(reverse('archive:groups_admin'))
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def group_comments_check(request, group_id):
+    """
+    Check group comments
+
+    :param request: request
+    :param group_id: group id
+    :return: if you succeed, redirect groups page
+    """
+    if not Group.objects.filter(id=group_id).exists():
+        latest_group_list = Group.objects.order_by('name')
+        error = 'Does not exist group.'
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
+
+    tasks.check_group_comments.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY, True)
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 

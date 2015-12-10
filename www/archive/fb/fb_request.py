@@ -55,6 +55,32 @@ class FBRequest:
 
         return next_query
 
+    def comments(self, post, query, comments):
+        """
+        This method gets comments.
+
+        :param post: post to find comments
+        :param query: details to find comments
+        :param comments: list of comments data
+        :return:
+        """
+        re = self.graph.request(post.id + query)
+
+        if re.get('comments') is not None:
+            re = re.get('comments')
+
+        len_data = len(re.get('data'))
+        if len_data == 0:
+            return None
+
+        logger.info('Get Feeds: %d', len_data)
+        comments += re.get('data')
+
+        next_query = None
+        if 'next' in re.get('paging'):
+            next_query = "/comments?" + unquote(urlparse(re.get('paging').get('next')).query)
+        return next_query
+
     def comment(self, query, comments):
         """
         This method gets comments
@@ -144,3 +170,4 @@ class FBRequest:
         except facebook.GraphAPIError as e:
             logger.info('Fail to access')
             return False, e.__str__()
+

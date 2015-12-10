@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^group/(?P<group_id>[0-9]+)/store/$', views.group_store, name='group_store'),
     url(r'^group/(?P<group_id>[0-9]+)/update/$', views.group_update, name='group_update'),
     url(r'^group/(?P<group_id>[0-9]+)/check/$', views.group_check, name='group_check'),
+    url(r'^group/(?P<group_id>[0-9]+)/comments_check/$', views.group_comments_check, name='group_comments_check'),
 
     url(r'^user/(?P<user_id>[0-9]+)/$', views.user, name='user'),
 
