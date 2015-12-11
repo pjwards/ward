@@ -85,7 +85,7 @@ def group_analysis(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all().order_by('-updated_time')
+    _groups = Group.objects.all().order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -108,7 +108,7 @@ def group_user(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all()
+    _groups = Group.objects.all().order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -131,7 +131,7 @@ def group_search(request, group_id):
     :param group_id: group_id
     :return: searched data
     """
-    _groups = Group.objects.all()
+    _groups = Group.objects.all().order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
 
     search = request.GET['q']

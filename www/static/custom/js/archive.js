@@ -284,7 +284,7 @@ var pcDisplayW = function (rows, row) {
     var new_label = row["updated_time"] < object["updated_time"] ? '<span class="label mini success">New</span> &nbsp; &nbsp;' : '';
     var btn = '&nbsp; &nbsp;<btn class="btn btn-block btn-social-icon btn-facebook mini" onclick="updateWard(' + row["id"] + ',\'' + fb_url + object_id + '\')"><span class="fa fa-facebook"></span></btn>';
     var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
-    var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+    var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
     rows.push({
         "picture": '<img src="' + object["user"].picture + '" style="border-radius: 10px;">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + object["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>',
@@ -911,7 +911,7 @@ jui.ready(["ui.notify"], function (notify) {
 
 jui.ready(["ui.combo"], function (combo) {
     groups_combo = combo("#groups_combo", {
-        index: 0,
+        index: $('#current_group').text(),
         width: 200,
         keydown: true,
         event: {

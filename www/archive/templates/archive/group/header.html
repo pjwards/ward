@@ -8,6 +8,9 @@
             <a class="btn small toggle"><i class="icon-arrow2"></i></a>
             <ul>
                 {% for grp in groups %}
+                    {% if grp.id == group.id %}
+                        <p id="current_group" style="display: none;">{{ forloop.counter0 }}</p>
+                    {% endif %}
                     <li value="{% url 'archive:group' grp.id %}">{{ grp.name }}</li>
                 {% endfor %}
             </ul>
