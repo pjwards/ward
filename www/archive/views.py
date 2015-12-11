@@ -490,6 +490,20 @@ def ward(request, object_id):
             _ward.user = _user
             _ward.save()
         return JsonResponse({'success': 'Ward success'})
+    elif request.method == "DELETE":
+        try:
+            _ward = Ward.objects.get(id=object_id)
+        except Ward.DoesNotExist:
+            error = 'Did not exist this ward.'
+            return JsonResponse({'error': error})
+
+        _user = request.user
+        if _ward.user != _user:
+            error = 'Did not match the owner.'
+            return JsonResponse({'error': error})
+
+        _ward.delete()
+        return JsonResponse({'success': 'Delete ward success'})
 
 
 @login_required()

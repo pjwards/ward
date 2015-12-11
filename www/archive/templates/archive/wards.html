@@ -276,5 +276,9 @@
             });
         });
 
+        function reload () {
+            getWards(post_ward_url, user_id, post_ward_table, post_ward_limit, 1, post_ward_paging);
+            getWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, 1, comment_ward_paging);
+        }
     </script>
 {% endblock %}

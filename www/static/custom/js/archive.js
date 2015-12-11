@@ -56,7 +56,7 @@ var getAsyncAjaxResult = function (url, data) {
 }
 
 /**
- * Get Results by using ajax
+ * Post by using ajax
  */
 var postAjax = function (url, data) {
     var csrftoken = Cookies.get('csrftoken');
@@ -109,7 +109,7 @@ var postAjax = function (url, data) {
 }
 
 /**
- * Get Results by using async ajax
+ * Post by using async ajax
  */
 var postAsyncAjax = function (url, data) {
     var csrftoken = Cookies.get('csrftoken');
@@ -130,6 +130,60 @@ var postAsyncAjax = function (url, data) {
     $.ajax({
         url: url,
         type: "post",
+        data: data,
+        async: false,
+        dataType: "JSON",
+        success: function (source) {
+            if (source["success"]) {
+                data = {
+                    title: source["success"],
+                    message: getToday(),
+                    color: 'success',
+                }
+                notify_top_submit(1, data);
+            }
+            else if (source["error"]) {
+                data = {
+                    title: source["error"],
+                    message: getToday(),
+                    color: 'danger',
+                }
+                notify_top_submit(1, data);
+            }
+        },
+        error: function (request, status, error) {
+            data = {
+                title: status,
+                message: getToday(),
+                color: 'danger',
+            }
+            notify_top_submit(1, data)
+        }
+    });
+}
+
+/**
+ * Delete by using async ajax
+ */
+var deleteAsyncAjax = function (url, data) {
+    var csrftoken = Cookies.get('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    $.ajax({
+        url: url,
+        type: "delete",
         data: data,
         async: false,
         dataType: "JSON",
@@ -198,13 +252,22 @@ var postWard = function (object_id) {
 }
 
 /**
- * update ward
+ * Update ward
  */
 var updateWard = function (ward_id, fb_url) {
     var url = '/archive/ward/' + ward_id + '/update/';
     var data = {};
     postAjax(url, data);
     window.open(fb_url, '_blank');
+}
+
+/**
+ * Delete ward
+ */
+var deleteWard = function (ward_id) {
+    var url = '/archive/ward/' + ward_id + '/';
+    var data = {};
+    deleteAsyncAjax(url, data);
 }
 
 /**
@@ -283,12 +346,13 @@ var pcDisplayW = function (rows, row) {
     var fb_url = "https://www.facebook.com/";
     var new_label = row["updated_time"] < object["updated_time"] ? '<span class="label mini success">New</span> &nbsp; &nbsp;' : '';
     var btn = '&nbsp; &nbsp;<btn class="btn btn-block btn-social-icon btn-facebook mini" onclick="updateWard(' + row["id"] + ',\'' + fb_url + object_id + '\')"><span class="fa fa-facebook"></span></btn>';
-    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
+    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + object_id + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
+    var remove_ward_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Are you sure delete?\')) deleteWard(\'' + row["id"] + '\'); reload()" style="color:#de615e;"><i class="icon-trashcan"></i></btn>'
     var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
     rows.push({
         "picture": '<img src="' + object["user"].picture + '" style="border-radius: 10px;">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + object["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>',
-        "message": new_label + (message.length < 100 ? message + btn + report_btn : message.substring(0, 100) + "..." + btn + report_btn),
+        "message": new_label + (message.length < 100 ? message + btn + report_btn + remove_ward_btn : message.substring(0, 100) + "..." + btn + report_btn + remove_ward_btn),
         "like_count": object["like_count"],
         "comment_count": object["comment_count"],
     });
