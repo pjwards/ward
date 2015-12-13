@@ -5,11 +5,11 @@
 # have to be manually restarted because changes will not be noticed
 # immediately.
 
-DEBUG = True
+DEBUG = False
 
 # Make these unique, and don't share it with anybody.
-SECRET_KEY = "0*pab#&%9##an(w9fk$b&uhn#yvv6b+(0nl(f^f6(-ec%5v)!k"
-NEVERCACHE_KEY = "^)h*m1byrat2%jcaool9n@fc%=%%#97k0$qrh7yn2p^g-qw)ku"
+SECRET_KEY = ""
+NEVERCACHE_KEY = ""
 
 DATABASES = {
     "default": {
@@ -18,11 +18,11 @@ DATABASES = {
         # DB name or path to database file if using sqlite3.
         "NAME": "ward",
         # Not used with sqlite3.
-        "USER": "donghyun",
+        "USER": "",
         # Not used with sqlite3.
         "PASSWORD": "",
         # Set to empty string for localhost. Not used with sqlite3.
-        "HOST": "localhost",
+        "HOST": "",
         # Set to empty string for default. Not used with sqlite3.
         "PORT": "5432",
     }
@@ -57,8 +57,8 @@ DATABASES = {
 ####################
 
 # Facebook Graph API
-FB_APP_ID = '1621617961401149'
-FB_APP_SECRET = 'bdc8380f61ba92b08e2d03bf9993303f'
+FB_APP_ID = ''
+FB_APP_SECRET = ''
 
 SOCIAL_AUTH_FACEBOOK_KEY = FB_APP_ID
 SOCIAL_AUTH_FACEBOOK_SECRET = FB_APP_SECRET
@@ -68,7 +68,35 @@ SOCIAL_AUTH_FACEBOOK_SECRET = FB_APP_SECRET
 # CELERY SETTINGS #
 ###################
 
-# BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-# BROKER_URL = 'ward.dszwip.0001.apne1.cache.amazonaws.com:6379'
 BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'db+sqlite:///results.db'
+CELERY_RESULT_BACKEND = "database"
+# CELERY_RESULT_DBURI = ''
+
+
+####################
+# ARCHIVE SETTINGS #
+####################
+
+ARCHIVE_USE_CELERY = True
+ARCHIVE_GROUP_AUTO_SAVE = False
+
+
+#######################
+# DJANGO REGISTRATION #
+#######################
+
+# Google
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = ''
+# EMAIL_HOST_PASSWORD = ''
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = "pjwards.com@gmail.com"
+
+# Amazon
+EMAIL_HOST = ''
+EMAIL_PORT = 587
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "admin@pjwards.com"

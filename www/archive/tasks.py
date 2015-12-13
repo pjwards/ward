@@ -269,7 +269,8 @@ def store_group(group_data):
         group.updated_time = group_data.get('updated_time')
         group.privacy = group_data.get('privacy')
         group.save()
-        group.owner = store_user(group_data.get('owner').get('id'), group_data.get('owner').get('name'), group)
+        if 'owner' in group_data:
+            group.owner = store_user(group_data.get('owner').get('id'), group_data.get('owner').get('name'), group)
         group.save()
         logger.info('Saved group: %s', group)
     else:
@@ -278,7 +279,8 @@ def store_group(group_data):
         group.description = group_data.get('description')
         group.updated_time = group_data.get('updated_time')
         group.privacy = group_data.get('privacy')
-        group.owner = store_user(group_data.get('owner').get('id'), group_data.get('owner').get('name'), group)
+        if 'owner' in group_data:
+            group.owner = store_user(group_data.get('owner').get('id'), group_data.get('owner').get('name'), group)
         group.save()
         logger.info('Update group updated_time: %s', group.id)
     return group
