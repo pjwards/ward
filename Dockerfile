@@ -4,11 +4,12 @@ MAINTAINER Donghyun Seo <egaoneko@naver.com>
 RUN apt-get update
 RUN apt-get install -y build-essential git
 RUN apt-get install -y python python-dev python3 python3-dev python3-pip
-RUN apt-get install -y nginx uwsgi uwsgi-plugin-python3
+RUN apt-get install -y nginx uwsgi uwsgi-plugin-python3 supervisor
 
 RUN pip3 install uwsgi
+RUN pip install glances
 
-RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
+#RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
 RUN chown -R www-data:www-data /var/lib/nginx
 
 # UWSGI
@@ -75,28 +76,60 @@ RUN npm install -g bower
 # Redis
 RUN apt-get update -qq && apt-get install -y python-software-properties sudo
 RUN apt-get install -y redis-server
+RUN chown -R redis:redis /var/lib/redis
 
-# Psycopg2
+# psycopg2
 RUN apt-get install -y python-psycopg2
+RUN apt-get install -y libpq-dev
+
+# lxml
+RUN apt-get install -y python3-lxml
+RUN apt-get install -y libxml2-dev libxslt-dev
+
+# Pillow
+RUN apt-get install -y libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
 
 # Project
 ENV PROJECT_DIR /home/ubuntu/workspace/ward
 ADD . ${PROJECT_DIR}
-RUN ls -s ${PROJECT_DIR}/conf/redis.conf /etc/redis/redis.conf
-RUN ls -s ${PROJECT_DIR}/conf/nginx-app.conf /etc/nginx/sites-enabled/
-RUN ls -s ${PROJECT_DIR}/conf/uwsgi.ini /etc/uwsgi/apps-enabled/
-
 RUN cd ${PROJECT_DIR} && bower --allow-root install
 RUN cd ${PROJECT_DIR} && pip3 install -r requirements.txt
-RUN ls ${PROJECT_DIR}
+RUN mkdir ${PROJECT_DIR}/www/logs
+RUN cd ${PROJECT_DIR}/www && python3 manage.py migrate --noinput
+RUN cd ${PROJECT_DIR}/www && python3 manage.py collectstatic --noinput
+
+RUN ln -s ${PROJECT_DIR}/conf/nginx-app.conf /etc/nginx/sites-enabled/
+RUN ln -s ${PROJECT_DIR}/conf/uwsgi.ini /etc/uwsgi/apps-enabled/
+RUN ln -s ${PROJECT_DIR}/conf/celeryd.conf /etc/default/celeryd
+RUN ln -s ${PROJECT_DIR}/conf/celerybeat.conf /etc/default/celerybeat
+
+RUN cp ${PROJECT_DIR}/conf/celeryd /etc/init.d/
+RUN chmod +x /etc/init.d/celeryd
+RUN update-rc.d celeryd defaults
+RUN update-rc.d celeryd enable
+RUN chown root:root /etc/init.d/celeryd
+RUN chmod 755 /etc/init.d/celeryd
+
+RUN cp ${PROJECT_DIR}/conf/celerybeat /etc/init.d/
+RUN chmod +x /etc/init.d/celerybeat
+RUN update-rc.d celeryd defaults
+RUN update-rc.d celeryd enable
+RUN chown root:root /etc/init.d/celerybeat
+RUN chmod 755 /etc/init.d/celerybeat
+
+service nginx start
+service uwsgi start
+service celeryd start
+service celerybeat start
 
 VOLUME ["/data", \
 		"/etc/nginx/site-enabled", "/var/log/nginx", \
-		"/etc/uwsgi/apps-enabled", "/var/log/uwsgi",  \
+		"/etc/uwsgi/apps-enabled", "/var/log/uwsgi", \
+		"/var/log/celery", \
 		"/var/lib/redis", "/etc/redis"]
-
-# CMD ["/usr/local/bin/run"]
 
 EXPOSE 80
 EXPOSE 443
 # EXPOSE 6379
+
+CMD ["glances"]

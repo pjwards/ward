@@ -280,13 +280,16 @@ def group_check(request, group_id):
     :param group_id: group id
     :return: if you succeed, redirect groups page
     """
+    p_limit = int(request.POST.get("post_limit", '100'))
+    c_limit = int(request.POST.get("comment_limit", '100'))
+
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
         error = 'Does not exist group.'
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.check_group_feed.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY, True)
+    tasks.check_group_feed.delay(group_id, get_feed_query(p_limit, c_limit), settings.ARCHIVE_USE_CELERY, True)
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
