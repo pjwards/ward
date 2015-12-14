@@ -7,7 +7,7 @@ RUN apt-get install -y python python-dev python3 python3-dev python3-pip
 RUN apt-get install -y nginx uwsgi uwsgi-plugin-python3 supervisor
 
 RUN pip3 install uwsgi
-RUN pip install glances
+RUN pip3 install glances
 
 #RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
 RUN chown -R www-data:www-data /var/lib/nginx
@@ -92,6 +92,7 @@ RUN apt-get install -y libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
 # Project
 ENV PROJECT_DIR /home/ubuntu/workspace/ward
 ADD . ${PROJECT_DIR}
+RUN chown -R www-data:www-data ${PROJECT_DIR}
 RUN cd ${PROJECT_DIR} && bower --allow-root install
 RUN cd ${PROJECT_DIR} && pip3 install -r requirements.txt
 RUN mkdir ${PROJECT_DIR}/www/logs
@@ -102,6 +103,7 @@ RUN ln -s ${PROJECT_DIR}/conf/nginx-app.conf /etc/nginx/sites-enabled/
 RUN ln -s ${PROJECT_DIR}/conf/uwsgi.ini /etc/uwsgi/apps-enabled/
 RUN ln -s ${PROJECT_DIR}/conf/celeryd.conf /etc/default/celeryd
 RUN ln -s ${PROJECT_DIR}/conf/celerybeat.conf /etc/default/celerybeat
+RUN ln -s ${PROJECT_DIR}/code/supervisor-app.conf /etc/supervisor/conf.d/
 
 RUN cp ${PROJECT_DIR}/conf/celeryd /etc/init.d/
 RUN chmod +x /etc/init.d/celeryd
@@ -112,15 +114,11 @@ RUN chmod 755 /etc/init.d/celeryd
 
 RUN cp ${PROJECT_DIR}/conf/celerybeat /etc/init.d/
 RUN chmod +x /etc/init.d/celerybeat
-RUN update-rc.d celeryd defaults
-RUN update-rc.d celeryd enable
+RUN update-rc.d celerybeat defaults
+RUN update-rc.d celerybeat enable
 RUN chown root:root /etc/init.d/celerybeat
 RUN chmod 755 /etc/init.d/celerybeat
 
-service nginx start
-service uwsgi start
-service celeryd start
-service celerybeat start
 
 VOLUME ["/data", \
 		"/etc/nginx/site-enabled", "/var/log/nginx", \
