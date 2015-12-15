@@ -6,11 +6,34 @@ RUN apt-get install -y build-essential git
 RUN apt-get install -y python python-dev python3 python3-dev python3-pip
 RUN apt-get install -y nginx supervisor
 
-RUN pip3 install uwsgi
 RUN pip3 install glances
 
-#RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
+RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
 RUN chown -R www-data:www-data /var/lib/nginx
+
+# UWSGI
+ENV UWSGIVERSION 2.0.11.2
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+            build-essential \
+            libjansson-dev \
+            libpcre3-dev \
+            libssl-dev \
+            libxml2-dev \
+            wget \
+            zlib1g-dev
+
+RUN cd /usr/src && \
+    wget --quiet -O - http://projects.unbit.it/downloads/uwsgi-${UWSGIVERSION}.tar.gz | \
+    tar zxvf -
+
+RUN cd /usr/src/uwsgi-${UWSGIVERSION} && make
+RUN cp /usr/src/uwsgi-${UWSGIVERSION}/uwsgi /usr/local/bin/uwsgi
+RUN PYTHON=/usr/local/python3.4/bin/python3.4
+RUN cd /usr/src/uwsgi-${UWSGIVERSION} && ./uwsgi --build-plugin "plugins/python python34"
+RUN mkdir -p /usr/local/lib/uwsgi/plugins
+RUN cp /usr/src/uwsgi-${UWSGIVERSION}/*.so /usr/local/lib/uwsgi/plugins
+RUN pip3 install uwsgi
 
 # Java
 ENV VERSION 7
@@ -45,6 +68,7 @@ RUN npm install -g bower
 # Redis
 RUN apt-get update -qq && apt-get install -y python-software-properties sudo
 RUN apt-get install -y redis-server
+RUN sysctl vm.overcommit_memory=1 > /dev/null
 RUN chown -R redis:redis /var/lib/redis
 
 # psycopg2
@@ -68,11 +92,13 @@ RUN mkdir ${PROJECT_DIR}/www/logs
 RUN cd ${PROJECT_DIR}/www && python3 manage.py migrate --noinput
 RUN cd ${PROJECT_DIR}/www && python3 manage.py collectstatic --noinput
 
+RUN mkdir -p /var/uwsgi/sites-available
 RUN ln -s ${PROJECT_DIR}/conf/nginx-app.conf /etc/nginx/sites-enabled/
 RUN ln -s ${PROJECT_DIR}/conf/uwsgi.ini /var/uwsgi/sites-available/
 RUN cp ${PROJECT_DIR}/conf/celeryd.conf /etc/default/celeryd
 RUN cp ${PROJECT_DIR}/conf/celerybeat.conf /etc/default/celerybeat
-RUN ln -s ${PROJECT_DIR}/code/supervisor-app.conf /etc/supervisor/conf.d/
+RUN cp ${PROJECT_DIR}/conf/redis.conf /etc/redis/redis.conf
+RUN ln -s ${PROJECT_DIR}/conf/supervisor-app.conf /etc/supervisor/conf.d/
 
 RUN cp ${PROJECT_DIR}/conf/celeryd /etc/init.d/
 RUN chmod +x /etc/init.d/celeryd
@@ -89,14 +115,13 @@ RUN chown root:root /etc/init.d/celerybeat
 RUN chmod 755 /etc/init.d/celerybeat
 
 
-VOLUME ["/data", \
+VOLUME ["/data", "/var/log", \
 		"/etc/nginx/site-enabled", "/var/log/nginx", \
 		"/etc/uwsgi/apps-enabled", "/var/log/uwsgi", \
-		"/var/log/celery", \
+		"/var/log/celery", "/var/log/supervisor", \
 		"/var/lib/redis", "/etc/redis"]
 
 EXPOSE 80
 EXPOSE 443
-# EXPOSE 6379
 
 CMD ["supervisord", "-n"]
