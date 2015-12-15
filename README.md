@@ -23,6 +23,7 @@
 * django-allauth (tested with version 0.24.1)
 * redis (tested with version 2.10.3)
 * uwsgi (tested with version 2.0.11.2)
+* pylibmc (tested with version 1.5.0)
 
 
 * psycopg2 (tested with version 2.6.1)

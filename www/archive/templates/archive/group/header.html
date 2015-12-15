@@ -2,6 +2,12 @@
 <div class="col col-8">
     <span>{{ group.name }}</span>
     &nbsp;&nbsp;
+
+    <form id="search_form" method="get" action="{% url 'archive:group_search' group.id %}"
+          style="display: inline;">
+        <input id="search_input" type="text" style="width: 50%;" class="input small" name="q" placeholder="Search"/>
+    </form>
+
     <span>
         <div id="groups_combo" class="combo">
             <a class="btn small">Select...</a>
@@ -17,10 +23,7 @@
         </div>
     </span>
 
-    <form id="search_form" method="get" action="{% url 'archive:group_search' group.id %}"
-          style="display: inline;">
-        <input id="search_input" type="text" style="width: 50%;" class="input small" name="q" placeholder="Search"/>
-    </form>
+
 </div>
 
 <div class="col col-1">

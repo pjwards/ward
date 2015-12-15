@@ -82,6 +82,9 @@ RUN apt-get install -y libxml2-dev libxslt-dev
 # Pillow
 RUN apt-get install -y libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
 
+# Memcached
+RUN apt-get install -y libmemcached-dev
+
 # Project
 ENV PROJECT_DIR /home/ubuntu/workspace/ward
 ADD . ${PROJECT_DIR}
