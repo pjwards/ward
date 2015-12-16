@@ -1,4 +1,4 @@
-from archive.models import FBUser, Group, Post, Comment, Media, Attachment, Blacklist, Report, Ward
+from archive.models import *
 from rest_framework import serializers
 
 __author__ = "Donghyun Seo"
@@ -116,3 +116,12 @@ class WardSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = '__all__'
         exclude = ('user',)
         depth = 2
+
+
+class UserActivitySerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = UserActivity
+        # fields = '__all__'
+        read_only_fields = '__all__'
+        exclude = ('group',)
+        depth = 1

@@ -263,7 +263,6 @@ class DeletedComment(models.Model):
         """
         return get_different_time(self.created_time)
 
-
     @classmethod
     def create(cls, comment):
         if comment.parent:
@@ -291,3 +290,56 @@ class Ward(models.Model):
         :return: True is updated and False is not updated
         """
         return self.updated_time.strftime('%Y-%m-%dT%H:%M:%S') != new_updated_time.split('+')[0]
+
+
+class UserActivity(models.Model):
+    user = models.ForeignKey(FBUser, related_name='user_activities')
+    group = models.ForeignKey(Group, related_name='user_activities')
+    post_count = models.IntegerField(default=0)
+    comment_count = models.IntegerField(default=0)
+
+    @classmethod
+    def add_post_count(cls, user, group):
+        if not UserActivity.objects.filter(user=user, group=group).exists():
+            user_activity = UserActivity(user=user, group=group, post_count=1)
+            user_activity.save()
+        else:
+            user_activity = UserActivity.objects.filter(user=user, group=group)[0]
+            user_activity.post_count += 1
+            user_activity.save()
+
+    @classmethod
+    def add_comment_count(cls, user, group):
+        if not UserActivity.objects.filter(user=user, group=group).exists():
+            user_activity = UserActivity(user=user, group=group, comment_count=1)
+            user_activity.save()
+        else:
+            user_activity = UserActivity.objects.filter(user=user, group=group)[0]
+            user_activity.comment_count += 1
+            user_activity.save()
+
+    @classmethod
+    def sub_post_count(cls, user, group):
+        if not UserActivity.objects.filter(user=user, group=group).exists():
+            user_activity = UserActivity(user=user, group=group)
+            user_activity.save()
+        else:
+            user_activity = UserActivity.objects.filter(user=user, group=group)[0]
+            if user_activity.post_count > 0:
+                user_activity.post_count -= 1
+            else:
+                user_activity.post_count = 0
+            user_activity.save()
+
+    @classmethod
+    def sub_comment_count(cls, user, group):
+        if not UserActivity.objects.filter(user=user, group=group).exists():
+            user_activity = UserActivity(user=user, group=group)
+            user_activity.save()
+        else:
+            user_activity = UserActivity.objects.filter(user=user, group=group)[0]
+            if user_activity.comment_count > 0:
+                user_activity.comment_count -= 1
+            else:
+                user_activity.comment_count = 0
+            user_activity.save()

@@ -1,6 +1,5 @@
 from django.utils import timezone
 import datetime
-import pytz
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."

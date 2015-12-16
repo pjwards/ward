@@ -103,19 +103,6 @@
                     <div class="body">
                         <h1 class="title"><i class="icon-orderedlist"></i> <strong>Activity</strong></h1>
 
-                        <ul id="activity_tab" class="tab top">
-                            <li>
-                                <a href="#total">Total</a>
-                            </li>
-                            <li><a href="#Month">Month</a></li>
-                            <li><a href="#week">Week</a></li>
-                        </ul>
-
-                        <div id="activity_tab_contents">
-                            <div id="total"></div>
-                            <div id="month"></div>
-                            <div id="week"></div>
-                        </div>
                         <div align="center">
                             <div class="col col-6">
                                 <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
@@ -276,19 +263,6 @@
          * Generate Activity
          */
         jui.ready(["uix.tab", "uix.table"], function (tab, table) {
-            activity_tab = tab("#activity_tab", {
-                event: {
-                    change: function (data) {
-                        loading_activity_post.show();
-                        loading_activity_comment.show();
-                        getActivity(activity_url, 10, data.text.toLowerCase(), "post", post_activity_table, loading_activity_post);
-                        getActivity(activity_url, 10, data.text.toLowerCase(), "comment", comment_activity_table, loading_activity_comment);
-                    }
-                },
-                target: "#activity_tab_contents",
-                index: 0
-            });
-
             post_activity_table = table("#post_activity_table", {
                 tpl: {
                     row: $("#tpl_row").html(),
@@ -391,8 +365,8 @@
         $(function () {
             loading_activity_post.show();
             loading_activity_comment.show();
-            getActivity(activity_url, 10, "total", "post", post_activity_table, loading_activity_post);
-            getActivity(activity_url, 10, "total", "comment", comment_activity_table, loading_activity_comment);
+            getActivity(activity_url, 10, "post", post_activity_table, loading_activity_post);
+            getActivity(activity_url, 10, "comment", comment_activity_table, loading_activity_comment);
 
             loading_proportion_post.show();
             loading_proportion_comment.show();

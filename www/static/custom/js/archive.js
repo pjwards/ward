@@ -597,18 +597,25 @@ var getHourTotalStatistics = function (url, display, from, to) {
 /**
  * Get active by using ajax
  */
-var getActivity = function (url, limit, method, model, table, loading) {
+var getActivity = function (url, limit, model, table, loading) {
 
     var fun = function (source) {
         var results = source["results"];
         var rows = []
         for (var i in results) {
             var row = results[i];
-            var user_url = '/archive/user/' + row["id"] + '/';
+            var user_url = '/archive/user/' + getIdFromUrl(row["user"]["url"]) + '/';
+
+            var count = 0;
+            if (model == 'post') {
+                count = row["post_count"];
+            } else {
+                count = row["comment_count"];
+            }
             rows.push({
-                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
-                "count": row["count"],
+                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px;">',
+                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["user"]["name"] + '</div></a></div>',
+                "count": count,
             });
         }
         ;
@@ -620,7 +627,6 @@ var getActivity = function (url, limit, method, model, table, loading) {
 
     data = {
         limit: limit,
-        method: method,
         model: model
     }
 
@@ -679,13 +685,13 @@ var getUserArchive = function (url, group_id, table, limit, search, loading, pag
         var rows = []
         for (var i in results) {
             var row = results[i];
-            var user_url = '/archive/user/' + row["id"] + '/';
+            var user_url = '/archive/user/' + getIdFromUrl(row["user"]["url"]) + '/';
 
             rows.push({
-                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
-                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
-                "post_count": row["p_count"],
-                "comment_count": row["c_count"],
+                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px;">',
+                "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["user"]["name"] + '</div></a></div>',
+                "post_count": row["post_count"],
+                "comment_count": row["comment_count"],
             });
         }
         ;

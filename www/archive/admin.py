@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import FBUser, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment, Report, Ward
+from .models import *
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -89,11 +89,16 @@ class DeletedCommentAdmin(admin.ModelAdmin):
     ]
     list_display = ('id', 'user', 'created_time', 'message', 'comment_count', 'like_count')
     list_filter = ['created_time']
-    search_fields = ['user']
+    search_fields = ['user__id']
 
 
 class WardAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'group', 'post', 'comment', 'created_time', 'updated_time')
+
+
+class UserActivityAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'group', 'post_count', 'comment_count')
+    search_fields = ['user__id', 'group__id']
 
 
 admin.site.register(FBUser, UserAdmin)
@@ -107,3 +112,4 @@ admin.site.register(Report, ReportAdmin)
 admin.site.register(DeletedPost, DeletedPostAdmin)
 admin.site.register(DeletedComment, DeletedCommentAdmin)
 admin.site.register(Ward, WardAdmin)
+admin.site.register(UserActivity, UserActivityAdmin)

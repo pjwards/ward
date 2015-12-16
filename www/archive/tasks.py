@@ -5,7 +5,7 @@ from django.utils import timezone
 from facebook import GraphAPIError
 from celery import shared_task
 from archive.fb.fb_request import FBRequest
-from .models import FBUser, Group, Post, Comment, Media, Attachment, Blacklist, DeletedPost, DeletedComment
+from .models import *
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -135,6 +135,7 @@ def store_comment(comment_data, post_id, group_id, parent_id=None, use_celery=Fa
         comment.save()
         logger.info('Saved comment: %s', comment.id)
 
+        # save attachment
         if 'attachment' in comment_data:
             if use_celery:
                 store_attachment.delay(attachment_data=comment_data.get('attachment'), comment_id=comment.id,
@@ -142,6 +143,8 @@ def store_comment(comment_data, post_id, group_id, parent_id=None, use_celery=Fa
             else:
                 store_attachment(attachment_data=comment_data.get('attachment'), comment_id=comment.id,
                                  use_celery=use_celery)
+        # save user activity
+        UserActivity.add_comment_count(user=comment.user, group=comment.group)
     else:
         comment = Comment.objects.filter(id=comment_id)[0]
         comment.like_count = comment_data.get('like_count')
@@ -210,6 +213,9 @@ def store_feed(feed_data, group_id, use_celery=False, is_check=False, is_check_c
                     store_attachment.delay(attachment_data=attachment_data, post_id=post.id, use_celery=use_celery)
                 else:
                     store_attachment(attachment_data=attachment_data, post_id=post.id, use_celery=use_celery)
+
+        # save user activity
+        UserActivity.add_post_count(user=post.user, group=post.group)
     else:
         post = Post.objects.filter(id=post_id)[0]
 
@@ -531,18 +537,21 @@ def delete_group_content(object_id, model):
     if isinstance(content, Post):
         deleted_post = DeletedPost.create(content)
         deleted_post.save()
-        comments = Comment.objects.filter(post=content)
+        UserActivity.sub_post_count(user=content.user, group=content.group)
 
+        comments = Comment.objects.filter(post=content)
         if comments:
             for comment in comments:
                 deleted_comment = DeletedComment.create(comment)
                 deleted_comment.save()
 
             for comment in comments:
+                UserActivity.sub_comment_count(user=comment.user, group=comment.group)
                 comment.delete()
     else:
         deleted_comment = DeletedComment.create(content)
         deleted_comment.save()
+        UserActivity.sub_comment_count(user=content.user, group=content.group)
 
         child_comments = Comment.objects.filter(parent=content)
         if child_comments:
@@ -551,6 +560,7 @@ def delete_group_content(object_id, model):
                 deleted_comment.save()
 
             for child_comment in child_comments:
+                UserActivity.sub_comment_count(user=child_comment.user, group=child_comment.group)
                 child_comment.delete()
 
     content.delete()

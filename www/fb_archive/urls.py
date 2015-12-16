@@ -67,6 +67,7 @@ router.register(r'attachments', views.AttachmentViewSet)
 router.register(r'blacklists', views.BlacklistViewSet)
 router.register(r'reports', views.ReportViewSet)
 router.register(r'wards', views.WardViewSet)
+router.register(r'user_activities', views.UserActivityViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

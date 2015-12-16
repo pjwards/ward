@@ -717,8 +717,18 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        users_activity = self.get_activity()
-        return self.response_models(users_activity, request, ActivityFBUserSerializer)
+        _group = self.get_object()
+        model = self.request.query_params.get('model', None)
+
+        if model != 'post' and model != 'comment':
+            raise ValueError("Model can be used 'post' or 'comment'. Input model:" + model)
+
+        if model == 'post':
+            user_activities = UserActivity.objects.filter(group=_group).order_by('-post_count')
+        else:
+            user_activities = UserActivity.objects.filter(group=_group).order_by('-comment_count')
+
+        return self.response_models(user_activities, request, UserActivitySerializer)
 
     @detail_route()
     @renderer_classes((JSONRenderer,))
@@ -792,59 +802,16 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        cursor = connection.cursor()
         _group = self.get_object()
-
         search = self.request.query_params.get('q', '')
 
         if search:
-            cursor.execute(
-                """
-                SELECT
-                    UG.fbuser_id as id,
-                    U.name as name,
-                    U.picture as picture,
-                    (SELECT count(*) FROM archive_post WHERE group_id = %s AND user_id = UG.fbuser_id) as p_count,
-                    (SELECT count(*) FROM archive_comment WHERE group_id = %s AND user_id = UG.fbuser_id) as c_count
-                FROM
-                    archive_fbuser_groups as UG
-                INNER JOIN archive_fbuser as U
-                ON UG.fbuser_id = U.id
-                WHERE UG.group_id = %s AND U.name @@ %s
-                ORDER BY U.name;
-                """, [_group.id, _group.id, _group.id, search])
+            _users = FBUser.objects.search(search)
+            user_activities = UserActivity.objects.filter(group=_group, user__in=_users).order_by('-user__name')
         else:
-            cursor.execute(
-                """
-                SELECT
-                    UG.fbuser_id as id,
-                    U.name as name,
-                    U.picture as picture,
-                    (SELECT count(*) FROM archive_post WHERE group_id = %s AND user_id = UG.fbuser_id) as p_count,
-                    (SELECT count(*) FROM archive_comment WHERE group_id = %s AND user_id = UG.fbuser_id) as c_count
-                FROM
-                    archive_fbuser_groups as UG
-                INNER JOIN archive_fbuser as U
-                ON UG.fbuser_id = U.id
-                WHERE UG.group_id = %s
-                ORDER BY U.name;
-                """, [_group.id, _group.id, _group.id])
-        row = self.dictfetchall(cursor)
+            user_activities = UserActivity.objects.filter(group=_group).order_by('-user__name')
 
-        return self.response_models(row, request, ActivityForArchiveFBUserSerializer)
-
-    @staticmethod
-    def dictfetchall(cursor):
-        """
-        Return all rows from a cursor as a dict
-
-        :param cursor: cursor
-        """
-        columns = [col[0] for col in cursor.description]
-        return [
-            dict(zip(columns, row))
-            for row in cursor.fetchall()
-            ]
+        return self.response_models(user_activities, request, UserActivitySerializer)
 
     @detail_route()
     def post_search(self, request, pk=None):
@@ -1233,6 +1200,14 @@ class WardViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Ward.objects.all().order_by('-created_time')
     serializer_class = WardSerializer
+
+
+class UserActivityViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Ward View Set
+    """
+    queryset = UserActivity.objects.all()
+    serializer_class = UserActivitySerializer
 
 
 def about(request):
