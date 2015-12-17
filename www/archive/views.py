@@ -809,9 +809,9 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if search:
             _users = FBUser.objects.search(search)
-            user_activities = UserActivity.objects.filter(group=_group, user__in=_users).order_by('-user__name')
+            user_activities = UserActivity.objects.filter(group=_group, user__in=_users).order_by('user__name')
         else:
-            user_activities = UserActivity.objects.filter(group=_group).order_by('-user__name')
+            user_activities = UserActivity.objects.filter(group=_group).order_by('user__name')
 
         return self.response_models(user_activities, request, UserActivitySerializer)
 
