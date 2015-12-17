@@ -1,6 +1,6 @@
 [![Stories in Ready](https://badge.waffle.io/egaoneko/ward.png?label=ready&title=Ready)](https://waffle.io/egaoneko/ward)
 
-# Ward
+# [Ward](http://pjwards.com)
 
 ## Requirements
 
@@ -24,10 +24,11 @@
 * redis (tested with version 2.10.3)
 * uwsgi (tested with version 2.0.11.2)
 * pylibmc (tested with version 1.5.0)
-
-
 * psycopg2 (tested with version 2.6.1)
+
+
 * MeCab
+
 
 #### Front-End
 
@@ -46,76 +47,24 @@
 * FitText.js
 * jquery-backstretch
 
+
+
 ## Installation
 
-### Celery
+#### How to install?
 
-#### redis-server
+##### Docker
 
-##### Ubuntu
+Ward uses Docker, so you can easy to install by using Docker.
+If you learn more about Docker, [this site](https://docs.docker.com) helps you.
 
 ```bash
-sudo apt-get install redis-server
+docker build -t=ward .
+docker run --name ward -it -p 80:80 -v /var/log/ward:/var/log ward:latest
 ```
+
 
 ##### Mac
-
-```bash
-brew install redis
-```
-
-
-#### django-celery
-
-[django-celery install](http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html#using-the-django-orm-cache-as-a-result-backend)
-
-
-#### django-bower
-
-[django-bower install](https://django-bower.readthedocs.org/en/latest/installation.html)
-
-```bash
-brew install nodejs
-npm install bower
-```
-
-#### MeCab
-
-##### Ubuntu
-
-```bash
-sudo yum install curl
-bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
-```
-
-##### Mac
-
-```bash
-bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
-```
-
-## Tip
-
-### Pycharm
-
-If you face unresolved reference issue in pycharm, you should make 'www' Source root. And you set 'add source roots to PYTHONPATH' in pycharm preference.
-
-[This site](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm) helps you to set.
-
-And set 'Django Support' in pycharm preference, such as 'Django project root', 'Settings' and 'manage.py'.
-
-
-### DB
-
-```bash
-python manage.py migrate
-python manage.py createsuperuser
-```
-
-
-## How to install?
-
-### Mac
 
 ```bash
 pip install -r requirements.txt
@@ -134,7 +83,8 @@ sudo redis-server
 . run_celery.sh
 ```
 
-### Ubuntu
+
+##### Ubuntu
 
 ```bash
 # JPype1-py3
@@ -177,8 +127,43 @@ python manage.py createsuperuser
 
 ```
 
-### OAuth Setting
+
+#### setting.py
+
+You must set your own `local_settings.py` in `ward/wwww/fb_archive`.
+
+
+#### OAuth Setting
 
 Go to admin sites and add social application.
 You need app id, app secret for facebook oauth.
-If you lean more, [this site](https://godjango.com/65-starting-with-django-allauth/) helps you.
+If you learn more, [this site](https://godjango.com/65-starting-with-django-allauth/) helps you.
+
+
+#### MeCab
+
+##### Ubuntu
+
+```bash
+sudo yum install curl
+bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
+```
+
+##### Mac
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
+```
+
+## Tip
+
+### Pycharm
+
+If you face unresolved reference issue in pycharm, you should make 'www' Source root. And you set 'add source roots to PYTHONPATH' in pycharm preference.
+
+[This site](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm) helps you to set.
+
+And set 'Django Support' in pycharm preference, such as 'Django project root', 'Settings' and 'manage.py'.
+
+
+
