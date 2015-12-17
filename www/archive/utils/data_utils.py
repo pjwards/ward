@@ -1,6 +1,7 @@
 from django.db import connection
 
-from archive.models import FBUser, Group, UserActivity
+from archive.fb.fb_request import FBRequest
+from archive.models import *
 
 __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
@@ -58,3 +59,77 @@ def update_user_activity():
                 user_activity.post_count = row.get('p_count')
                 user_activity.comment_count = row.get('c_count')
                 user_activity.save()
+
+
+def check_users_name():
+    """
+    Check users name
+
+    :return:
+    """
+    print('=== Start checking users name ===')
+
+    # Check Korean and English
+    users = FBUser.objects.filter(name__iregex=r'[^ \-a-zA-Z0-9\u3131-\u3163\uac00-\ud7a3]+')
+    print('Checked Users : %s' % users.count())
+
+    i = 1
+    for user in users:
+        print('=' * 10 + str(i) + '=' * 10)
+        i += 1
+
+        print('Start checking %s name' % user.name)
+        check_user_name(user.id)
+        print('End checking %s name' % user.name)
+    print('=== End checking users name ===')
+
+
+def check_user_name(user_id):
+    """
+    Check name about each user by using posts or comments
+
+    :param user_id: user id
+    :return:
+    """
+    user = FBUser.objects.get(id=user_id)
+    contents = Post.objects.filter(user=user)
+
+    if contents:
+        if not check_user_from_contents(user, contents):
+            contents = Comment.objects.filter(user=user)
+            check_user_from_contents(user, contents)
+    else:
+        contents = Comment.objects.filter(user=user)
+        check_user_from_contents(user, contents)
+
+
+def check_user_from_contents(user, contents):
+    """
+    Check name about each user by using posts or comments
+
+    :param user: user
+    :param contents: contents
+    :return:
+    """
+    fb_request = FBRequest()
+    for content in contents:
+        try:
+            result = fb_request.graph.request(content.id, {'field': 'from'}).get('from')
+        except Exception as e:
+            print('Fail to request by exception : %s', e)
+            continue
+
+        print(result)
+
+        if result:
+            if 'name' in result:
+                name = result.get('name')
+            if name != user.name:
+                print('Change name from %s to %s' % (user.name, name))
+                user.name = name
+                user.save()
+                return True
+            elif name == user.name:
+                print('Name is same. (%s)' % user.name)
+                return True
+    return False

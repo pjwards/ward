@@ -744,7 +744,9 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         _group = self.get_object()
 
         # Count posts and comments about user in group
-        user_count = _group.fbuser_set.count()
+        cursor.execute("SELECT count(*) FROM archive_fbuser_groups WHERE group_id = %s", [_group.id])
+        user_count = cursor.fetchall()[0][0]
+        print(user_count)
 
         # Get post proportion
         posts = {}
@@ -1087,42 +1089,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         models = self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
         return models
-
-    def get_activity(self):
-        """
-        Get user activity
-        :return: result models
-        """
-        _group = self.get_object()
-
-        method = self.request.query_params.get('method', 'total')
-        model = self.request.query_params.get('model', None)
-
-        if method != 'total' and method != 'week' and method != 'month':
-            raise ValueError("Method can be used 'total', 'week', or 'month'. Input method:" + method)
-        if model != 'post' and model != 'comment':
-            raise ValueError("Model can be used 'post' or 'comment'. Input model:" + model)
-
-        if method == 'total':
-            if model == 'post':
-                return _group.fbuser_set.filter(posts__group=_group).annotate(count=Count('posts')).order_by('-count')
-            else:
-                return _group.fbuser_set.filter(comments__group=_group).annotate(count=Count('comments')).order_by(
-                    '-count')
-
-        elif method == 'month':
-            to_date, from_date = date_utils.date_range(date_utils.get_today(), -30)
-        else:
-            to_date, from_date = date_utils.date_range(date_utils.get_today(), -7)
-
-        if model == 'post':
-            return _group.fbuser_set.filter(posts__group=_group, posts__created_time__gt=from_date,
-                                            posts__created_time__lt=to_date) \
-                .annotate(count=Count('posts')).order_by('-count')
-        else:
-            return _group.fbuser_set.filter(comments__group=_group, comments__created_time__gt=from_date,
-                                            comments__created_time__lt=to_date) \
-                .annotate(count=Count('comments')).order_by('-count')
 
     def group_search_by_check(self, model):
         """

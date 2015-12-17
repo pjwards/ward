@@ -103,11 +103,12 @@ USE_TZ = True
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = "en"
+LANGUAGE_CODE = "kr"
 
 # Supported languages
 LANGUAGES = (
     ('en', _('English')),
+    ('kr', _('Korean')),
 )
 
 # SECURITY WARNING: keep the secret key used in production secret!

@@ -141,7 +141,7 @@
             getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
             setInterval(function () {
                 getGroups(groups_url, groups_table, groups_limit, page, groups_search.val());
-            }, 5000);
+            }, 10000);
 
             $("#groups_run").on("click", function () {
                 getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);

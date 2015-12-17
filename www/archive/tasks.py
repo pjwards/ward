@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 import logging
-from time import sleep
-from django.utils import timezone
 from facebook import GraphAPIError
 from celery import shared_task
 from archive.fb.fb_request import FBRequest
@@ -26,14 +24,25 @@ def store_user(user_id, user_name, group):
     :return: user model
     """
     user = FBUser.objects.filter(id=user_id)
+    picture = fb_request.user_picture(user_id)
     if not user:
         # save user
         user = FBUser(id=user_id, name=user_name)
-        user.picture = fb_request.user_picture(user_id)
+        user.picture = picture
         user.save()
         logger.info('Saved user: %s', user.id)
     else:
         user = user[0]
+        is_change = False
+        if user.name != user_name:
+            is_change = True
+            user.name = user_name
+        elif user.picture != picture:
+            is_change = True
+            user.picture = picture
+        if is_change:
+            user.save()
+            logger.info('Update user: %s', user.id)
 
     user.groups.add(group)
 
