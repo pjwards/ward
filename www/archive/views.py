@@ -328,7 +328,7 @@ def user(request, user_id):
         'archive/user/user.html',
         {
             'user': _user,
-            'groups': _groups.all(),
+            'groups': _groups.exclude(privacy='CLOSED'),
         }
     )
 
@@ -875,7 +875,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param request: request
         :return: response model
         """
-        _groups = self.get_queryset().order_by('-updated_time')
+        _groups = self.get_queryset().exclude(privacy='CLOSED').order_by('-updated_time')
         search = self.request.query_params.get('q', '')
         if search:
             return self.response_models(_groups.search(search), request, GroupSerializer)
