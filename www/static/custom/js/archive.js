@@ -1032,7 +1032,7 @@ var getSearchPCM = function (url, table, limit, model, search, search_check, pag
  */
 var getSearchBM = function (url, group_id, table, limit, search, page, paging) {
     var blacklist_url = "/api/groups/" + group_id + "/blacklist_user/";
-    var activity_url = "/api/groups/" + group_id + "/user_activity/";
+    var activity_url = "/api/groups/" + group_id + "/user_archive/";
 
     var fun = function (source) {
         var results = source["results"];
@@ -1045,12 +1045,11 @@ var getSearchBM = function (url, group_id, table, limit, search, page, paging) {
                 user_id: row["id"]
             }
             var blacklist = getAsyncAjaxResult(blacklist_url, async_data);
-            var activity = getAsyncAjaxResult(activity_url, async_data);
+            var activity = getAsyncAjaxResult(activity_url, async_data)["results"][0];
 
             rows.push({
                 "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["name"] + '</div></a></div>',
-                "id": '<div class=" more-link"><a href="' + user_url + '"><div class="h5">' + row["id"] + '</div></a></div>',
                 "count": blacklist["count"],
                 "post_count": activity["post_count"],
                 "comment_count": activity["comment_count"],

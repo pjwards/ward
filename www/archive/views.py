@@ -806,10 +806,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         _group = self.get_object()
         search = self.request.query_params.get('q', '')
+        user_id = self.request.query_params.get('user_id', '')
 
         if search:
             _users = FBUser.objects.search(search)
             user_activities = UserActivity.objects.filter(group=_group, user__in=_users).order_by('user__name')
+        elif user_id:
+            _user = FBUser.objects.get(id=user_id)
+            user_activities = UserActivity.objects.filter(group=_group, user = _user).order_by('user__name')
         else:
             user_activities = UserActivity.objects.filter(group=_group).order_by('user__name')
 

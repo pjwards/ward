@@ -296,7 +296,6 @@
                                 <tr>
                                     <th></th>
                                     <th><i class="icon-user"></i> User</th>
-                                    <th style="text-align: center;"><i class="icon-orderedlist"></i> Id</th>
                                     <th style="text-align: center;"><i class="icon-caution"></i> Spam</th>
                                     <th style="text-align: center;"><i class="icon-report"></i> Post</th>
                                     <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
@@ -358,7 +357,6 @@
                     <tr>
                         <td style="text-align: right;"><!= picture !></td>
                         <td><!= from !></td>
-                        <td style="text-align: center;"><!= id !></td>
                         <td style="text-align: center;"><!= count !></td>
                         <td style="text-align: center;"><!= post_count !></td>
                         <td style="text-align: center;"><!= comment_count !></td>
@@ -368,7 +366,7 @@
 
                 <script id="tpl_none3" type="text/template">
                     <tr>
-                        <td colspan="7" class="none" align="center">Data does not exist.</td>
+                        <td colspan="6" class="none" align="center">Data does not exist.</td>
                     </tr>
                 </script>
 
@@ -583,7 +581,7 @@
             });
 
             blacklist_table = table("#blacklist_table", {
-                fields: ["", "from", "id", "count", "post_count", "comment_count", "updated_time"],
+                fields: ["", "from", "count", "post_count", "comment_count", "updated_time"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
