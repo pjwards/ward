@@ -599,7 +599,8 @@ def delete_group_content_by_fb(object_id, model, _fb_request=fb_request):
     try:
         _fb_request.delete_object(object_id)
     except GraphAPIError as e:
-        return False, e.__str__()
+        if 'Unsupported delete request' not in e.__str__():
+            return False, e.__str__()
 
     return delete_group_content(object_id, model)
 
