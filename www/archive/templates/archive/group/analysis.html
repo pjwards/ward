@@ -15,9 +15,94 @@
     {% block header %}
         {% include 'archive/group/archive_header.html' %}
     {% endblock %}
+
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Group Statistics
+                    <div class="pull-right">
+                        <input type="text" class="input-xs" id="statistics_from" placeholder="From"/>
+                        <input type="text" class="input-xs" id="statistics_to" placeholder="To"/>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                Actions
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right" role="menu">
+                                <li>
+                                    <a value="reset" onclick="controllerStatisticsPlot.resetZoom();">
+                                        Refresh
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <a onclick="changeStatistics('year', $('#statistics_from').val(), $('#statistics_to').val());">Year</a>
+                                </li>
+                                <li>
+                                    <a onclick="changeStatistics('month', $('#statistics_from').val(), $('#statistics_to').val());">Month</a>
+                                </li>
+                                <li>
+                                    <a onclick="changeStatistics('day', $('#statistics_from').val(), $('#statistics_to').val());">Day</a>
+                                </li>
+                                <li>
+                                    <a onclick="changeStatistics('hour', $('#statistics_from').val(), $('#statistics_to').val());">Hour</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="morris-area-chart"></div>
+                    <div class="jqPlot" id="chart1"></div>
+                    <div class="jqPlot" id="chart2" style="margin-top: 30px; height:100px;"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Time Overview
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                Actions
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right" role="menu">
+                                <li>
+                                    <a value="reset" onclick="controllerTotalHourStatisticsPlot.resetZoom();">
+                                        Refresh
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="morris-area-chart"></div>
+                    <div class="jqPlot" id="chart3"></div>
+                    <div class="jqPlot" id="chart4" style="margin-top: 30px; height:100px;"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+
     <div class="container">
+
         <div class="content">
+
             <div class="content-list">
+
+
                 <div class="panel">
                     <div class="body">
                         <h1 class="title"><i class="icon-analysis2"></i> <strong>Statistics</strong>
@@ -263,11 +348,21 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/analysis.js' %}" type="text/javascript"></script>
+    <script class="include" type="text/javascript"
+            src="{% static 'jqplot-bower/dist/plugins/jqplot.cursor.min.js' %}"></script>
+    <script class="include" type="text/javascript"
+            src="{% static 'jqplot-bower/dist/plugins/jqplot.dateAxisRenderer.min.js' %}"></script>
+    <script class="include" type="text/javascript"
+            src="{% static 'jqplot-bower/dist/plugins/jqplot.highlighter.min.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasTextRenderer.min.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasAxisLabelRenderer.min.js' %}"></script>
+
     <script>
-        var statistics_method = 'month';
-        var statistics_display = '#statistics';
-        var hour_statistics_display = "#hour_statistics";
+        var statistics_method = 'month'
 
         var post_issue_limit = 10;
         var comment_issue_limit = 10;
@@ -279,6 +374,7 @@
         var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
         var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";
         var comment_archive_url = "/api/groups/{{ group.id }}/comment_archive/";
+
 
         /**
          * Generate Hot Issue
@@ -431,21 +527,6 @@
         });
 
         /**
-         * Generate Button
-         */
-        jui.ready(["ui.button"], function (button) {
-            statistics_radio = button("#statistics_radio", {
-                type: "radio",
-                index: 1,
-                event: {
-                    change: function (data) {
-                        statistics_method = data.value;
-                    }
-                }
-            });
-        });
-
-        /**
          * Generate Date Picker
          */
         $(function () {
@@ -465,11 +546,15 @@
                     $("#statistics_to").datepicker("option", "minDate", selectedDate);
                     $("#post_issue_to").datepicker("option", "minDate", selectedDate);
                     $("#comment_issue_to").datepicker("option", "minDate", selectedDate);
+                },
+                onSelect: function () {
+                    if (this.id == 'statistics_from') {
+                        console.log('test')
+                        changeStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
+                    }
                 }
             });
-        });
 
-        $(function () {
             $("#statistics_to, #post_issue_to, #comment_issue_to").datepicker({
                 dateFormat: "yy-mm-dd",
                 showMonthAfterYear: true,
@@ -486,6 +571,9 @@
                     $("#statistics_from").datepicker("option", "maxDate", selectedDate);
                     $("#post_issue_from").datepicker("option", "maxDate", selectedDate);
                     $("#comment_issue_from").datepicker("option", "maxDate", selectedDate);
+                    if (this.id == 'statistics_to') {
+                        changeStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
+                    }
                 }
             });
         });
@@ -494,17 +582,19 @@
          * Init analysis.html
          */
         $(function () {
-            getStatistics(statistics_url, statistics_display);
-            getHourTotalStatistics(statistics_url, hour_statistics_display);
+            getStatistics(statistics_url);
+            getHourTotalStatistics(statistics_url);
+            window.onresize = function (event) {
+                statisticsPlot.replot();
+                controllerStatisticsPlot.replot();
+                totalHourStatisticsPlot.replot();
+                controllerTotalHourStatisticsPlot.replot();
+            }
+
             getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
             getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
             getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
             getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
-
-            $("#statistics_run").on("click", function () {
-                getStatistics(statistics_url, statistics_display, statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
-                getHourTotalStatistics(statistics_url, hour_statistics_display, $("#statistics_from").val(), $("#statistics_to").val());
-            });
 
             $("#post_issue_run").on("click", function () {
                 getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
@@ -542,5 +632,21 @@
                 getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
             });
         });
+
+        /**
+         * Change Statistics
+         *
+         * @param method
+         * @param from
+         * @param to
+         */
+        function changeStatistics(method, from, to) {
+            statistics_method = method;
+            statisticsPlot.destroy();
+            controllerStatisticsPlot.destroy();
+            getStatistics(statistics_url, method, from, to);
+        }
+
+
     </script>
 {% endblock %}

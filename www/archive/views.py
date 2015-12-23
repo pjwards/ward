@@ -602,64 +602,35 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Get posts and comment count in some date
         all_posts = all_posts.extra(select={'date': dic[method]}).order_by().values('date') \
-            .annotate(p_count=Count('created_time'))
+            .annotate(count=Count('created_time'))
         all_comments = all_comments.extra(select={'date': dic[method]}).order_by().values('date') \
-            .annotate(c_count=Count('created_time'))
-
-        # Max count in above data
-        post_max_cnt = all_posts.aggregate(Max('p_count'))
-        comment_max_cnt = all_comments.aggregate(Max('c_count'))
-
-        # Value for slice
-        if method == 'year':
-            date_start_len = 0
-            date_end_len = 4
-        elif method == 'month':
-            date_start_len = 2
-            date_end_len = 7
-        elif method == 'day':
-            date_start_len = 5
-            date_end_len = 10
-        elif method == 'hour':
-            date_start_len = 8
-            date_end_len = 13
-        else:
-            date_start_len = 0
-            date_end_len = 2
+            .annotate(count=Count('created_time'))
 
         # Merge post and comment data
-        data_source = {}
-
-        for comment in all_comments:
-            if method == "hour_total":
-                date = '{0:0.0f}'.format(comment.get('date')).zfill(2)
-            else:
-                date = comment.get("date").isoformat()[:13].replace('T', '-')
-            dic = dict()
-            dic["date"] = date[date_start_len:date_end_len]
-            dic["posts"] = 0
-            dic["comments"] = comment.get("c_count")
-            data_source[date] = dic
+        posts = []
+        comments = []
 
         for post in all_posts:
             if method == "hour_total":
                 date = '{0:0.0f}'.format(post.get('date')).zfill(2)
             else:
-                date = post.get("date").isoformat()[:13].replace('T', '-')
-            if date in data_source:
-                data_source[date]["posts"] = post.get("p_count")
+                date = post.get("date").strftime("%Y-%m-%d %I:%M%p")
+            count = post.get("count")
+            posts.append([date, count])
+
+        for comment in all_comments:
+            if method == "hour_total":
+                date = '{0:0.0f}'.format(comment.get('date')).zfill(2)
             else:
-                dic = dict()
-                dic["date"] = date[date_start_len:date_end_len]
-                dic["posts"] = post.get("p_count")
-                dic["comments"] = 0
-                data_source[date] = dic
+                date = comment.get("date").strftime("%Y-%m-%d %I:%M%p")
+            count = comment.get("count")
+            comments.append([date, count])
 
         # Return json data after rearranging data
         return Response({
-            'statistics': [data_source[key] for key in sorted(data_source.keys())],
-            'post_max_cnt': post_max_cnt["p_count__max"],
-            'comment_max_cnt': comment_max_cnt["c_count__max"]})
+            'posts': sorted(posts, key=lambda k: k[0]),
+            'comments': sorted(comments, key=lambda k: k[0])
+        })
 
     @detail_route()
     def post_issue(self, request, pk=None):
@@ -812,7 +783,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             user_activities = UserActivity.objects.filter(group=_group, user__in=_users).order_by('user__name')
         elif user_id:
             _user = FBUser.objects.get(id=user_id)
-            user_activities = UserActivity.objects.filter(group=_group, user = _user).order_by('user__name')
+            user_activities = UserActivity.objects.filter(group=_group, user=_user).order_by('user__name')
         else:
             user_activities = UserActivity.objects.filter(group=_group).order_by('user__name')
 
