@@ -17,7 +17,7 @@
 
 {% block content %}
 
-    <div class="panel dashed">
+    <div class="panel dashed jui">
         <div class="body">
             <h1 class="title"><i class="icon-document"></i> <strong>Groups</strong>
 
@@ -97,7 +97,7 @@
 {% endblock content %}
 
 {% block script %}
-    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/archive.js' %}" type="text/javascript"></script>
     <script>
         var groups_url = "/api/groups/group_search/";
         var groups_limit = 10;

@@ -23,13 +23,13 @@ def get_different_time(time):
     minutes, seconds = divmod(remainder, 60)
 
     if diff.days > 0:
-        return str(int(diff.days)) + " days ago"
+        return str(int(diff.days)) + "days"
     elif hours > 0:
-        return str(int(hours)) + " hours ago"
+        return str(int(hours)) + "hours"
     elif minutes > 0:
-        return str(int(minutes)) + " minutes ago"
+        return str(int(minutes)) + "mins"
     else:
-        return str(int(seconds)) + " seconds ago"
+        return str(int(seconds)) + "secs"
 
 
 class Group(models.Model):

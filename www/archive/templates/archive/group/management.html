@@ -2,104 +2,19 @@
 {% load staticfiles %}
 
 {% block css %}
-    <style type="text/css">
-        /* Base */
-        .visit_total {
-            font-size: 15px;
-        }
-
-        .visit_total .title {
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-
-        .visit_total .number {
-            font-size: 20px;
-        }
-
-        .visit_total .chart {
-            margin-top: 5px;
-            height: 50px;
-            width: 100px;
-        }
-
-        .bargauge {
-            font-size: 15px;
-        }
-
-        .bargauge .title {
-            padding: 16px;
-        }
-
-        .bargauge .chart {
-            height: 150px;
-            width: 80%;
-        }
-
-        .body {
-            padding: 10px;
-        }
-
-        .dashed {
-            border-top: 1px dashed #e5e5e5;
-
-        }
-    </style>
 {% endblock %}
 
-{% block header %}
-    {% include 'archive/group/header.html' %}
+{% block sidebar %}
+    {% include 'archive/group/sidebar.html' %}
 {% endblock %}
 
 {% block content %}
+    {% block header %}
+        {% include 'archive/group/archive_header.html' %}
+    {% endblock %}
     <div class="container">
-        <div class="menu">
-
-            <div class="vmenu ">
-                <a href="{% url 'archive:group_analysis' group.id %}"><i class="icon-profile"></i> Analysis</a>
-                <a href="{% url 'archive:group_user' group.id %}"><i class="icon-user"></i> User</a>
-                {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}
-                    <a href="{% url 'archive:group_management' group.id %}" class="active"><i class="icon-gear"></i>
-                        Management</a>
-                {% else %}
-                    <a href="#" class="disabled"><i class="icon-gear"></i> Management</a>
-                {% endif %}
-            </div>
-
-        </div>
         <div class="content">
-
             <div class="content-list">
-                <div class="dashboard-first">
-                    <div class="col col-3">
-                        <div class="card">
-                            <div class="title">Total Posts</div>
-                            <div class="value">{{ group.post_count }}</div>
-                        </div>
-                    </div>
-                    <div class="col col-3">
-                        <div class="card">
-                            <div class="title">Total Comments</div>
-                            <div class="value">{{ group.comment_count }}</div>
-                        </div>
-
-                    </div>
-                    <div class="col col-3">
-                        <div class="card">
-                            <div class="title">Weekly Posts</div>
-                            <div class="value">{{ posts|length }}</div>
-                        </div>
-
-                    </div>
-                    <div class="col col-3">
-                        <div class="card">
-                            <div class="title">Last Updated</div>
-                            <div class="value">{{ group.get_diff_time }}</div>
-                        </div>
-
-                    </div>
-                </div>
-
                 <div class="panel">
                     <div class="body">
                         <h1 class="title">
