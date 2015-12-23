@@ -746,7 +746,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         # Count posts and comments about user in group
         cursor.execute("SELECT count(*) FROM archive_fbuser_groups WHERE group_id = %s", [_group.id])
         user_count = cursor.fetchall()[0][0]
-        print(user_count)
 
         # Get post proportion
         posts = {}
