@@ -166,12 +166,14 @@ def group_management(request, group_id):
 
     if request.method == "GET":
         _groups = Group.objects.all()
+        posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
         return render(
             request,
             'archive/group/management.html',
             {
                 'groups': _groups,
                 'group': _group,
+                'posts': posts,
             }
         )
     elif request.method == "POST":

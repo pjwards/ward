@@ -88,7 +88,7 @@ var getStatistics = function (url, method, from, to) {
                     show: false,
                 },
                 seriesDefaults: {
-                    showMarker: true
+                    showMarker: false
                 },
                 series: [
                     {label: 'Posts'},
@@ -218,7 +218,7 @@ var getHourTotalStatistics = function (url) {
                     show: false,
                 },
                 seriesDefaults: {
-                    showMarker: true
+                    showMarker: false
                 },
                 series: [
                     {label: 'Posts'},
