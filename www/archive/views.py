@@ -764,8 +764,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             s += c_count[1]
         comments["others"] = user_count - s
 
-        return Response({'posts': posts,
-                         'comments': comments})
+        return Response({'posts': [[key, posts[key]] for key in posts.keys()],
+                         'comments': [[key, comments[key]] for key in comments.keys()]})
 
     @detail_route()
     def user_archive(self, request, pk=None):

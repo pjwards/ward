@@ -14,6 +14,39 @@
     {% block header %}
         {% include 'archive/group/archive_header.html' %}
     {% endblock %}
+
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Post Proportion
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="morris-area-chart"></div>
+                    <div class="jqPlot" id="pie1"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Comment Proportion
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="morris-area-chart"></div>
+                    <div class="jqPlot" id="pie2"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+
     <div class="container">
         <div class="content">
             <div class="content-list">
@@ -40,31 +73,6 @@
                                     <table id="comment_activity_table" class="table simple normal borderless">
                                         <tbody></tbody>
                                     </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-chart"></i> <strong>Proportion</strong></h1>
-
-                        <div align="center">
-                            <div class="col col-6">
-                                <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
-                                    <div class="head">
-                                        <strong>Post Proportion</strong>
-                                    </div>
-                                    <div id="post_proportion"></div>
-                                </div>
-                            </div>
-                            <div class="col col-6">
-                                <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
-                                    <div class="head">
-                                        <strong>Comment Proportion</strong>
-                                    </div>
-                                    <div id="comment_proportion"></div>
                                 </div>
                             </div>
                         </div>
@@ -167,7 +175,13 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/user.js' %}" type="text/javascript"></script>
+    <script class="include" type="text/javascript"
+            src="{% static 'jqplot-bower/dist/plugins/jqplot.pieRenderer.min.js' %}"></script>
+    <script class="include" type="text/javascript"
+            src="{% static 'jqplot-bower/dist/plugins/jqplot.highlighter.min.js' %}"></script>
+
     <script>
         var group_id = "{{ group.id }}";
 
@@ -288,7 +302,11 @@
 
             loading_proportion_post.show();
             loading_proportion_comment.show();
-            getProportion(proportion_url, "#post_proportion", "#comment_proportion");
+            getProportion(proportion_url);
+            window.onresize = function (event) {
+                postProportion.replot();
+                commentProportion.replot();
+            }
 
             loading_archive_user.show();
             getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);

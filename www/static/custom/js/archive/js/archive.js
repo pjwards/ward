@@ -467,49 +467,6 @@ var getActivity = function (url, limit, model, table, loading) {
 }
 
 /**
- * Generate Proportion
- */
-var getProportion = function (url, post_display, comment_display) {
-    function displayProportion(display, data) {
-        var chart = jui.include("chart.builder");
-        $(display).empty();
-        chart(display, {
-            padding: 150,
-            height: 600,
-            axis: {
-                data: [data]
-            },
-            brush: {
-                type: "pie",
-                showText: true,
-                activeEvent: "click",
-            },
-            widget: [{
-                type: "title",
-                text: "Proprotion"
-            }, {
-                type: "tooltip",
-                orient: "left",
-            }, {
-                type: "legend",
-            }]
-        });
-    }
-
-    var fun = function (source) {
-        post_proportion = source['posts'];
-        comment_proportion = source['comments']
-
-        displayProportion(post_display, post_proportion);
-        displayProportion(comment_display, comment_proportion);
-    };
-
-    data = {}
-
-    getAjaxResult(url, data, fun);
-}
-
-/**
  * Get user archive by using ajax
  */
 var getUserArchive = function (url, group_id, table, limit, search, loading, page, paging) {
