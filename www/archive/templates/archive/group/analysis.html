@@ -67,6 +67,7 @@
                     <div class="panel-body">
                         <div class="jqPlot" id="chart1"></div>
                         <div class="jqPlot" id="chart2" style="margin-top: 30px; height:100px;"></div>
+                        <div id="group_statistics"></div>
                     </div>
                     <!-- /.panel-body -->
                 </div>
@@ -97,6 +98,7 @@
                     <div class="panel-body">
                         <div class="jqPlot" id="chart3"></div>
                         <div class="jqPlot" id="chart4" style="margin-top: 30px; height:100px;"></div>
+                        <div id="time_overview"></div>
                     </div>
                     <!-- /.panel-body -->
                 </div>
@@ -229,8 +231,8 @@
                     <!-- /.panel-body -->
                 </div>
             </div>
-    </div><!--row end-->
-    <div class="row">
+        </div><!--row end-->
+        <div class="row">
             <div class="col-lg-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -350,6 +352,52 @@
             </div>
         </div>
         <!-- /.row -->
+
+        <script id="tpl_row" type="text/template">
+            <tr>
+                <td style="text-align: right;"><!= picture !></td>
+                <td><!= from !></td>
+                <td><!= message !></td>
+                <td style="text-align: center;"><!= like_count !></td>
+                <td style="text-align: center;"><!= comment_count !></td>
+            </tr>
+        </script>
+
+        <script id="tpl_none" type="text/template">
+            <tr>
+                <td colspan="5" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
+
+        <script id="tpl_pages" type="text/template">
+            <! for(var i = 0; i < pages.length; i++) { !>
+            <a href="#" class="page"><!= pages[i] !></a>
+            <! } !>
+        </script>
+
+        <div id="loading_group_statistics_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_time_overview_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_post_issue_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_comment_issue_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_post_archive_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_comment_archive_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
     </div><!-- /.page-wrapper -->
 {% endblock %}
 
@@ -368,31 +416,9 @@
     <script type="text/javascript"
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasAxisLabelRenderer.min.js' %}"></script>
 
-    <!--Draw extra rows-->
-    <script id="tpl_row" type="text/template">
-        <tr>
-            <td style="text-align: right;"><!= picture !></td>
-            <td><!= from !></td>
-            <td><!= message !></td>
-            <td style="text-align: center;"><!= like_count !></td>
-            <td style="text-align: center;"><!= comment_count !></td>
-        </tr>
-    </script>
-
-    <script id="tpl_none" type="text/template">
-        <tr>
-            <td colspan="5" class="none" align="center">Data does not exist.</td>
-        </tr>
-    </script>
-
-    <script id="tpl_pages" type="text/template">
-        <! for(var i = 0; i < pages.length; i++) { !>
-        <a href="#" class="page"><!= pages[i] !></a>
-        <! } !>
-    </script>
-
     <script>
-        var statistics_method = 'month'
+        var is_authenticated = {{ user.is_authenticated|lower }};
+        var statistics_method = 'month';
 
         var post_issue_limit = 10;
         var comment_issue_limit = 10;
@@ -415,7 +441,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), pNo);
+                        changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, pNo);
                     }
                 },
                 tpl: {
@@ -450,7 +476,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), pNo);
+                        changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, pNo);
                     }
                 },
                 tpl: {
@@ -490,7 +516,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), pNo);
+                        changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, pNo);
                     }
                 },
                 tpl: {
@@ -525,7 +551,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), pNo);
+                        changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, pNo);
                     }
                 },
                 tpl: {
@@ -573,14 +599,35 @@
                 changeMonth: true,
                 changeYear: true,
                 onClose: function (selectedDate) {
-                    $("#statistics_to").datepicker("option", "minDate", selectedDate);
-                    $("#post_issue_to").datepicker("option", "minDate", selectedDate);
-                    $("#comment_issue_to").datepicker("option", "minDate", selectedDate);
+                    switch (this.id) {
+                        case 'statistics_from':
+                            $("#statistics_to").datepicker("option", "minDate", selectedDate);
+                            break;
+                        case 'post_issue_from':
+                            $("#post_issue_to").datepicker("option", "minDate", selectedDate);
+                            break;
+                        case 'comment_issue_from':
+                            $("#comment_issue_to").datepicker("option", "minDate", selectedDate);
+                            break;
+                    }
                 },
                 onSelect: function () {
-                    if (this.id == 'statistics_from') {
-                        console.log('test')
-                        changeStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
+                    switch (this.id) {
+                        case 'statistics_from':
+                            changeStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
+                            break;
+                        case 'post_issue_from':
+                            changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
+                            break;
+                        case 'comment_issue_from':
+                            changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
+                            break;
+                        case 'post_archive_from':
+                            changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, 1, post_archive_paging);
+                            break;
+                        case 'comment_archive_from':
+                            changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
+                            break;
                     }
                 }
             });
@@ -598,13 +645,78 @@
                 changeMonth: true,
                 changeYear: true,
                 onClose: function (selectedDate) {
-                    $("#statistics_from").datepicker("option", "maxDate", selectedDate);
-                    $("#post_issue_from").datepicker("option", "maxDate", selectedDate);
-                    $("#comment_issue_from").datepicker("option", "maxDate", selectedDate);
-                    if (this.id == 'statistics_to') {
-                        changeStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
+                    switch (this.id) {
+                        case 'statistics_to':
+                            $("#statistics_from").datepicker("option", "maxDate", selectedDate);
+                            break;
+                        case 'post_issue_to':
+                            $("#post_issue_from").datepicker("option", "maxDate", selectedDate);
+                            break;
+                        case 'comment_issue_to':
+                            $("#comment_issue_from").datepicker("option", "maxDate", selectedDate);
+                            break;
+                    }
+                },
+                onSelect: function () {
+                    switch (this.id) {
+                        case 'statistics_to':
+                            changeStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
+                            break;
+                        case 'post_issue_to':
+                            changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
+                            break;
+                        case 'comment_issue_to':
+                            changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
+                            break;
                     }
                 }
+            });
+        });
+
+        /**
+         * Loading message
+         */
+        jui.ready(["ui.modal"], function (modal) {
+            loading_group_statistics = modal("#loading_group_statistics_msg", {
+                target: "#group_statistics",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_time_overview = modal("#loading_time_overview_msg", {
+                target: "#time_overview",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_post_issue = modal("#loading_post_issue_msg", {
+                target: "#post_issue_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_comment_issue = modal("#loading_comment_issue_msg", {
+                target: "#comment_issue_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_post_archive = modal("#loading_post_archive_msg", {
+                target: "#post_archive_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_comment_archive = modal("#loading_comment_archive_msg", {
+                target: "#comment_archive_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
             });
         });
 
@@ -612,12 +724,17 @@
          * Init analysis.html
          */
         $(function () {
-            getStatistics(statistics_url);
-            getHourTotalStatistics(statistics_url);
-            getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
-            getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
-            getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
-            getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
+            loading_group_statistics.show();
+            getStatistics(statistics_url, loading_group_statistics);
+
+            loading_time_overview.show();
+            getHourTotalStatistics(statistics_url, loading_time_overview);
+
+            changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
+            changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
+
+            changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, 1, post_archive_paging);
+            changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
 
             window.onresize = function (event) {
                 statisticsPlot.replot();
@@ -630,40 +747,24 @@
                 comment_archive_table.resize();
             }
 
-            $("#post_issue_run").on("click", function () {
-                getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
-            });
-
-            $("#comment_issue_run").on("click", function () {
-                getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
-            });
-
-            $("#post_archive_run").on("click", function () {
-                getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
-            });
-
-            $("#comment_archive_run").on("click", function () {
-                getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
-            });
-
             $("#post_issue_limit").on("input", function () {
                 post_issue_limit = $("#post_issue_limit").val();
-                getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
+                changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
             });
 
             $("#comment_issue_limit").on("input", function () {
                 comment_issue_limit = $("#comment_issue_limit").val();
-                getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
+                changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
             })
 
             $("#post_archive_limit").on("input", function () {
                 post_archive_limit = $("#post_archive_limit").val();
-                getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
+                changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, 1, post_archive_paging);
             });
 
             $("#comment_archive_limit").on("input", function () {
                 comment_archive_limit = $("#comment_archive_limit").val();
-                getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
+                changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
             });
         });
 
@@ -676,11 +777,10 @@
          */
         function changeStatistics(method, from, to) {
             statistics_method = method;
-            statisticsPlot.destroy();
-            controllerStatisticsPlot.destroy();
-            getStatistics(statistics_url, method, from, to);
+            if(statisticsPlot) statisticsPlot.destroy();
+            if(controllerStatisticsPlot) controllerStatisticsPlot.destroy();
+            loading_group_statistics.show();
+            getStatistics(statistics_url, loading_group_statistics, method, from, to);
         }
-
-
     </script>
 {% endblock %}

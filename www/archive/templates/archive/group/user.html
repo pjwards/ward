@@ -238,8 +238,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        loading_archive_user.show();
-                        getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, pNo);
+                        changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, pNo);
                     }
                 },
                 tpl: {
@@ -314,17 +313,10 @@
          * Init user.html
          */
         $(function () {
-            loading_activity_post.show();
-            loading_activity_comment.show();
-            getActivity(activity_url, 10, "post", post_activity_table, loading_activity_post);
-            getActivity(activity_url, 10, "comment", comment_activity_table, loading_activity_comment);
-
-            loading_proportion_post.show();
-            loading_proportion_comment.show();
-            getProportion(proportion_url, loading_proportion_post, loading_proportion_comment);
-
-            loading_archive_user.show();
-            getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
+            changeActivity(activity_url, 10, "post", post_activity_table, loading_activity_post);
+            changeActivity(activity_url, 10, "comment", comment_activity_table, loading_activity_comment);
+            changeProportion(proportion_url, loading_proportion_post, loading_proportion_comment);
+            changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
 
             window.onresize = function (event) {
                 postProportion.replot();
@@ -336,15 +328,13 @@
 
             $("#user_archive_limit").on("input", function () {
                 user_archive_limit = $("#user_archive_limit").val();
-                loading_archive_user.show();
-                getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
+                changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
             });
 
             $("#user_archive_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    loading_archive_user.show();
-                    getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
+                    changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
                 }
             })
         });

@@ -1,8 +1,12 @@
 /**
  * Created by donghyun on 11/14/15.
  */
+
 /**
  * to round to n decimal places
+ *
+ * @param num
+ * @returns {number}
  */
 var ceil = function (num) {
     var places;
@@ -17,8 +21,13 @@ var ceil = function (num) {
     return Math.ceil(num / multiplier) * multiplier;
 }
 
+
 /**
  * Get Results by using ajax
+ *
+ * @param url
+ * @param data
+ * @param fun
  */
 var getAjaxResult = function (url, data, fun) {
     $.ajax({
@@ -40,8 +49,13 @@ var getAjaxResult = function (url, data, fun) {
     });
 }
 
+
 /**
  * Get Results by using async ajax
+ *
+ * @param url
+ * @param data
+ * @returns {undefined}
  */
 var getAsyncAjaxResult = function (url, data) {
     var response = $.ajax({
@@ -55,8 +69,12 @@ var getAsyncAjaxResult = function (url, data) {
     return response.includes("DoesNotExist") ? undefined : JSON.parse(response);
 }
 
+
 /**
  * Post by using ajax
+ *
+ * @param url
+ * @param data
  */
 var postAjax = function (url, data) {
     var csrftoken = Cookies.get('csrftoken');
@@ -108,8 +126,12 @@ var postAjax = function (url, data) {
     });
 }
 
+
 /**
  * Post by using async ajax
+ *
+ * @param url
+ * @param data
  */
 var postAsyncAjax = function (url, data) {
     var csrftoken = Cookies.get('csrftoken');
@@ -162,8 +184,12 @@ var postAsyncAjax = function (url, data) {
     });
 }
 
+
 /**
  * Delete by using async ajax
+ *
+ * @param url
+ * @param data
  */
 var deleteAsyncAjax = function (url, data) {
     var csrftoken = Cookies.get('csrftoken');
@@ -216,16 +242,23 @@ var deleteAsyncAjax = function (url, data) {
     });
 }
 
+
 /**
  * Get url from id
+ *
+ * @param url
+ * @returns {*}
  */
 var getIdFromUrl = function (url) {
     var split_url = url.split('/');
     return split_url[split_url.length - 2];
 }
 
+
 /**
  * Post report
+ *
+ * @param object_id
  */
 var postReport = function (object_id) {
     var url = '/archive/report/' + object_id + '/';
@@ -233,8 +266,12 @@ var postReport = function (object_id) {
     postAjax(url, data);
 }
 
+
 /**
  * Report action
+ *
+ * @param report_id
+ * @param action
  */
 var reportAction = function (report_id, action) {
     var url = '/archive/report/' + report_id + '/' + action + '/';
@@ -242,8 +279,11 @@ var reportAction = function (report_id, action) {
     postAsyncAjax(url, data);
 }
 
+
 /**
  * Post ward
+ *
+ * @param object_id
  */
 var postWard = function (object_id) {
     var url = '/archive/ward/' + object_id + '/';
@@ -251,8 +291,12 @@ var postWard = function (object_id) {
     postAjax(url, data);
 }
 
+
 /**
  * Update ward
+ *
+ * @param ward_id
+ * @param fb_url
  */
 var updateWard = function (ward_id, fb_url) {
     var url = '/archive/ward/' + ward_id + '/update/';
@@ -261,8 +305,11 @@ var updateWard = function (ward_id, fb_url) {
     window.open(fb_url, '_blank');
 }
 
+
 /**
  * Delete ward
+ *
+ * @param ward_id
  */
 var deleteWard = function (ward_id) {
     var url = '/archive/ward/' + ward_id + '/';
@@ -270,22 +317,29 @@ var deleteWard = function (ward_id) {
     deleteAsyncAjax(url, data);
 }
 
+
 /**
  * Post and comment Display
+ *
+ * @param rows
+ * @param row
  */
 var pcDisplay = function (rows, row) {
-    var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+    var user_url = '/archive/user/' + row["user"].id + '/';
     var fb_url = "https://www.facebook.com/";
-    var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
-    var ward_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postWard(\'' + row["id"] + '\')" style="color:#ffa500;"><i class="icon-pin"></i></btn>';
-    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
+    var ward_btn = is_authenticated?'&nbsp; &nbsp;<btn class="btn mini" onclick="postWard(\'' + row["id"] + '\')" style="color:#ffa500;"><i class="icon-pin"></i> Ward</btn>':'';
+    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i> Report</btn>';
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
+    var fb_link = function(message) {
+        message = message.length < 100 ? message:message.substring(0, 100) + "...";
+        return '<div class="h5"><div class="more-link" style="margin-bottom:10px;"><a href="' + fb_url + row["id"] + '" target="_blank">' + message + '</a></div>'  + ward_btn + report_btn + '</div>';
+    }
     rows.push({
         "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>',
-        "message": message.length < 100 ? message + btn + ward_btn + report_btn : message.substring(0, 100) + "..." + btn + ward_btn + report_btn,
-        "like_count": row["like_count"],
-        "comment_count": row["comment_count"],
+        "message": fb_link(message),
+        "like_count": '<div class="h5">' + row["like_count"] + '</div>',
+        "comment_count": '<div class="h5">' + row["comment_count"] + '</div>',
     });
 }
 
@@ -293,7 +347,7 @@ var pcDisplay = function (rows, row) {
  * Post and comment Display for management
  */
 var pcDisplayM = function (rows, row, name) {
-    var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
+    var user_url = '/archive/user/' + row["user"].id + '/';
     var fb_url = "https://www.facebook.com/";
     var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + row["id"] + '" target="_blank"><span class="fa fa-facebook"></span></a>';
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
@@ -357,77 +411,6 @@ var pcDisplayW = function (rows, row) {
         "comment_count": object["comment_count"],
     });
 }
-
-/**
- * Get issue by using ajax
- */
-var getIssue = function (url, table, limit, from, to, page, paging) {
-    var fun = function (source) {
-        var results = source["results"];
-        var rows = []
-        for (var i in results) {
-            pcDisplay(rows, results[i]);
-        }
-        ;
-
-        table.reset()
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.reload(source["count"]);
-            paging.first();
-        }
-    }
-
-    if (!page) {
-        page = 1;
-    }
-
-    data = {
-        limit: limit,
-        offset: (page - 1) * limit,
-        from: from,
-        to: to,
-    }
-
-    getAjaxResult(url, data, fun);
-}
-
-/**
- * Get archive by using ajax
- */
-var getArchive = function (url, table, limit, from, page, paging) {
-    var fun = function (source) {
-        var results = source["results"];
-        var rows = []
-        for (var i in results) {
-            pcDisplay(rows, results[i]);
-        }
-        ;
-
-        table.reset()
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.reload(source["count"]);
-            paging.first();
-        }
-    }
-
-    if (!page) {
-        page = 1;
-    }
-
-    data = {
-        limit: limit,
-        offset: (page - 1) * limit,
-        from: from,
-    }
-
-    getAjaxResult(url, data, fun);
-}
-
-
 
 /**
  * Get search post and comment by using ajax

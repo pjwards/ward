@@ -4,8 +4,14 @@
 
 /**
  * Generate Statistics
+ *
+ * @param url
+ * @param loading
+ * @param method
+ * @param from
+ * @param to
  */
-var getStatistics = function (url, method, from, to) {
+var getStatistics = function (url, loading, method, from, to) {
     var posts;
     var comments;
     var formatString;
@@ -129,6 +135,8 @@ var getStatistics = function (url, method, from, to) {
             $.jqplot.Cursor.zoomProxy(statisticsPlot, controllerStatisticsPlot);
 
             $.jqplot._noToImageButton = true;
+
+            loading.hide();
         });
     }
 
@@ -143,10 +151,14 @@ var getStatistics = function (url, method, from, to) {
     getAjaxResult(url, data, fun);
 }
 
+
 /**
  * Generate Hour Total Statistics
+ *
+ * @param url
+ * @param loading
  */
-var getHourTotalStatistics = function (url) {
+var getHourTotalStatistics = function (url, loading) {
     var posts;
     var comments;
 
@@ -260,6 +272,8 @@ var getHourTotalStatistics = function (url) {
             $.jqplot.Cursor.zoomProxy(totalHourStatisticsPlot, controllerTotalHourStatisticsPlot);
 
             $.jqplot._noToImageButton = true;
+
+            loading.hide();
         });
     }
 
@@ -268,4 +282,129 @@ var getHourTotalStatistics = function (url) {
     }
 
     getAjaxResult(url, data, fun);
+}
+
+
+/**
+ * Get issue by using ajax
+ *
+ * @param url
+ * @param table
+ * @param limit
+ * @param from
+ * @param to
+ * @param loading
+ * @param page
+ * @param paging
+ */
+var getIssue = function (url, table, limit, from, to, loading, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            pcDisplay(rows, results[i]);
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+            paging.first();
+        }
+        loading.hide();
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        from: from,
+        to: to,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+
+/**
+ * Change Issue
+ *
+ * @param url
+ * @param table
+ * @param limit
+ * @param from
+ * @param to
+ * @param loading
+ * @param page
+ * @param paging
+ */
+function changeIssue(url, table, limit, from, to, loading, page, paging) {
+    loading.show();
+    getIssue(url, table, limit, from, to, loading, page, paging);
+}
+
+
+/**
+ * Get archive by using ajax
+ *
+ * @param url
+ * @param table
+ * @param limit
+ * @param from
+ * @param loading
+ * @param page
+ * @param paging
+ */
+var getArchive = function (url, table, limit, from, loading, page, paging) {
+    var fun = function (source) {
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            pcDisplay(rows, results[i]);
+        }
+        ;
+
+        table.reset()
+        table.append(rows);
+        if (paging) {
+            paging.setOption("pageCount", limit);
+            paging.reload(source["count"]);
+            paging.first();
+        }
+        loading.hide();
+    }
+
+    if (!page) {
+        page = 1;
+    }
+
+    data = {
+        limit: limit,
+        offset: (page - 1) * limit,
+        from: from,
+    }
+
+    getAjaxResult(url, data, fun);
+}
+
+
+/**
+ * Change Archive
+ *
+ * @param url
+ * @param table
+ * @param limit
+ * @param from
+ * @param loading
+ * @param page
+ * @param paging
+ */
+function changeArchive(url, table, limit, from, loading, page, paging) {
+    loading.show();
+    getArchive(url, table, limit, from, loading, page, paging);
 }

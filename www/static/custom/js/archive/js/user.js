@@ -4,6 +4,12 @@
 
 /**
  * Get active by using ajax
+ *
+ * @param url
+ * @param limit
+ * @param model
+ * @param table
+ * @param loading
  */
 var getActivity = function (url, limit, model, table, loading) {
 
@@ -43,7 +49,26 @@ var getActivity = function (url, limit, model, table, loading) {
 
 
 /**
+ * Change Activity
+ *
+ * @param url
+ * @param limit
+ * @param model
+ * @param table
+ * @param loading
+ */
+var changeActivity = function (url, limit, model, table, loading) {
+    loading.show();
+    getActivity(url, limit, model, table, loading);
+}
+
+
+/**
  * Generate Proportion
+ *
+ * @param url
+ * @param post_loading
+ * @param comment_loading
  */
 var getProportion = function (url, post_loading, comment_loading) {
     var posts;
@@ -124,7 +149,30 @@ var getProportion = function (url, post_loading, comment_loading) {
 
 
 /**
+ * Change Proportion
+ *
+ * @param url
+ * @param post_loading
+ * @param comment_loading
+ */
+function changeProportion(url, post_loading, comment_loading) {
+    post_loading.show();
+    comment_loading.show();
+    getProportion(url, post_loading, comment_loading)
+}
+
+
+/**
  * Get user archive by using ajax
+ *
+ * @param url
+ * @param group_id
+ * @param table
+ * @param limit
+ * @param search
+ * @param loading
+ * @param page
+ * @param paging
  */
 var getUserArchive = function (url, group_id, table, limit, search, loading, page, paging) {
     var fun = function (source) {
@@ -167,4 +215,22 @@ var getUserArchive = function (url, group_id, table, limit, search, loading, pag
     }
 
     getAjaxResult(url, data, fun);
+}
+
+
+/**
+ * Change User Archive
+ *
+ * @param url
+ * @param group_id
+ * @param table
+ * @param limit
+ * @param search
+ * @param loading
+ * @param page
+ * @param paging
+ */
+function changeUserArchive(url, group_id, table, limit, search, loading, page, paging) {
+    loading.show();
+    getUserArchive(url, group_id, table, limit, search, loading, page, paging);
 }
