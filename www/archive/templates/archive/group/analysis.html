@@ -58,7 +58,6 @@
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <div id="morris-area-chart"></div>
                         <div class="jqPlot" id="chart1"></div>
                         <div class="jqPlot" id="chart2" style="margin-top: 30px; height:100px;"></div>
                     </div>
@@ -89,277 +88,261 @@
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <div id="morris-area-chart"></div>
                         <div class="jqPlot" id="chart3"></div>
                         <div class="jqPlot" id="chart4" style="margin-top: 30px; height:100px;"></div>
                     </div>
                     <!-- /.panel-body -->
                 </div>
             </div>
-        </div>
-        <!-- /.row -->
 
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Hot issue</h1>
-            </div><!-- /.col-lg-12 -->
-        </div><!-- /.row -->
-
-        <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        Hot Issue Posts
+                        <i class="fa fa-feed fa-fw"></i> Post Hot Issue
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="post_issue_limit">Limit</label>
+                                        <input type="text" class="input" id="post_issue_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="post_issue_from" placeholder="From"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="post_issue_to" placeholder="To"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                     <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <div class="dataTable_wrapper">
-                            <table class="table table-striped table-bordered table-hover" id="hotIssueTable">
-                                <thead>
-                                <tr>
-                                    <th>From</th>
-                                    <th>Message</th>
-                                    <th>Like</th>
-                                    <th>Comment</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr class="odd gradeX">
-                                    <td>From</td>
-                                    <td>Message</td>
-                                    <td class="center">Like</td>
-                                    <td class="center">Comment</td>
-                                </tr>
-                                </tbody>
-                            </table>
+                    <div class="panel-body jui">
+                        <table id="post_issue_table" class="table simple hover borderless">
+                            <colgroup>
+                                <col style="width: 60px;">
+                                <col style="width: 100px;">
+                                <col style="width: 60%;">
+                                <col style="width: 20%;">
+                                <col style="width: 20%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <div id="post_issue_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
                         </div>
-                        <!-- /.table-responsive -->
                     </div>
                     <!-- /.panel-body -->
                 </div>
-            </div><!-- /.col-lg-12 -->
-        </div><!-- /.row -->
+            </div>
 
-    <div class="container">
-
-        <div class="content">
-
-            <div class="content-list">
-
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-bell"></i> <strong>Hot Issue</strong></h1>
-
-                        <div class="col col-6">
-                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                                <div class="head">
-                                    <strong>Hot Issue Posts</strong>
-
-                                    <div class="group" style="float: right">
-                                        <input type="text" class="input" id="post_issue_limit" placeholder="Limit"
-                                               value="10" style="width: 60px; text-align: right;"/>
-                                        <input type="text" class="input" id="post_issue_from" placeholder="From"/>
-                                        <input type="text" class="input" id="post_issue_to" placeholder="To"/>
-                                        <button class="btn" value="run" id="post_issue_run"><i class="icon-play"></i>
-                                            Run
-                                        </button>
-                                    </div>
-                                </div>
-                                <table id="post_issue_table" class="table simple hover borderless">
-                                    <colgroup>
-                                        <col style="width: 60px;">
-                                        <col style="width: 100px;">
-                                        <col style="width: 60%;">
-                                        <col style="width: 20%;">
-                                        <col style="width: 20%;">
-                                    </colgroup>
-                                    <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-
-                            <div id="post_issue_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
-                            </div>
-                        </div>
-
-                        <div class="col col-6">
-                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                                <div class="head">
-                                    <strong>Hot Issue Comments</strong>
-
-                                    <div class="group" style="float: right">
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-comments fa-fw"></i> Comment Hot Issue
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="post_issue_limit">Limit</label>
                                         <input type="text" class="input" id="comment_issue_limit" placeholder="Limit"
-                                               value="10" style="width: 60px; text-align: right;"/>
-                                        <input type="text" class="input" id="comment_issue_from"
-                                               placeholder="from"/>
-                                        <input type="text" class="input" id="comment_issue_to" placeholder="to"/>
-                                        <button class="btn" value="run" id="comment_issue_run"><i class="icon-play"></i>
-                                            Run
-                                        </button>
-                                    </div>
-                                </div>
-                                <table id="comment_issue_table" class="table simple hover borderless">
-                                    <colgroup>
-                                        <col style="width: 60px;">
-                                        <col style="width: 100px;">
-                                        <col style="width: 60%;">
-                                        <col style="width: 20%;">
-                                        <col style="width: 20%;">
-                                    </colgroup>
-                                    <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-
-                            <div id="comment_issue_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="comment_issue_from" placeholder="From"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="comment_issue_to" placeholder="To"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="comment_issue_table" class="table simple hover borderless">
+                            <colgroup>
+                                <col style="width: 60px;">
+                                <col style="width: 100px;">
+                                <col style="width: 60%;">
+                                <col style="width: 20%;">
+                                <col style="width: 20%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <div id="comment_issue_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
-
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-db"></i> <strong>Archive</strong></h1>
-
-                        <div class="col col-6">
-                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                                <div class="head">
-                                    <strong>Post List</strong>
-
-                                    <div class="group" style="float: right">
+            </div>
+    </div><!--row end-->
+    <div class="row">
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-feed fa-fw"></i> Post Archive List
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="post_issue_limit">Limit</label>
                                         <input type="text" class="input" id="post_archive_limit" placeholder="Limit"
-                                               value="10" style="width: 60px; text-align: right;"/>
-                                        <input type="text" class="input" id="post_archive_from" placeholder="From"/>
-                                        <button class="btn" value="run" id="post_archive_run"><i class="icon-play"></i>
-                                            Run
-                                        </button>
-                                    </div>
-                                </div>
-                                <table id="post_archive_table" class="table simple hover borderless">
-                                    <colgroup>
-                                        <col style="width: 60px;">
-                                        <col style="width: 100px;">
-                                        <col style="width: 60%;">
-                                        <col style="width: 20%;">
-                                        <col style="width: 20%;">
-                                    </colgroup>
-                                    <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-
-                            <div id="post_archive_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
-                            </div>
-                        </div>
-
-
-                        <div class="col col-6">
-                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                                <div class="head">
-                                    <strong>Comment List</strong>
-
-                                    <div class="group" style="float: right">
-                                        <input type="text" class="input" id="comment_archive_limit" placeholder="Limit"
-                                               value="10" style="width: 60px; text-align: right;"/>
-                                        <input type="text" class="input" id="comment_archive_from" placeholder="From"/>
-                                        <button class="btn" value="run" id="comment_archive_run"><i
-                                                class="icon-play"></i>
-                                            Run
-                                        </button>
-                                    </div>
-                                </div>
-                                <table id="comment_archive_table" class="table simple hover borderless">
-                                    <colgroup>
-                                        <col style="width: 60px;">
-                                        <col style="width: 100px;">
-                                        <col style="width: 60%;">
-                                        <col style="width: 20%;">
-                                        <col style="width: 20%;">
-                                    </colgroup>
-                                    <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-
-                            <div id="comment_archive_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="post_archive_from" placeholder="From"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="post_archive_table" class="table simple hover borderless">
+                            <colgroup>
+                                <col style="width: 60px;">
+                                <col style="width: 100px;">
+                                <col style="width: 60%;">
+                                <col style="width: 20%;">
+                                <col style="width: 20%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <div id="post_archive_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
+            </div>
 
-                <script id="tpl_row" type="text/template">
-                    <tr>
-                        <td style="text-align: right;"><!= picture !></td>
-                        <td><!= from !></td>
-                        <td><!= message !></td>
-                        <td style="text-align: center;"><!= like_count !></td>
-                        <td style="text-align: center;"><!= comment_count !></td>
-                    </tr>
-                </script>
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-comments fa-fw"></i> Comment Archive List
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="post_issue_limit">Limit</label>
+                                        <input type="text" class="input" id="comment_archive_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="comment_archive_from" placeholder="From"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="comment_archive_table" class="table simple hover borderless">
+                            <colgroup>
+                                <col style="width: 60px;">
+                                <col style="width: 100px;">
+                                <col style="width: 60%;">
+                                <col style="width: 20%;">
+                                <col style="width: 20%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
 
-                <script id="tpl_none" type="text/template">
-                    <tr>
-                        <td colspan="5" class="none" align="center">Data does not exist.</td>
-                    </tr>
-                </script>
+                        <div id="comment_archive_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
 
-                <script id="tpl_pages" type="text/template">
-                    <! for(var i = 0; i < pages.length; i++) { !>
-                    <a href="#" class="page"><!= pages[i] !></a>
-                    <! } !>
-                </script>
-
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
             </div>
         </div>
-    </div>
+        <!-- /.row -->
     </div><!-- /.page-wrapper -->
 {% endblock %}
 
@@ -377,6 +360,29 @@
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasTextRenderer.min.js' %}"></script>
     <script type="text/javascript"
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasAxisLabelRenderer.min.js' %}"></script>
+
+    <!--Draw extra rows-->
+    <script id="tpl_row" type="text/template">
+        <tr>
+            <td style="text-align: right;"><!= picture !></td>
+            <td><!= from !></td>
+            <td><!= message !></td>
+            <td style="text-align: center;"><!= like_count !></td>
+            <td style="text-align: center;"><!= comment_count !></td>
+        </tr>
+    </script>
+
+    <script id="tpl_none" type="text/template">
+        <tr>
+            <td colspan="5" class="none" align="center">Data does not exist.</td>
+        </tr>
+    </script>
+
+    <script id="tpl_pages" type="text/template">
+        <! for(var i = 0; i < pages.length; i++) { !>
+        <a href="#" class="page"><!= pages[i] !></a>
+        <! } !>
+    </script>
 
     <script>
         var statistics_method = 'month'
@@ -396,22 +402,6 @@
         /**
          * Generate Hot Issue
          */
-        $(document).ready(function() {
-            $('#hotIssueTable').DataTable({
-                "responsive": true,
-                "ajax": {
-                    url: post_issue_url,
-                    dataSrc: "results",
-                },
-                "columns":[
-                    { data: "user.name"},
-                    { data: "message"},
-                    { data: "like_count"},
-                    { data: "comment_count"}
-                ]
-            });
-        });
-
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             post_issue_paging = paging("#post_issue_paging", {
                 pageCount: 10,
@@ -623,7 +613,6 @@
                 totalHourStatisticsPlot.replot();
                 controllerTotalHourStatisticsPlot.replot();
             }
-            getIssue2(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
 
             getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
             getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);

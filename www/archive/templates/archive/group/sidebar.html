@@ -17,7 +17,7 @@
                 <a href="{% url 'archive:group_analysis' group.id %}"><i class="fa fa-bar-chart-o fa-fw"></i>Analysis</a>
             </li>
             <li>
-                <a href="{% url 'archive:group_user' group.id %}"><i class="fa fa-table fa-fw"></i>User</a>
+                <a href="{% url 'archive:group_user' group.id %}"><i class="fa fa-users fa-fw"></i>User</a>
             </li>
             <li>
                 {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}
