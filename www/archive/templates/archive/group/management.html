@@ -8,10 +8,14 @@
     {% include 'archive/group/sidebar.html' %}
 {% endblock %}
 
+
 {% block content %}
+    <div id="page-wrapper">
+
     {% block header %}
         {% include 'archive/group/archive_header.html' %}
     {% endblock %}
+
     <div class="container">
         <div class="content">
             <div class="content-list">
@@ -345,7 +349,9 @@
             </div>
         </div>
     </div>
+    </div><!-- /.page-wrapper -->
 {% endblock %}
+
 
 {% block script %}
     <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>

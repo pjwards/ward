@@ -11,6 +11,8 @@
 {% endblock %}
 
 {% block content %}
+    <div id="page-wrapper">
+
     {% block header %}
         {% include 'archive/group/archive_header.html' %}
     {% endblock %}
@@ -47,6 +49,7 @@
     </div>
     <!-- /.row -->
 
+
     <div class="container">
         <div class="content">
             <div class="content-list">
@@ -73,6 +76,31 @@
                                     <table id="comment_activity_table" class="table simple normal borderless">
                                         <tbody></tbody>
                                     </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel dashed">
+                    <div class="body">
+                        <h1 class="title"><i class="icon-chart"></i> <strong>Proportion</strong></h1>
+
+                        <div align="center">
+                            <div class="col col-6">
+                                <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
+                                    <div class="head">
+                                        <strong>Post Proportion</strong>
+                                    </div>
+                                    <div id="post_proportion"></div>
+                                </div>
+                            </div>
+                            <div class="col col-6">
+                                <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
+                                    <div class="head">
+                                        <strong>Comment Proportion</strong>
+                                    </div>
+                                    <div id="comment_proportion"></div>
                                 </div>
                             </div>
                         </div>
@@ -172,6 +200,7 @@
             </div>
         </div>
     </div>
+    </div><!-- /.page-wrapper -->
 {% endblock %}
 
 {% block script %}

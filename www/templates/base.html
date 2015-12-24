@@ -59,7 +59,7 @@
     <meta name="theme-color" content="#ffffff">
 </head>
 <body>
-<div class="header" id="wrapper">
+<div id="wrapper">
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
     <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -68,7 +68,8 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
         </button>
-        <a href="/"><img src="{% static 'images/ward.png' %}" width="45px;"/></a>
+        <a class="navbar-brand" href="/"><img src="{% static 'images/ward.png' %}" width="25px;" style="display: inline;"/> Ward</a>
+{#        <a class="navbar-brand" href="{% static 'images/ward.png' %}">Ward</a>#}
     </div>
     <ul class="nav navbar-top-links navbar-right">
         {% if user.is_authenticated %}
@@ -110,12 +111,7 @@
     </nav>
 </div>
 
-<div id="page-wrapper">
 {% block content %}
-{% endblock %}
-</div>
-
-{% block footer %}
 {% endblock %}
 
 <script id="tpl_alarm" type="text/template">
@@ -154,6 +150,10 @@
 
 <!-- Custom Theme JavaScript -->
 <script src="{% static 'startbootstrap-sb-admin-2/dist/js/sb-admin-2.js' %}"></script>
+
+<!-- DataTables JavaScript -->
+<script src="{% static 'datatables/media/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
 
 <!-- Analytics -->
 <script>
