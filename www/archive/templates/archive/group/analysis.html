@@ -399,12 +399,15 @@
         $(document).ready(function() {
             $('#hotIssueTable').DataTable({
                 "responsive": true,
-                "ajax": post_issue_url,
+                "ajax": {
+                    url: post_issue_url,
+                    dataSrc: "results",
+                },
                 "columns":[
-                    {"results": "user.name"},
-                    {"results": "message"},
-                    {"results": "like_count"},
-                    {"results": "comment_count"}
+                    { data: "user.name"},
+                    { data: "message"},
+                    { data: "like_count"},
+                    { data: "comment_count"}
                 ]
             });
         });
@@ -620,6 +623,7 @@
                 totalHourStatisticsPlot.replot();
                 controllerTotalHourStatisticsPlot.replot();
             }
+            getIssue2(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
 
             getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
             getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);

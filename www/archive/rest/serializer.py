@@ -9,12 +9,12 @@ __email__ = "egaoneko@naver.com"
 # Serializers define the API representation.
 class FBUserSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
-    comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
-    posts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='post-detail')
+    # comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+    # posts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='post-detail')
 
     class Meta:
         model = FBUser
-        fields = '__all__'
+        exclude = ('groups',)
         read_only_fields = '__all__'
 
 
@@ -74,15 +74,16 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     # attachments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='attachment-detail')
-    comments = serializers.HyperlinkedIdentityField(many=True, read_only=True, view_name='comment-detail')
+    # comments = serializers.HyperlinkedIdentityField(many=True, read_only=True, view_name='comment-detail')
     # comments = CommentSerializer(many=True, read_only=True)
-    attachments = AttachmentSerializer(many=True, read_only=True)
+    # attachments = AttachmentSerializer(many=True, read_only=True)
+    user = FBUserSerializer(read_only=True)
 
     class Meta:
         model = Post
         fields = '__all__'
         read_only_fields = '__all__'
-        depth = 1
+        # depth = 1
 
 
 class BlacklistSerializer(serializers.HyperlinkedModelSerializer):
