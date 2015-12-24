@@ -24,9 +24,6 @@
                     <div class="panel-heading">
                         <i class="fa fa-bar-chart-o fa-fw"></i> Group Statistics
                         <div class="pull-right">
-                            <input type="text" class="input-xs" id="statistics_from" placeholder="From"/>
-                            <input type="text" class="input-xs" id="statistics_to" placeholder="To"/>
-
                             <div class="btn-group">
                                 <button type="button" class="btn btn-default btn-xs dropdown-toggle"
                                         data-toggle="dropdown">
@@ -51,6 +48,16 @@
                                     </li>
                                     <li>
                                         <a onclick="changeStatistics('hour', $('#statistics_from').val(), $('#statistics_to').val());">Hour</a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="input" class="input-xs" id="statistics_from" placeholder="From"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input-xs" id="statistics_to" placeholder="To"
+                                               style="width: 80%; text-align: center;"/>
                                     </li>
                                 </ul>
                             </div>
@@ -607,17 +614,21 @@
         $(function () {
             getStatistics(statistics_url);
             getHourTotalStatistics(statistics_url);
+            getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
+            getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
+            getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
+            getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
+
             window.onresize = function (event) {
                 statisticsPlot.replot();
                 controllerStatisticsPlot.replot();
                 totalHourStatisticsPlot.replot();
                 controllerTotalHourStatisticsPlot.replot();
+                post_issue_table.resize();
+                comment_issue_table.resize();
+                post_archive_table.resize();
+                comment_archive_table.resize();
             }
-
-            getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);
-            getIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), 1, comment_issue_paging);
-            getArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), 1, post_archive_paging);
-            getArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), 1, comment_archive_paging);
 
             $("#post_issue_run").on("click", function () {
                 getIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), 1, post_issue_paging);

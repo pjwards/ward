@@ -18,23 +18,6 @@ class FBUserSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = '__all__'
 
 
-class ActivityFBUserSerializer(FBUserSerializer):
-    count = serializers.IntegerField()
-
-    class Meta:
-        model = FBUser
-        exclude = ('posts', 'comments')
-        read_only_fields = '__all__'
-
-
-class ActivityForArchiveFBUserSerializer(serializers.Serializer):
-    id = serializers.CharField()
-    name = serializers.CharField()
-    picture = serializers.CharField()
-    p_count = serializers.IntegerField()
-    c_count = serializers.IntegerField()
-
-
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
 
@@ -120,6 +103,8 @@ class WardSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserActivitySerializer(serializers.HyperlinkedModelSerializer):
+    user = FBUserSerializer(read_only=True)
+
     class Meta:
         model = UserActivity
         # fields = '__all__'

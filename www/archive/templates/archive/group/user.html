@@ -13,126 +13,117 @@
 {% block content %}
     <div id="page-wrapper">
 
-    {% block header %}
-        {% include 'archive/group/archive_header.html' %}
-    {% endblock %}
+        {% block header %}
+            {% include 'archive/group/archive_header.html' %}
+        {% endblock %}
 
-    <!-- /.row -->
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Post Proportion
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-sort-numeric-asc fa-fw"></i> Post Activity
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="post_activity_table" class="table simple normal borderless">
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <div id="morris-area-chart"></div>
-                    <div class="jqPlot" id="pie1"></div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-sort-numeric-asc fa-fw"></i> Comment Activity
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="comment_activity_table" class="table simple normal borderless">
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
-                <!-- /.panel-body -->
             </div>
         </div>
+        <!-- /.row -->
 
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Comment Proportion
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-pie-chart fa-fw"></i> Post Proportion
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="jqPlot" id="pie1"></div>
+                        <div id="post_proportion"></div>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <div id="morris-area-chart"></div>
-                    <div class="jqPlot" id="pie2"></div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-pie-chart fa-fw"></i> Comment Proportion
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="jqPlot" id="pie2"></div>
+                        <div id="comment_proportion"></div>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
-                <!-- /.panel-body -->
             </div>
         </div>
-    </div>
-    <!-- /.row -->
+        <!-- /.row -->
 
-
-    <div class="container">
-        <div class="content">
-            <div class="content-list">
-                <div class="panel">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-orderedlist"></i> <strong>Activity</strong></h1>
-
-                        <div align="center">
-                            <div class="col col-6">
-                                <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
-                                    <div class="head">
-                                        <strong>Post Activity</strong>
-                                    </div>
-                                    <table id="post_activity_table" class="table simple normal borderless">
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="col col-6">
-                                <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
-                                    <div class="head">
-                                        <strong>Comment Activity</strong>
-                                    </div>
-                                    <table id="comment_activity_table" class="table simple normal borderless">
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-user fa-fw"></i> User Archive
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="user_archive_limit">Limit</label>
+                                        <input type="text" class="input" id="user_archive_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="user_archive_search" placeholder="Search"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-chart"></i> <strong>Proportion</strong></h1>
-
-                        <div align="center">
-                            <div class="col col-6">
-                                <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
-                                    <div class="head">
-                                        <strong>Post Proportion</strong>
-                                    </div>
-                                    <div id="post_proportion"></div>
-                                </div>
-                            </div>
-                            <div class="col col-6">
-                                <div class="panel" style="border:1px solid #ababab; border-radius: 10px; width: 90%;">
-                                    <div class="head">
-                                        <strong>Comment Proportion</strong>
-                                    </div>
-                                    <div id="comment_proportion"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-db"></i> <strong>Archive</strong></h1>
-
-                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                            <div class="head">
-                                <strong>User List</strong>
-
-                                <div class="group" style="float: right">
-                                    <input type="text" class="input" id="user_archive_limit" placeholder="Limit"
-                                           value="10" style="width: 60px; text-align: right;"/>
-                                    <input type="text" class="input" id="user_archive_search" placeholder="Search"/>
-                                </div>
-                            </div>
-                            <table id="user_archive_table" class="table simple hover borderless">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th><i class="icon-user"></i> User</th>
-                                    <th style="text-align: center;"><i class="icon-report"></i> Post</th>
-                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="user_archive_table" class="table simple hover borderless">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th><i class="icon-user"></i> User</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Post</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
 
                         <div id="user_archive_paging" class="paging" style="margin-top: 3px;">
                             <a href="#" class="prev">Previous</a>
@@ -141,65 +132,66 @@
                             <a href="#" class="next">Next</a>
                         </div>
                     </div>
-                </div>
-
-                <script id="tpl_row" type="text/template">
-                    <tr>
-                        <td style="text-align: right;"><!= picture !></td>
-                        <td><!= from !></td>
-                        <td><!= count !></td>
-                    </tr>
-                </script>
-
-                <script id="tpl_row2" type="text/template">
-                    <tr>
-                        <td style="text-align: right;"><!= picture !></td>
-                        <td><!= from !></td>
-                        <td style="text-align: center;"><!= post_count !></td>
-                        <td style="text-align: center;"><!= comment_count !></td>
-                    </tr>
-                </script>
-
-                <script id="tpl_none" type="text/template">
-                    <tr>
-                        <td colspan="2" class="none" align="center">Data does not exist.</td>
-                    </tr>
-                </script>
-
-                <script id="tpl_none2" type="text/template">
-                    <tr>
-                        <td colspan="4" class="none" align="center">Data does not exist.</td>
-                    </tr>
-                </script>
-
-                <script id="tpl_pages" type="text/template">
-                    <! for(var i = 0; i < pages.length; i++) { !>
-                    <a href="#" class="page"><!= pages[i] !></a>
-                    <! } !>
-                </script>
-
-                <div id="loading_activity_post_msg" style="display: none; font-size: 20px; color: red;">
-                    NOW LOADING...
-                </div>
-
-                <div id="loading_activity_comment_msg" style="display: none; font-size: 20px; color: red;">
-                    NOW LOADING...
-                </div>
-
-                <div id="loading_proportion_post_msg" style="display: none; font-size: 20px; color: red;">
-                    NOW LOADING...
-                </div>
-
-                <div id="loading_proportion_comment_msg" style="display: none; font-size: 20px; color: red;">
-                    NOW LOADING...
-                </div>
-
-                <div id="loading_archive_user_msg" style="display: none; font-size: 20px; color: red;">
-                    NOW LOADING...
+                    <!-- /.panel-body -->
                 </div>
             </div>
         </div>
-    </div>
+        <!-- /.row -->
+
+        <script id="tpl_row" type="text/template">
+            <tr>
+                <td style="text-align: right;"><!= picture !></td>
+                <td><!= from !></td>
+                <td><!= count !></td>
+            </tr>
+        </script>
+
+        <script id="tpl_row2" type="text/template">
+            <tr>
+                <td style="text-align: right;"><!= picture !></td>
+                <td><!= from !></td>
+                <td style="text-align: center;"><!= post_count !></td>
+                <td style="text-align: center;"><!= comment_count !></td>
+            </tr>
+        </script>
+
+        <script id="tpl_none" type="text/template">
+            <tr>
+                <td colspan="2" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
+
+        <script id="tpl_none2" type="text/template">
+            <tr>
+                <td colspan="4" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
+
+        <script id="tpl_pages" type="text/template">
+            <! for(var i = 0; i < pages.length; i++) { !>
+            <a href="#" class="page"><!= pages[i] !></a>
+            <! } !>
+        </script>
+
+        <div id="loading_activity_post_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_activity_comment_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_proportion_post_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_proportion_comment_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_archive_user_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
     </div><!-- /.page-wrapper -->
 {% endblock %}
 
@@ -227,14 +219,12 @@
             post_activity_table = table("#post_activity_table", {
                 tpl: {
                     row: $("#tpl_row").html(),
-                    none: $("#tpl_none").html()
                 }
             });
 
             comment_activity_table = table("#comment_activity_table", {
                 tpl: {
                     row: $("#tpl_row").html(),
-                    none: $("#tpl_none").html()
                 }
             });
         });
@@ -331,14 +321,18 @@
 
             loading_proportion_post.show();
             loading_proportion_comment.show();
-            getProportion(proportion_url);
-            window.onresize = function (event) {
-                postProportion.replot();
-                commentProportion.replot();
-            }
+            getProportion(proportion_url, loading_proportion_post, loading_proportion_comment);
 
             loading_archive_user.show();
             getUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
+
+            window.onresize = function (event) {
+                postProportion.replot();
+                commentProportion.replot();
+                post_activity_table.resize();
+                comment_activity_table.resize();
+                user_archive_table.resize();
+            }
 
             $("#user_archive_limit").on("input", function () {
                 user_archive_limit = $("#user_archive_limit").val();
