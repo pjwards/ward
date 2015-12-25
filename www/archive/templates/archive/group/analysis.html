@@ -181,7 +181,7 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="comment_issue_limit">Limit</label>
+                                        <label for="post_issue_limit">Limit</label>
                                         <input type="text" class="input" id="comment_issue_limit" placeholder="Limit"
                                                value="10" style="width: 80%; text-align: center;"/>
                                     </li>
@@ -231,8 +231,7 @@
                     <!-- /.panel-body -->
                 </div>
             </div>
-        </div>
-        <!-- /.row -->
+        </div><!--row end-->
 
         <!-- /.row -->
         <div class="row">
@@ -249,7 +248,7 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="post_archive_limit">Limit</label>
+                                        <label for="post_issue_limit">Limit</label>
                                         <input type="text" class="input" id="post_archive_limit" placeholder="Limit"
                                                value="10" style="width: 80%; text-align: center;"/>
                                     </li>
@@ -308,7 +307,7 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="comment_archive_limit">Limit</label>
+                                        <label for="post_issue_limit">Limit</label>
                                         <input type="text" class="input" id="comment_archive_limit" placeholder="Limit"
                                                value="10" style="width: 80%; text-align: center;"/>
                                     </li>
@@ -404,6 +403,7 @@
     </div><!-- /.page-wrapper -->
 {% endblock %}
 
+
 {% block script %}
     <script src="{% static 'js/archive/js/archive.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/archive/js/analysis.js' %}" type="text/javascript"></script>
@@ -432,6 +432,7 @@
         var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
         var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";
         var comment_archive_url = "/api/groups/{{ group.id }}/comment_archive/";
+
 
         /**
          * Generate Hot Issue

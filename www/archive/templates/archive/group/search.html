@@ -32,7 +32,7 @@
                                     <li style="text-align: center;">
                                         <label for="post_limit">Limit</label>
                                         <input type="text" class="input" id="post_limit" placeholder="Limit"
-                                               value="10" style="width: 60px; text-align: right;"/>
+                                               value="10" style="width: 80%; text-align: center;"/>
                                     </li>
                                 </ul>
                             </div>
@@ -86,7 +86,7 @@
                                     <li style="text-align: center;">
                                         <label for="comment_limit">Limit</label>
                                         <input type="text" class="input" id="comment_limit" placeholder="Limit"
-                                               value="10" style="width: 60px; text-align: right;"/>
+                                               value="10" style="width: 80%; text-align: center;"/>
                                     </li>
                                 </ul>
                             </div>
@@ -140,7 +140,7 @@
                                     <li style="text-align: center;">
                                         <label for="user_limit">Limit</label>
                                         <input type="text" class="input" id="user_limit" placeholder="Limit"
-                                               value="10" style="width: 60px; text-align: right;"/>
+                                               value="10" style="width: 80%; text-align: center;"/>
                                     </li>
                                 </ul>
                             </div>
@@ -385,6 +385,12 @@
             changeSearchPC(post_search_url, post_table, post_limit, search, loading_post, 1, post_paging);
             changeSearchPC(comment_search_url, comment_table, comment_limit, search, loading_comment, 1, comment_paging);
             changeUserArchive(user_search_url, group_id, user_table, user_limit, search, loading_user, 1, user_paging);
+
+            window.onresize = function (event) {
+                post_table.resize();
+                comment_table.resize();
+                user_table.resize();
+            }
 
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();

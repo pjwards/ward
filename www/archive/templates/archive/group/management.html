@@ -8,183 +8,270 @@
     {% include 'archive/group/sidebar.html' %}
 {% endblock %}
 
-
 {% block content %}
     <div id="page-wrapper">
 
-    {% block header %}
-        {% include 'archive/group/archive_header.html' %}
-    {% endblock %}
+        {% block header %}
+            {% include 'archive/group/archive_header.html' %}
+        {% endblock %}
 
-    <div class="container">
-        <div class="content">
-            <div class="content-list">
-                <div class="panel">
-                    <div class="body">
-                        <h1 class="title">
-                            <i class="icon-report"></i> <strong>Access Token </strong>
-                            <small class="focus_color"><i class="icon-help" id="tooltip_1"
-                                                          title="1. Go to this <a target='_blank' href='https://developers.facebook.com/tools/explorer/'>link</a>.<br>2. Copy the access token in graph api explorer.<br>3. Paste the access token in our site.<br><b><p style='color:#ff1493;'>Our site does not save this access token. It only use to access graph api once.</p></b>"></i>
-                            </small>
-                        </h1>
-
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-key fa-fw"></i> Access Token
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button class="btn btn-danger btn-xs" data-toggle="modal" data-target="#help">
+                                    <i class="fa fa-question fa-fw"></i> help
+                                </button>
+                                <!-- Modal -->
+                                <div class="modal fade" id="help" tabindex="-1" role="dialog"
+                                     aria-labelledby="help_label" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-hidden="true">&times;</button>
+                                                <h4 class="modal-title" id="help_label">How to get access token?</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <ol>
+                                                    <li>
+                                                        Go to this <a target='_blank'
+                                                                      href='https://developers.facebook.com/tools/explorer/'>link</a>
+                                                    </li>
+                                                    <li>
+                                                        Copy the access token in graph api explorer.
+                                                    </li>
+                                                    <li>
+                                                        Paste the access token in our site.
+                                                    </li>
+                                                </ol>
+                                                <b><p style='color:#ff1493;'>Our site does not save this access token.
+                                                    It only use to access graph api once.</p></b>
+                                            </div>
+                                        </div>
+                                        <!-- /.modal-content -->
+                                    </div>
+                                    <!-- /.modal-dialog -->
+                                </div>
+                                <!-- /.modal -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
                         <input type="text" class="input" id="access_token" name="access_token"
                                placeholder="Please Input Access Token"
                                style="width: 100%;"/>
                     </div>
+                    <!-- /.panel-body -->
                 </div>
+            </div>
 
-                <div class="panel dashed">
-                    <div class="body">
-
-                        <div class="col col-6">
-                            <h1 class="title">
-                                <i class="icon-report"></i> <strong>Post</strong>
-                            </h1>
-
-                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                                <div class="head">
-                                    <strong>Post List</strong>
-
-                                    <div class="group" style="float: right">
-                                        <div id="post_radio" class="group">
-                                            <a class="btn " value="text"><i class="icon-text"></i></a>
-                                            <a class="btn " value="user"><i class="icon-user"></i></a>
-                                            <input type="text" class="input" id="post_limit" placeholder="Limit"
-                                                   value="20" style="width: 60px; text-align: right;"/>
-                                            <input type="text" class="input" id="post_search" placeholder="Search"/>
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-list fa-fw"></i> Post
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="post_limit">Limit</label>
+                                        <input type="text" class="input" id="post_limit" placeholder="Limit"
+                                               value="20" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <div id="post_radio" style="margin-bottom: 10px;">
+                                            <a class="btn btn-default btn-xs" value="text">Text</a>
+                                            <a class="btn btn-default btn-xs" value="user">User</a>
                                         </div>
-                                        <button id="post_del_btn" class="btn">
-                                            <i class="icon-trashcan"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <form id="post_del_form" action="" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="model" value="post">
-                                    <table id="post_table" class="table simple hover borderless">
-                                        <colgroup>
-                                            <col style="width: 20px;">
-                                            <col style="width: 60px;">
-                                            <col style="width: 100px;">
-                                            <col style="width: 60%;">
-                                            <col style="width: 20%;">
-                                            <col style="width: 20%;">
-                                        </colgroup>
-                                        <thead>
-                                        <tr>
-                                            <th style="text-align: center;">
-                                                <input type="checkbox" id="check_all_post"
-                                                       style="display: inline-block;">
-                                            </th>
-                                            <th></th>
-                                            <th><i class="icon-user"></i> From</th>
-                                            <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                            <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                            <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </form>
-                            </div>
-
-                            <div id="post_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
-                            </div>
-                        </div>
-                        <div class="col col-6">
-                            <h1 class="title">
-                                <i class="icon-message"></i> <strong>Comment</strong>
-                            </h1>
-
-                            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                                <div class="head">
-                                    <strong>Comment List</strong>
-
-                                    <div class="group" style="float: right">
-                                        <div id="comment_radio" class="group">
-                                            <a class="btn " value="text"><i class="icon-text"></i></a>
-                                            <a class="btn " value="user"><i class="icon-user"></i></a>
-                                            <input type="text" class="input" id="comment_limit" placeholder="Limit"
-                                                   value="20" style="width: 60px; text-align: right;"/>
-                                            <input type="text" class="input" id="comment_search"
-                                                   placeholder="Search"/>
-                                        </div>
-                                        <button id="comment_del_btn" class="btn">
-                                            <i class="icon-trashcan"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <form id="comment_del_form" action="" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="model" value="comment">
-                                    <table id="comment_table" class="table simple hover borderless">
-                                        <colgroup>
-                                            <col style="width: 20px;">
-                                            <col style="width: 60px;">
-                                            <col style="width: 100px;">
-                                            <col style="width: 60%;">
-                                            <col style="width: 20%;">
-                                            <col style="width: 20%;">
-                                        </colgroup>
-                                        <thead>
-                                        <tr>
-                                            <th style="text-align: center;">
-                                                <input type="checkbox" id="check_all_comment"
-                                                       style="display: inline-block;">
-                                            </th>
-                                            <th></th>
-                                            <th><i class="icon-user"></i> From</th>
-                                            <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                            <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                            <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </form>
-                            </div>
-
-                            <div id="comment_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
+                                    </li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="post_search" placeholder="Search"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a id="post_del_btn">Delete</a>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-user"></i> <strong>User</strong></h1>
-
-                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                            <div class="head">
-                                <strong>User List</strong>
-
-                                <div class="group" style="float: right">
-                                    <input type="text" class="input" id="user_limit" placeholder="Limit"
-                                           value="10" style="width: 60px; text-align: right;"/>
-                                    <input type="text" class="input" id="user_search" placeholder="Search"/>
-                                </div>
-                            </div>
-                            <table id="user_table" class="table simple hover borderless">
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <form id="post_del_form" action="" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="model" value="post">
+                            <table id="post_table" class="table simple hover borderless">
+                                <colgroup>
+                                    <col style="width: 20px;">
+                                    <col style="width: 60px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 60%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 20%;">
+                                </colgroup>
                                 <thead>
                                 <tr>
+                                    <th style="text-align: center;">
+                                        <input type="checkbox" id="check_all_post"
+                                               style="display: inline-block;">
+                                    </th>
                                     <th></th>
-                                    <th><i class="icon-user"></i> User</th>
-                                    <th style="text-align: center;"><i class="icon-report"></i> Post</th>
-                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                    <th><i class="icon-user"></i> From</th>
+                                    <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                    <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                    <th style="text-align: center;"><i class="icon-message"></i> Comment
+                                    </th>
                                 </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
+                        </form>
+
+                        <div id="post_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
                         </div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-comments fa-fw"></i> Comment
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="comment_limit">Limit</label>
+                                        <input type="text" class="input" id="comment_limit" placeholder="Limit"
+                                               value="20" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <div id="comment_radio" style="margin-bottom: 10px;">
+                                            <a class="btn btn-default btn-xs" value="text">Text</a>
+                                            <a class="btn btn-default btn-xs" value="user">User</a>
+                                        </div>
+                                    </li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="comment_search"
+                                               placeholder="Search" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a id="comment_del_btn">Delete</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <form id="comment_del_form" action="" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="model" value="comment">
+                            <table id="comment_table" class="table simple hover borderless">
+                                <colgroup>
+                                    <col style="width: 20px;">
+                                    <col style="width: 60px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 60%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 20%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th style="text-align: center;">
+                                        <input type="checkbox" id="check_all_comment"
+                                               style="display: inline-block;">
+                                    </th>
+                                    <th></th>
+                                    <th><i class="icon-user"></i> From</th>
+                                    <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                    <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                    <th style="text-align: center;"><i class="icon-message"></i> Comment
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </form>
+
+                        <div id="comment_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-user fa-fw"></i> User
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="user_limit">Limit</label>
+                                        <input type="text" class="input" id="user_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="user_search" placeholder="Search"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="user_table" class="table simple hover borderless">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th><i class="icon-user"></i> User</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Post</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
 
                         <div id="user_paging" class="paging" style="margin-top: 3px;">
                             <a href="#" class="prev">Previous</a>
@@ -193,37 +280,55 @@
                             <a href="#" class="next">Next</a>
                         </div>
                     </div>
+                    <!-- /.panel-body -->
                 </div>
+            </div>
+        </div>
+        <!-- /.row -->
 
-                <div class="panel dashed">
-                    <div class="body">
-                        <h1 class="title"><i class="icon-user" style="color: #de615e;"></i> <strong>Blacklist</strong>
-                        </h1>
-
-                        <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                            <div class="head">
-                                <strong>Blaicklist List</strong>
-
-                                <div class="group" style="float: right">
-                                    <input type="text" class="input" id="blacklist_limit" placeholder="Limit"
-                                           value="10" style="width: 60px; text-align: right;"/>
-                                    <input type="text" class="input" id="blacklist_search" placeholder="Search"/>
-                                </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-user fa-fw"></i> Blacklist
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="blacklist_limit">Limit</label>
+                                        <input type="text" class="input" id="blacklist_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="blacklist_search" placeholder="Search"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
                             </div>
-                            <table id="blacklist_table" class="table simple hover borderless">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th><i class="icon-user"></i> User</th>
-                                    <th style="text-align: center;"><i class="icon-caution"></i> Spam</th>
-                                    <th style="text-align: center;"><i class="icon-report"></i> Post</th>
-                                    <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                    <th style="text-align: center;"><i class="icon-realtime"></i> Updated Time</th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
                         </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="blacklist_table" class="table simple hover borderless">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th><i class="icon-user"></i> User</th>
+                                <th style="text-align: center;"><i class="icon-caution"></i> Spam</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Post</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                <th style="text-align: center;"><i class="icon-realtime"></i> Updated Time</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
 
                         <div id="blacklist_paging" class="paging" style="margin-top: 3px;">
                             <a href="#" class="prev">Previous</a>
@@ -232,129 +337,132 @@
                             <a href="#" class="next">Next</a>
                         </div>
                     </div>
+                    <!-- /.panel-body -->
                 </div>
-
-                <script id="tpl_row" type="text/template">
-                    <tr>
-                        <td style="text-align: right;"><!= checkbox !></td>
-                        <td style="text-align: right;"><!= picture !></td>
-                        <td><!= from !></td>
-                        <td><!= message !></td>
-                        <td style="text-align: center;"><!= like_count !></td>
-                        <td style="text-align: center;"><!= comment_count !></td>
-                    </tr>
-                </script>
-
-                <script id="tpl_none" type="text/template">
-                    <tr>
-                        <td colspan="6" class="none" align="center">Data does not exist.</td>
-                    </tr>
-                </script>
-
-                <script id="tpl_pages" type="text/template">
-                    <! for(var i = 0; i < pages.length; i++) { !>
-                    <a href="#" class="page"><!= pages[i] !></a>
-                    <! } !>
-                </script>
-
-                <script id="tpl_row2" type="text/template">
-                    <tr>
-                        <td style="text-align: right;"><!= picture !></td>
-                        <td><!= from !></td>
-                        <td style="text-align: center;"><!= post_count !></td>
-                        <td style="text-align: center;"><!= comment_count !></td>
-                    </tr>
-                </script>
-
-                <script id="tpl_none2" type="text/template">
-                    <tr>
-                        <td colspan="5" class="none" align="center">Data does not exist.</td>
-                    </tr>
-                </script>
-
-                <script id="tpl_row3" type="text/template">
-                    <tr>
-                        <td style="text-align: right;"><!= picture !></td>
-                        <td><!= from !></td>
-                        <td style="text-align: center;"><!= count !></td>
-                        <td style="text-align: center;"><!= post_count !></td>
-                        <td style="text-align: center;"><!= comment_count !></td>
-                        <td style="text-align: center;"><i class="icon-realtime"></i> <!= updated_time !></td>
-                    </tr>
-                </script>
-
-                <script id="tpl_none3" type="text/template">
-                    <tr>
-                        <td colspan="6" class="none" align="center">Data does not exist.</td>
-                    </tr>
-                </script>
-
-                <div id="loading_user_msg" style="display: none; font-size: 20px; color: red;">
-                    NOW LOADING...
-                </div>
-
-                <div id="modal_1" class="msgbox" style="display: none; width: 500px;">
-                    <div class="head" style="text-align: center;">
-                        User Search
-                    </div>
-                    <div class="body">
-                        <div>
-                            <table id="user_search_helper_table" class="table simple hover borderless">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th><i class="icon-user"></i> User</th>
-                                    <th style="text-align: center;"><i class="icon-pin"></i></th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                            <div id="user_search_helper_paging" class="paging" style="margin-top: 3px;">
-                                <a href="#" class="prev">Previous</a>
-
-                                <div class="list"></div>
-                                <a href="#" class="next">Next</a>
-                            </div>
-                        </div>
-
-                        <script id="tpl_row4" type="text/template">
-                            <tr>
-                                <td style="text-align: right;"><!= picture !></td>
-                                <td><!= from !></td>
-                                <td style="text-align: center;"><!= select !></td>
-                            </tr>
-                        </script>
-
-                        <script id="tpl_none4" type="text/template">
-                            <tr>
-                                <td colspan="3" class="none" align="center">Data does not exist.</td>
-                            </tr>
-                        </script>
-                    </div>
-                    <div class="foot">
-                        <input id="user_search_helper_search" type="text" class="input small" placeholder="Search"
-                               style="text-align: center; width: 100%;"/>
-                    </div>
-                </div>
-
-                <script id="tpl_popover" type="text/template">
-                    <div class="popover <!= position !>" style="z-index: 10001;">
-                        <div class="head">How to get access token?</div>
-                        <div class="body">
-                            <div class="image"><i class="icon-caution"></i></div>
-                            <div class="message"><!= message !></div>
-                        </div>
-                    </div>
-                </script>
             </div>
         </div>
-    </div>
+        <!-- /.row -->
+
+        <script id="tpl_row" type="text/template">
+            <tr>
+                <td style="text-align: right;"><!= checkbox !></td>
+                <td style="text-align: right;"><!= picture !></td>
+                <td><!= from !></td>
+                <td><!= message !></td>
+                <td style="text-align: center;"><!= like_count !></td>
+                <td style="text-align: center;"><!= comment_count !></td>
+            </tr>
+        </script>
+
+        <script id="tpl_none" type="text/template">
+            <tr>
+                <td colspan="6" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
+
+        <script id="tpl_pages" type="text/template">
+            <! for(var i = 0; i < pages.length; i++) { !>
+            <a href="#" class="page"><!= pages[i] !></a>
+            <! } !>
+        </script>
+
+        <script id="tpl_row2" type="text/template">
+            <tr>
+                <td style="text-align: right;"><!= picture !></td>
+                <td><!= from !></td>
+                <td style="text-align: center;"><!= post_count !></td>
+                <td style="text-align: center;"><!= comment_count !></td>
+            </tr>
+        </script>
+
+        <script id="tpl_none2" type="text/template">
+            <tr>
+                <td colspan="5" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
+
+        <script id="tpl_row3" type="text/template">
+            <tr>
+                <td style="text-align: right;"><!= picture !></td>
+                <td><!= from !></td>
+                <td style="text-align: center;"><!= count !></td>
+                <td style="text-align: center;"><!= post_count !></td>
+                <td style="text-align: center;"><!= comment_count !></td>
+                <td style="text-align: center;"><!= updated_time !></td>
+            </tr>
+        </script>
+
+        <script id="tpl_none3" type="text/template">
+            <tr>
+                <td colspan="6" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
+
+        <div id="loading_post_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_comment_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_user_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_blacklist_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_user_search_helper_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="modal_1" class="msgbox jui" style="display: none; width: 400px;">
+            <div class="body">
+                <div style="background: #ffffff;">
+                    <table id="user_search_helper_table" class="table simple hover borderless">
+                        <thead>
+                        <tr>
+                            <th colspan="2" style="text-align: center;"><i class="icon-user"></i> User</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="user_search_helper_paging" class="paging" style="margin-top: 3px;">
+                        <a href="#" class="prev">Previous</a>
+
+                        <div class="list"></div>
+                        <a href="#" class="next">Next</a>
+                    </div>
+
+                    <input id="user_search_helper_search" type="text" class="input small"
+                           placeholder="Search"
+                           style="text-align: center; width: 100%;"/>
+                </div>
+            </div>
+
+            <script id="tpl_row4" type="text/template">
+                <tr>
+                    <td style="text-align: center;"><!= picture !></td>
+                    <td><!= from !></td>
+                </tr>
+            </script>
+
+            <script id="tpl_none4" type="text/template">
+                <tr>
+                    <td colspan="2" class="none" align="center">Data does not exist.</td>
+                </tr>
+            </script>
+        </div>
     </div><!-- /.page-wrapper -->
 {% endblock %}
 
 
 {% block script %}
-    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/user.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/management.js' %}" type="text/javascript"></script>
     <script>
         var group_id = "{{ group.id }}";
 
@@ -387,7 +495,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, pNo);
+                        changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, pNo);
                     }
                 },
                 tpl: {
@@ -422,7 +530,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, pNo);
+                        changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, pNo);
                     }
                 },
                 tpl: {
@@ -457,8 +565,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        loading_user.show();
-                        getUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, pNo);
+                        changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, pNo);
                     }
                 },
                 tpl: {
@@ -493,7 +600,7 @@
                 screenCount: 10,
                 event: {
                     page: function (pNo) {
-                        getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), pNo);
+                        changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, pNo);
                     }
                 },
                 tpl: {
@@ -528,7 +635,7 @@
                 screenCount: 5,
                 event: {
                     page: function (pNo) {
-                        getSearchUM2(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), pNo);
+                        changeSearchUM(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), loading_user_search_helper, pNo);
                     }
                 },
                 tpl: {
@@ -537,7 +644,7 @@
             });
 
             user_search_helper_table = table("#user_search_helper_table", {
-                fields: ["", "from", "select"],
+                fields: ["", "from"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
@@ -568,16 +675,6 @@
             modal_1 = modal("#modal_1", {
                 color: "black"
             });
-
-            tooltip_1 = tooltip("#tooltip_1", {
-                width: 300,
-                align: "left",
-                showType: "click",
-                hideType: "click",
-                tpl: {
-                    item: $("#tpl_popover").html()
-                }
-            });
         });
 
         /**
@@ -588,7 +685,7 @@
                 user_search_helper_check = model;
 
                 modal_1.show();
-                getSearchUM2(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), 1, user_search_helper_paging);
+                changeSearchUM(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), loading_user_search_helper, 1, user_search_helper_paging);
             }
 
             post_radio = button("#post_radio", {
@@ -601,6 +698,7 @@
                     }
                 }
             });
+
             comment_radio = button("#comment_radio", {
                 type: "radio",
                 index: 0,
@@ -617,8 +715,36 @@
          * Loading message
          */
         jui.ready(["ui.modal"], function (modal) {
+            loading_post = modal("#loading_post_msg", {
+                target: "#post_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_comment = modal("#loading_comment_msg", {
+                target: "#comment_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
             loading_user = modal("#loading_user_msg", {
                 target: "#user_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_blacklist = modal("#loading_blacklist_msg", {
+                target: "#blacklist_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_user_search_helper = modal("#loading_user_search_helper_msg", {
+                target: "#user_search_helper_table",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
@@ -629,72 +755,67 @@
          * Init analysis.html
          */
         $(function () {
-            getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
-            getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
-
-            loading_user.show();
-            getUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
-            getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
+            changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
+            changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
+            changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
+            changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
 
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();
-                getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
+                changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
+
             });
 
             $("#comment_limit").on("input", function () {
                 comment_limit = $("#comment_limit").val();
-                getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+                changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
             });
 
             $("#user_limit").on("input", function () {
                 user_limit = $("#user_limit").val();
-                loading_user.show();
-                getUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
+                changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
             });
 
             $("#blacklist_limit").on("input", function () {
                 user_limit = $("#blacklist_limit").val();
-                getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
+                changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
             });
 
             $("#post_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
+                    changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
                 }
             });
 
             $("#comment_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+                    changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
                 }
             });
 
             $("#user_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    loading_user.show();
-                    getUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
+                    changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
                 }
             });
 
             $("#blacklist_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), 1, blacklist_paging);
+                    changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
                 }
             });
 
             $("#user_search_helper_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
-                    getSearchUM2(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), 1, user_search_helper_paging);
+                    changeSearchUM(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), loading_user_search_helper, 1, user_search_helper_paging);
                 }
             });
-        });
 
-        $(function () {
             /**
              * check all
              */
@@ -723,8 +844,8 @@
                 var answer = confirm("Are you sure delete?")
                 if (answer) {
                     deleteAjax(data);
-                    getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, 1, post_paging);
-                    getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+                    changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
+                    changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
                 }
 
             });
@@ -735,13 +856,15 @@
                 var answer = confirm("Are you sure delete?")
                 if (answer) {
                     deleteAjax(data);
-                    getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, 1, comment_paging);
+                    changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
                 }
             });
         });
 
         /**
          * Delete checked objects
+         *
+         * @param data
          */
         function deleteAjax(data) {
             $.ajax({
@@ -808,16 +931,18 @@
         }
 
         /**
-         * Reset posts and comments by seleced user.
+         * Reset posts and comments by selected user.
+         *
+         * @param user_id
          */
         function searchUMSelect(user_id) {
             if (user_search_helper_check == "post") {
                 post_search.val(user_id);
-                getSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), 'user', 1, post_paging);
+                changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
             }
             else {
                 comment_search.val(user_id);
-                getSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), 'user', 1, comment_paging);
+                changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
             }
         }
     </script>

@@ -180,7 +180,7 @@ var getUserArchive = function (url, group_id, table, limit, search, loading, pag
         var rows = []
         for (var i in results) {
             var row = results[i];
-            var user_url = '/archive/user/' + getIdFromUrl(row["user"]["url"]) + '/';
+            var user_url = '/archive/user/' + row["user"]["id"] + '/';
 
             rows.push({
                 "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px;">',
