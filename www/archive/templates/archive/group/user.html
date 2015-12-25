@@ -235,7 +235,7 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             user_archive_paging = paging("#user_archive_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, pNo);
@@ -324,6 +324,7 @@
                 post_activity_table.resize();
                 comment_activity_table.resize();
                 user_archive_table.resize();
+                reLoadPaging(user_archive_paging);
             }
 
             $("#user_archive_limit").on("input", function () {

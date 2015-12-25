@@ -110,7 +110,7 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             groups_paging = paging("#groups_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         page = pNo;

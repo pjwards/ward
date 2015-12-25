@@ -26,6 +26,7 @@ var getSearchPC = function (url, table, limit, search, loading, page, paging) {
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }

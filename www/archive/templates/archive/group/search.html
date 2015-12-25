@@ -247,7 +247,7 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             post_paging = paging("#post_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeSearchPC(post_search_url, post_table, post_limit, search, loading_post, pNo);
@@ -282,7 +282,7 @@
 
             comment_paging = paging("#comment_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeSearchPC(comment_search_url, comment_table, comment_limit, search, loading_comment, pNo);
@@ -317,7 +317,7 @@
 
             user_paging = paging("#user_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeUserArchive(user_search_url, group_id, user_table, user_limit, search, loading_user, pNo);
@@ -390,6 +390,9 @@
                 post_table.resize();
                 comment_table.resize();
                 user_table.resize();
+                reLoadPaging(post_paging);
+                reLoadPaging(comment_paging);
+                reLoadPaging(user_paging);
             }
 
             $("#post_limit").on("input", function () {

@@ -189,7 +189,7 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             post_archive_paging = paging("#post_archive_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         getArchive(post_archive_url, user_id, post_archive_table, post_archive_limit, $("#post_archive_from").val(), pNo);
@@ -224,7 +224,7 @@
 
             comment_archive_paging = paging("#comment_archive_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         getArchiveByUser(comment_archive_url, user_id, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), pNo);

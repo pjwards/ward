@@ -14,7 +14,7 @@ var pcDisplayM = function (rows, row, name) {
     var fb_url = "https://www.facebook.com/";
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
     var fb_link = function (message) {
-        message = message.length < 100 ? message : message.substring(0, 100) + "...";
+        message = message.length < detectWidthToSubstring() ? message : message.substring(0, detectWidthToSubstring()) + "...";
         return '<div class="h5"><div class="more-link"><a href="' + fb_url + row["id"] + '" target="_blank">' + message + '</a></div></div>';
     }
     rows.push({
@@ -53,6 +53,7 @@ var getSearchPCM = function (url, table, limit, model, search, search_check, loa
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }
@@ -136,6 +137,7 @@ var getSearchBM = function (url, group_id, table, limit, search, loading, page, 
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }
@@ -203,6 +205,7 @@ var getSearchUM = function (url, table, limit, search, loading, page, paging) {
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }

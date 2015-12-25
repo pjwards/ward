@@ -492,7 +492,7 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             post_paging = paging("#post_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, pNo);
@@ -527,7 +527,7 @@
 
             comment_paging = paging("#comment_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, pNo);
@@ -562,7 +562,7 @@
 
             user_paging = paging("#user_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, pNo);
@@ -597,7 +597,7 @@
 
             blacklist_paging = paging("#blacklist_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, pNo);
@@ -759,6 +759,17 @@
             changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
             changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
             changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
+
+            window.onresize = function (event) {
+                post_table.resize();
+                comment_table.resize();
+                user_table.resize();
+                blacklist_table.resize();
+                reLoadPaging(post_paging);
+                reLoadPaging(comment_paging);
+                reLoadPaging(user_paging);
+                reLoadPaging(blacklist_paging);
+            }
 
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();

@@ -107,7 +107,7 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             reports_paging = paging("#reports_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         getReports(reports_url, reports_table, reports_limit, pNo);

@@ -109,7 +109,7 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             groups_paging = paging("#groups_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         getGroupsAdmin(groups_url, groups_table, groups_limit, pNo, groups_search.val());

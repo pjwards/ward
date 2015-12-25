@@ -433,14 +433,13 @@
         var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";
         var comment_archive_url = "/api/groups/{{ group.id }}/comment_archive/";
 
-
         /**
          * Generate Hot Issue
          */
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             post_issue_paging = paging("#post_issue_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, pNo);
@@ -475,7 +474,7 @@
 
             comment_issue_paging = paging("#comment_issue_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, pNo);
@@ -515,7 +514,7 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             post_archive_paging = paging("#post_archive_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, pNo);
@@ -550,7 +549,7 @@
 
             comment_archive_paging = paging("#comment_archive_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
                         changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, pNo);
@@ -747,6 +746,10 @@
                 comment_issue_table.resize();
                 post_archive_table.resize();
                 comment_archive_table.resize();
+                reLoadPaging(post_issue_paging);
+                reLoadPaging(comment_issue_paging);
+                reLoadPaging(post_archive_paging);
+                reLoadPaging(comment_archive_paging);
             }
 
             $("#post_issue_limit").on("input", function () {

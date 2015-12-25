@@ -3,6 +3,54 @@
  */
 
 /**
+ * Detect Inner Width For Screen Count
+ *
+ * @returns {number}
+ */
+var detectWidthToScreenCount =  function () {
+    var width = window.innerWidth;
+   if(width >= 800) {
+     return 10;
+   } if(width >= 500) {
+     return 5;
+   }  if(width >= 350) {
+     return 3;
+   } else {
+     return 1;
+   }
+}
+
+
+/**
+ * Reload paging
+ *
+ * @param paging
+ */
+var reLoadPaging = function(paging) {
+    paging.setOption('screenCount', detectWidthToScreenCount());
+    paging.reload(paging.options["count"]);
+}
+
+/**
+ * Detect Inner Width For Substring
+ *
+ * @returns {number}
+ */
+var detectWidthToSubstring =  function () {
+    var width = window.innerWidth;
+   if(width >= 800) {
+     return 100;
+   } if(width >= 500) {
+     return 50;
+   }  if(width >= 350) {
+     return 30;
+   } else {
+     return 10;
+   }
+}
+
+
+/**
  * Get Results by using ajax
  *
  * @param url
@@ -311,7 +359,7 @@ var pcDisplay = function (rows, row) {
     var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i> Report</btn>';
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
     var fb_link = function (message) {
-        message = message.length < 100 ? message : message.substring(0, 100) + "...";
+        message = message.length < detectWidthToSubstring() ? message : message.substring(0, detectWidthToSubstring()) + "...";
         return '<div class="h5"><div class="more-link" style="margin-bottom:10px;"><a href="' + fb_url + row["id"] + '" target="_blank">' + message + '</a></div>' + ward_btn + report_btn + '</div>';
     }
     rows.push({
@@ -399,6 +447,7 @@ var getArchiveByUser = function (url, user_id, table, limit, from, page, paging)
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }
@@ -450,6 +499,7 @@ var getGroups = function (url, table, limit, page, search, paging) {
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }
@@ -500,6 +550,7 @@ var getGroupsAdmin = function (url, table, limit, page, search, paging) {
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }
@@ -635,6 +686,7 @@ var getReports = function (url, table, limit, page, paging) {
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }
@@ -668,6 +720,7 @@ var getWards = function (url, user_id, table, limit, page, paging) {
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }

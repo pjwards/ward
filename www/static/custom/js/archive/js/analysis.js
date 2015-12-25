@@ -310,6 +310,7 @@ var getIssue = function (url, table, limit, from, to, loading, page, paging) {
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }
@@ -373,6 +374,7 @@ var getArchive = function (url, table, limit, from, loading, page, paging) {
         table.append(rows);
         if (paging) {
             paging.setOption("pageCount", limit);
+            paging.setOption("count", source["count"]);
             paging.reload(source["count"]);
             paging.first();
         }
