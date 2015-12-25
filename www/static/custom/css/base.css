@@ -15,3 +15,9 @@
 .more-link > a:hover i {
     text-decoration: none !important;
 }
+
+#custom-page-wrapper {
+    padding: 0 15px;
+    min-height: 568px;
+    background-color: white;
+}

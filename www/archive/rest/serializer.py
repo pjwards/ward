@@ -20,6 +20,7 @@ class FBUserSerializer(serializers.HyperlinkedModelSerializer):
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = FBUserSerializer(read_only=True)
 
     class Meta:
         model = Group

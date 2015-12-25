@@ -2,102 +2,130 @@
 {% load staticfiles %}
 
 {% block css %}
-    <style type="text/css">
-        /* Base */
-        .body {
-            padding: 10px;
-        }
-
-        .dashed {
-            border-top: 1px dashed #e5e5e5;
-
-        }
-    </style>
 {% endblock %}
 
 {% block content %}
+    <div id="custom-page-wrapper">
+        <br>
+        <br>
 
-    <div class="panel dashed jui">
-        <div class="body">
-            <h1 class="title"><i class="icon-document"></i> <strong>Groups</strong>
-
-                <form id="group_enroll" method="post" style="display: inline; float: right;">
-                    {% csrf_token %}
-                    <div class="group">
-                        <input id="group_enroll_input" type="text" class="input" name="fb_url" placeholder="Group Url"
-                               required/>
-                        <a class="btn" id="group_enroll_submit">enroll</a>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-user fa-fw"></i> Groups
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="groups_limit">Limit</label>
+                                        <input type="text" class="input" id="groups_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li style="text-align: center;">
+                                        <input type="text" class="input" id="groups_search" placeholder="Search"
+                                               style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a data-toggle="modal" data-target="#enroll">Enroll</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                </form>
-            </h1>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="groups_table" class="table simple hover">
+                            <thead>
+                            <tr>
+                                <th style="text-align: center;"><i class="icon-text"></i> Name</th>
+                                <th style="text-align: center;"><i class="icon-realtime"></i> Updated Time</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Post</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                <th style="text-align: center;"><i class="icon-user"></i> Owner</th>
+                                <th style="text-align: center;"><i class="icon-save"></i> Stored</th>
+                                <th style="text-align: center;"><i class="icon-refresh"></i> Action</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
 
-            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                <div class="head">
-                    <strong>Group List</strong>
+                        <div id="groups_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
 
-                    <div class="group" style="float: right">
-                        <input type="text" class="input" id="groups_limit" placeholder="Limit"
-                               value="10" style="width: 60px; text-align: right;"/>
-                        <input type="text" class="input" id="groups_search" placeholder="Search"/>
-                        <button class="btn" value="run" id="groups_run"><i class="icon-play"></i>
-                            Run
-                        </button>
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
                     </div>
+                    <!-- /.panel-body -->
                 </div>
-                <table id="groups_table" class="table simple hover">
-                    <thead>
-                    <tr>
-                        <th style="text-align: center;"><i class="icon-orderedlist"></i> ID</th>
-                        <th style="text-align: center;"><i class="icon-text"></i> Name</th>
-                        <th style="text-align: center;"><i class="icon-realtime"></i> Updated Time</th>
-                        <th style="text-align: center;"><i class="icon-report"></i> Post</th>
-                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                        <th style="text-align: center;"><i class="icon-caution"></i> Privacy</th>
-                        <th style="text-align: center;"><i class="icon-save"></i> Stored</th>
-                        <th style="text-align: center;"><i class="icon-refresh"></i> Update</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <div id="groups_paging" class="paging" style="margin-top: 3px;">
-                <a href="#" class="prev">Previous</a>
-
-                <div class="list"></div>
-                <a href="#" class="next">Next</a>
             </div>
         </div>
-    </div>
+        <!-- /.row -->
+        <br>
 
-    <script id="tpl_row" type="text/template">
-        <tr>
-            <td style="text-align: center;"><!= id !></td>
-            <td style="text-align: center;"><!= name !></td>
-            <td style="text-align: center;"><!= updated_time !></td>
-            <td style="text-align: center;"><!= post_count !></td>
-            <td style="text-align: center;"><!= comment_count !></td>
-            <td style="text-align: center;"><!= privacy !></td>
-            <td style="text-align: center;"><!= is_stored !></td>
-            <td style="text-align: center;"><!= update !></td>
-        </tr>
-    </script>
+        <!-- Modal -->
+        <div class="modal fade" id="enroll" tabindex="-1" role="dialog"
+             aria-labelledby="enroll_label" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                                aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="enroll_label">Enroll a new group.</h4>
+                    </div>
+                    <div class="modal-body" style="text-align: center;">
+                        <input id="group_enroll_input" type="text" class="input" name="fb_url" placeholder="Group Url"
+                               style="width: 80%; text-align: center;"/>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
 
-    <script id="tpl_none" type="text/template">
-        <tr>
-            <td colspan="7" class="none" align="center">Data does not exist.</td>
-        </tr>
-    </script>
+        <script id="tpl_row" type="text/template">
+            <tr>
+                <td style="text-align: center;"><!= name !></td>
+                <td style="text-align: center;"><!= updated_time !></td>
+                <td style="text-align: center;"><!= post_count !></td>
+                <td style="text-align: center;"><!= comment_count !></td>
+                <td style="text-align: center;"><!= owner !></td>
+                <td style="text-align: center;"><!= is_stored !></td>
+                <td style="text-align: center;"><!= action !></td>
+            </tr>
+        </script>
 
-    <script id="tpl_pages" type="text/template">
-        <! for(var i = 0; i < pages.length; i++) { !>
-        <a href="#" class="page"><!= pages[i] !></a>
-        <! } !>
-    </script>
+        <script id="tpl_none" type="text/template">
+            <tr>
+                <td colspan="8" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
+
+        <script id="tpl_pages" type="text/template">
+            <! for(var i = 0; i < pages.length; i++) { !>
+            <a href="#" class="page"><!= pages[i] !></a>
+            <! } !>
+        </script>
+
+        <div id="loading_groups_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+    </div><!-- /.page-wrapper -->
 {% endblock content %}
 
 {% block script %}
     <script src="{% static 'js/archive/js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/group.js' %}" type="text/javascript"></script>
     <script>
         var groups_url = "/api/groups/group_search/";
         var groups_limit = 10;
@@ -114,7 +142,7 @@
                 event: {
                     page: function (pNo) {
                         page = pNo;
-                        getGroups(groups_url, groups_table, groups_limit, pNo, groups_search.val());
+                        changeGroups(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, pNo);
                     }
                 },
                 tpl: {
@@ -123,7 +151,7 @@
             });
 
             groups_table = table("#groups_table", {
-                fields: ["id", "name", "updated_time", "post_count", "comment_count", "privacy", "is_stored", "update"],
+                fields: ["name", "updated_time", "post_count", "comment_count", "owner", "is_stored", "action"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
@@ -135,71 +163,53 @@
         });
 
         /**
+         * Loading message
+         */
+        jui.ready(["ui.modal"], function (modal) {
+            loading_groups = modal("#loading_groups_msg", {
+                target: "#groups_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+        });
+
+        /**
          * Init user.html
          */
         $(function () {
-            getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
-            setInterval(function () {
-                getGroups(groups_url, groups_table, groups_limit, page, groups_search.val());
-            }, 10000);
+            changeGroups(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, 1, groups_paging);
 
-            $("#groups_run").on("click", function () {
-                getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
-            });
+            window.onresize = function (event) {
+                groups_table.resize();
+                reLoadPaging(groups_paging);
+            }
 
             $("#groups_limit").on("input", function () {
                 groups_limit = $("#groups_limit").val();
-                getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
+                changeGroups(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, 1, groups_paging);
             });
 
             $("#groups_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
-                if (key_code == 13) $("#groups_run").click();
+                if (key_code == 13) {
+                    changeGroups(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, 1, groups_paging);
+                }
             });
 
             /**
              * Get Results by using ajax
              */
-            $("#group_enroll_submit").click(function () {
-                var form_data = $("#group_enroll").serialize();
-
-                $.ajax({
-                    url: '{% url 'archive:groups' %}',
-                    type: "post",
-                    data: form_data,
-                    success: function (json, status) {
-                        if (json["success"]) {
-                            data = {
-                                title: json["success"],
-                                message: getToday(),
-                                color: 'success',
-                            }
-                            notify_top_submit(1, data);
-                        }
-                        else if (json["error"]) {
-                            data = {
-                                title: json["error"],
-                                message: getToday(),
-                                color: 'danger',
-                            }
-                            notify_top_submit(1, data);
-                        }
-                        getGroups(groups_url, groups_table, groups_limit, 1, groups_search.val(), groups_paging);
-                    },
-                    error: function (request, status, error) {
-                        data = {
-                            title: "An unexpected error has occurred.",
-                            message: getToday(),
-                            color: 'danger',
-                        }
-                        notify_top_submit(1, data);
-                    }
-                });
-                $("#group_enroll_input").val('');
-            });
             $("#group_enroll_input").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
-                if (key_code == 13) $("#group_enroll_submit").click();
+                if (key_code == 13) {
+                    var data = {
+                        fb_url: $("#group_enroll_input").val(),
+                    }
+                    postAjax('{% url 'archive:groups' %}', data);
+                    changeGroups(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, 1, groups_paging);
+                    $("#group_enroll_input").val('');
+                }
             });
         });
     </script>
