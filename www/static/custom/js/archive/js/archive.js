@@ -3,26 +3,6 @@
  */
 
 /**
- * to round to n decimal places
- *
- * @param num
- * @returns {number}
- */
-var ceil = function (num) {
-    var places;
-
-    if (num < 100) {
-        places = 1;
-    } else {
-        places = 2;
-    }
-
-    var multiplier = Math.pow(10, places);
-    return Math.ceil(num / multiplier) * multiplier;
-}
-
-
-/**
  * Get Results by using ajax
  *
  * @param url
@@ -343,8 +323,13 @@ var pcDisplay = function (rows, row) {
     });
 }
 
+
 /**
  * Post and comment Display for management
+ *
+ * @param rows
+ * @param row
+ * @param name
  */
 var pcDisplayM = function (rows, row, name) {
     var user_url = '/archive/user/' + row["user"].id + '/';
@@ -361,8 +346,12 @@ var pcDisplayM = function (rows, row, name) {
     });
 }
 
+
 /**
  * Post and comment Display for report
+ *
+ * @param rows
+ * @param row
  */
 var pcDisplayR = function (rows, row) {
     var object = row["post"] ? row["post"] : row["comment"] ? row["comment"] : undefined;
@@ -390,8 +379,12 @@ var pcDisplayR = function (rows, row) {
     });
 }
 
+
 /**
  * Post and comment Display for ward
+ *
+ * @param rows
+ * @param row
  */
 var pcDisplayW = function (rows, row) {
     var object = row["post"] ? row["post"] : row["comment"] ? row["comment"] : undefined;
@@ -412,39 +405,6 @@ var pcDisplayW = function (rows, row) {
     });
 }
 
-/**
- * Get search post and comment by using ajax
- */
-var getSearchPC = function (url, table, limit, search, page, paging) {
-    var fun = function (source) {
-        var results = source["results"];
-        var rows = []
-        for (var i in results) {
-            pcDisplay(rows, results[i]);
-        }
-        ;
-
-        table.reset()
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.reload(source["count"]);
-            paging.first();
-        }
-    }
-
-    if (!page) {
-        page = 1;
-    }
-
-    data = {
-        limit: limit,
-        offset: (page - 1) * limit,
-        q: search,
-    }
-
-    getAjaxResult(url, data, fun);
-}
 
 /**
  * Get archive for user by using ajax

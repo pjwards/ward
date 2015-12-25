@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.views.generic import RedirectView
 
 from . import views
 
@@ -6,12 +7,12 @@ __author__ = "Donghyun Seo"
 __copyright__ = "Copyright ⓒ 2015, All rights reserved."
 __email__ = "egaoneko@naver.com"
 
-
 urlpatterns = [
     url(r'^groups/$', views.groups, name='groups'),
     url(r'^groups/admin/$', views.groups_admin, name='groups_admin'),
 
-    url(r'^group/(?P<group_id>[0-9]+)/$', views.group_analysis, name='group'),
+    url(r'^group/(?P<group_id>[0-9]+)/$', RedirectView.as_view(pattern_name='archive:group_analysis', permanent=False),
+        name='group'),
     url(r'^group/(?P<group_id>[0-9]+)/analysis/$', views.group_analysis, name='group_analysis'),
     url(r'^group/(?P<group_id>[0-9]+)/user/$', views.group_user, name='group_user'),
     url(r'^group/(?P<group_id>[0-9]+)/search/$', views.group_search, name='group_search'),
