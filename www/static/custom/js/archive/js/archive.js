@@ -375,32 +375,6 @@ var pcDisplay = function (rows, row) {
 
 
 /**
- * Post and comment Display for ward
- *
- * @param rows
- * @param row
- */
-var pcDisplayW = function (rows, row) {
-    var object = row["post"] ? row["post"] : row["comment"] ? row["comment"] : undefined;
-    var user_url = '/archive/user/' + getIdFromUrl(object["user"].url) + '/';
-    var object_id = getIdFromUrl(object.url);
-    var fb_url = "https://www.facebook.com/";
-    var new_label = row["updated_time"] < object["updated_time"] ? '<span class="label mini success">New</span> &nbsp; &nbsp;' : '';
-    var btn = '&nbsp; &nbsp;<btn class="btn btn-block btn-social-icon btn-facebook mini" onclick="updateWard(' + row["id"] + ',\'' + fb_url + object_id + '\')"><span class="fa fa-facebook"></span></btn>';
-    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Is this spam?\')) postReport(\'' + object_id + '\');" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
-    var remove_ward_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Are you sure delete?\')) deleteWard(\'' + row["id"] + '\'); reload()" style="color:#de615e;"><i class="icon-trashcan"></i></btn>'
-    var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
-    rows.push({
-        "picture": '<img src="' + object["user"].picture + '" style="border-radius: 10px;">',
-        "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + object["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>',
-        "message": new_label + (message.length < 100 ? message + btn + report_btn + remove_ward_btn : message.substring(0, 100) + "..." + btn + report_btn + remove_ward_btn),
-        "like_count": object["like_count"],
-        "comment_count": object["comment_count"],
-    });
-}
-
-
-/**
  * Generate Notify
  */
 jui.ready(["ui.notify"], function (notify) {
@@ -499,44 +473,3 @@ jui.ready(["ui.combo"], function (combo) {
         }
     });
 });
-
-
-
-/**
- * Get wards
- */
-var getWards = function (url, user_id, table, limit, page, paging) {
-    var fun = function (source) {
-        var results = source["results"];
-        var rows = []
-        for (var i in results) {
-            pcDisplayW(rows, results[i]);
-        }
-        ;
-
-        table.reset()
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.setOption("count", source["count"]);
-            paging.reload(source["count"]);
-            paging.first();
-        }
-    }
-
-    if (!user_id) {
-        return;
-    }
-
-    if (!page) {
-        page = 1;
-    }
-
-    data = {
-        limit: limit,
-        offset: (page - 1) * limit,
-        user_id: user_id,
-    }
-
-    getAjaxResult(url, data, fun);
-}

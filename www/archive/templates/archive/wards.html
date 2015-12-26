@@ -4,154 +4,180 @@
 {% block title %}{{ user.username }}'s wards{% endblock %}
 
 {% block css %}
-    <style type="text/css">
-        /* Base */
-        .body {
-            padding: 10px;
-        }
-
-        .dashed {
-            border-top: 1px dashed #e5e5e5;
-
-        }
-    </style>
-{% endblock %}
-
-{% block header %}
-    <div class="col col-3">
-        <span>{{ user.username }}' wards</span>
-    </div>
-
-    <div class="col col-3">
-    </div>
-
-    <div class="col col-3">
-    </div>
 {% endblock %}
 
 {% block content %}
-    <div class="panel">
-        <div class="body">
-            <h1 class="title">
-                <i class="icon-report"></i> <strong>Wards</strong>
+    <div id="custom-page-wrapper">
+        <br>
+        <br>
 
-                <div id="combo" class="combo" style="float: right">
-                    <a class="btn">Select...</a>
-                    <a class="btn toggle"><i class="icon-arrow2"></i></a>
-                    <ul>
-                        {% for group in groups %}
-                            <li value="/api/groups/{{ group.id }}/">{{ group.name }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </h1>
-
-            <div class="col col-6">
-                <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                    <div class="head">
-                        <strong>Post List</strong>
-
-                        <div class="group" style="float: right">
-                            <input type="text" class="input" id="post_ward_limit" placeholder="Limit" value="10"
-                                   style="width: 60px; text-align: right;"/>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-users fa-fw"></i> Groups
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <select id="select_group" class="form-control">
+                                {% for group in groups %}
+                                    <option value="/api/groups/{{ group.id }}/">{{ group.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    <table id="post_ward_table" class="table simple hover">
-                        <colgroup>
-                            <col style="width: 60px;">
-                            <col style="width: 100px;">
-                            <col style="width: 60%;">
-                            <col style="width: 20%;">
-                            <col style="width: 20%;">
-                        </colgroup>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                            <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                            <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                            <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                        </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-
-                <div id="post_ward_paging" class="paging" style="margin-top: 3px;">
-                    <a href="#" class="prev">Previous</a>
-
-                    <div class="list"></div>
-                    <a href="#" class="next">Next</a>
+                    <!-- /.panel-body -->
                 </div>
             </div>
 
-
-            <div class="col col-6">
-                <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                    <div class="head">
-                        <strong>Comment List</strong>
-
-                        <div class="group" style="float: right">
-                            <input type="text" class="input" id="comment_ward_limit" placeholder="Limit" value="10"
-                                   style="width: 60px; text-align: right;"/>
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-list fa-fw"></i> Post Wards
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="post_ward_limit">Limit</label>
+                                        <input type="text" class="input" id="post_ward_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                    <table id="comment_ward_table" class="table simple hover">
-                        <colgroup>
-                            <col style="width: 60px;">
-                            <col style="width: 100px;">
-                            <col style="width: 60%;">
-                            <col style="width: 20%;">
-                            <col style="width: 20%;">
-                        </colgroup>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                            <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                            <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                            <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                        </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="post_ward_table" class="table simple hover">
+                            <colgroup>
+                                <col style="width: 60px;">
+                                <col style="width: 100px;">
+                                <col style="width: 60%;">
+                                <col style="width: 20%;">
+                                <col style="width: 20%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <div id="post_ward_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
+            </div>
 
-                <div id="comment_ward_paging" class="paging" style="margin-top: 3px;">
-                    <a href="#" class="prev">Previous</a>
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-comments fa-fw"></i> Comment Wards
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="comment_ward_limit">Limit</label>
+                                        <input type="text" class="input" id="comment_ward_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="comment_ward_table" class="table simple hover">
+                            <colgroup>
+                                <col style="width: 60px;">
+                                <col style="width: 100px;">
+                                <col style="width: 60%;">
+                                <col style="width: 20%;">
+                                <col style="width: 20%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
 
-                    <div class="list"></div>
-                    <a href="#" class="next">Next</a>
+                        <div id="comment_ward_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
             </div>
         </div>
-    </div>
+        <!-- /.row -->
+        <br>
 
-    <script id="tpl_row" type="text/template">
-        <tr>
-            <td style="text-align: right;"><!= picture !></td>
-            <td><!= from !></td>
-            <td><!= message !></td>
-            <td style="text-align: center;"><!= like_count !></td>
-            <td style="text-align: center;"><!= comment_count !></td>
-        </tr>
-    </script>
+        <script id="tpl_row" type="text/template">
+            <tr>
+                <td style="text-align: right;"><!= picture !></td>
+                <td><!= from !></td>
+                <td><!= message !></td>
+                <td style="text-align: center;"><!= like_count !></td>
+                <td style="text-align: center;"><!= comment_count !></td>
+            </tr>
+        </script>
 
-    <script id="tpl_none" type="text/template">
-        <tr>
-            <td colspan="5" class="none" align="center">Data does not exist.</td>
-        </tr>
-    </script>
+        <script id="tpl_none" type="text/template">
+            <tr>
+                <td colspan="5" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
 
-    <script id="tpl_pages" type="text/template">
-        <! for(var i = 0; i < pages.length; i++) { !>
-        <a href="#" class="page"><!= pages[i] !></a>
-        <! } !>
-    </script>
+        <script id="tpl_pages" type="text/template">
+            <! for(var i = 0; i < pages.length; i++) { !>
+            <a href="#" class="page"><!= pages[i] !></a>
+            <! } !>
+        </script>
+
+        <div id="loading_post_ward_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
+        <div id="loading_comment_ward_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+    </div><!-- /.custom-page-wrapper -->
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/ward.js' %}" type="text/javascript"></script>
     <script>
         var post_ward_limit = 10;
         var comment_ward_limit = 10;
@@ -170,7 +196,7 @@
                 screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
-                        getWards(post_ward_url, user_id, post_ward_table, post_ward_limit, pNo);
+                        changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, pNo);
                     }
                 },
                 tpl: {
@@ -205,7 +231,7 @@
                 screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
-                        getWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, pNo);
+                        changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, pNo);
                     }
                 },
                 tpl: {
@@ -237,48 +263,62 @@
         });
 
         /**
-         * Generate Combo
+         * Loading message
          */
-        jui.ready(["ui.combo"], function (combo) {
-            combo = combo("#combo", {
-                index: 0,
-                width: 200,
-                keydown: true,
-                event: {
-                    change: function (data) {
-                        post_ward_url = data.value + 'post_ward/'
-                        comment_ward_url = data.value + 'comment_ward/'
-
-                        getWards(post_ward_url, user_id, post_ward_table, post_ward_limit, 1, post_ward_paging);
-                        getWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, 1, comment_ward_paging);
-                    }
-                }
+        jui.ready(["ui.modal"], function (modal) {
+            loading_post_ward = modal("#loading_post_ward_msg", {
+                target: "#post_ward_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
             });
-        });
+
+            loading_comment_ward = modal("#loading_comment_ward_msg", {
+                target: "#comment_ward_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+        })
 
         /**
          * Init analysis.html
          */
         $(function () {
             {% if groups %}
-                getWards(post_ward_url, user_id, post_ward_table, post_ward_limit, 1, post_ward_paging);
-                getWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, 1, comment_ward_paging);
+                changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
+                changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, 1, comment_ward_paging);
             {% endif %}
+
+            window.onresize = function (event) {
+                post_ward_table.resize();
+                comment_ward_table.resize();
+                reLoadPaging(post_ward_paging);
+                reLoadPaging(comment_ward_paging);
+            }
 
             $("#post_ward_limit").on("input", function () {
                 post_ward_limit = $("#post_ward_limit").val();
-                getWards(post_ward_url, user_id, post_ward_table, post_ward_limit, 1, post_ward_paging);
+                changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
             });
 
             $("#comment_ward_limit").on("input", function () {
                 comment_ward_limit = $("#comment_ward_limit").val();
-                getWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, 1, comment_ward_paging);
+                changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, 1, comment_ward_paging);
+            });
+
+            $("#select_group").change(function () {
+                post_ward_url = $("#select_group option:selected").val() + 'post_ward/'
+                comment_ward_url = $("#select_group option:selected").val() + 'comment_ward/'
+
+                changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
+                changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, 1, comment_ward_paging);
             });
         });
 
-        function reload () {
-            getWards(post_ward_url, user_id, post_ward_table, post_ward_limit, 1, post_ward_paging);
-            getWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, 1, comment_ward_paging);
+        function reload() {
+            changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
+            changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, 1, comment_ward_paging);
         }
     </script>
 {% endblock %}

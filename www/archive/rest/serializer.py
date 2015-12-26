@@ -99,6 +99,8 @@ class BlacklistFBUserSerializer(FBUserSerializer):
 
 class WardSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
+    post = PostSerializer(required=True)
+    comment = CommentSerializer(required=True)
 
     class Meta:
         model = Ward
