@@ -2,24 +2,31 @@
  * Created by donghyun on 11/14/15.
  */
 
+$(function () {
+    $("#sidebar_select_group").change(function () {
+        location.href = $("#sidebar_select_group option:selected").val();
+    });
+});
+
+
 /**
  * Detect Inner Width For Screen Count
  *
  * @returns {number}
  */
-var detectWidthToScreenCount =  function () {
+var detectWidthToScreenCount = function () {
     var width = window.innerWidth;
-   if(width >= 1366) {
-     return 10;
-   } else if(width >= 800) {
-     return 7;
-   } else if(width >= 500) {
-     return 5;
-   } else if(width >= 350) {
-     return 3;
-   } else {
-     return 1;
-   }
+    if (width >= 1366) {
+        return 10;
+    } else if (width >= 800) {
+        return 7;
+    } else if (width >= 500) {
+        return 5;
+    } else if (width >= 350) {
+        return 3;
+    } else {
+        return 1;
+    }
 }
 
 
@@ -28,7 +35,7 @@ var detectWidthToScreenCount =  function () {
  *
  * @param paging
  */
-var reLoadPaging = function(paging) {
+var reLoadPaging = function (paging) {
     paging.setOption('screenCount', detectWidthToScreenCount());
     paging.reload(paging.options["count"]);
 }
@@ -38,17 +45,19 @@ var reLoadPaging = function(paging) {
  *
  * @returns {number}
  */
-var detectWidthToSubstring =  function () {
+var detectWidthToSubstring = function () {
     var width = window.innerWidth;
-   if(width >= 800) {
-     return 100;
-   } if(width >= 500) {
-     return 50;
-   }  if(width >= 350) {
-     return 30;
-   } else {
-     return 10;
-   }
+    if (width >= 800) {
+        return 100;
+    }
+    if (width >= 500) {
+        return 50;
+    }
+    if (width >= 350) {
+        return 30;
+    } else {
+        return 10;
+    }
 }
 
 
@@ -274,18 +283,6 @@ var deleteAsyncAjax = function (url, data) {
 
 
 /**
- * Get url from id
- *
- * @param url
- * @returns {*}
- */
-var getIdFromUrl = function (url) {
-    var split_url = url.split('/');
-    return split_url[split_url.length - 2];
-}
-
-
-/**
  * Post report
  *
  * @param object_id
@@ -372,104 +369,3 @@ var pcDisplay = function (rows, row) {
         "comment_count": '<div class="h5">' + row["comment_count"] + '</div>',
     });
 }
-
-
-/**
- * Generate Notify
- */
-jui.ready(["ui.notify"], function (notify) {
-    var handler = {
-        show: function (data) {
-            console.log("show : " + JSON.stringify(data));
-        },
-        hide: function (data) {
-            console.log("hide : " + JSON.stringify(data));
-        },
-        click: function (data) {
-            console.log("click : " + JSON.stringify(data));
-        }
-    };
-
-    notify_1 = notify("body", {
-        position: "top-right",
-        event: handler,
-        timeout: 2000,
-        tpl: {
-            item: $("#tpl_alarm").html()
-        }
-    });
-
-    notify_2 = notify("body", {
-        position: "top-left",
-        event: handler,
-        timeout: 2000,
-        tpl: {
-            item: $("#tpl_alarm").html()
-        }
-    });
-
-    notify_3 = notify("body", {
-        position: "top",
-        event: handler,
-        timeout: 2000,
-        padding: {
-            top: 100
-        },
-        tpl: {
-            item: $("#tpl_alarm").html()
-        }
-    });
-
-    notify_4 = notify("body", {
-        position: "bottom",
-        event: handler,
-        timeout: 2000,
-        distance: 30,
-        tpl: {
-            item: $("#tpl_alarm").html()
-        }
-    });
-
-    notify_5 = notify("body", {
-        position: "bottom-left",
-        event: handler,
-        timeout: 2000,
-        showDuration: 1000,
-        hideDuration: 1000,
-        tpl: {
-            item: $("#tpl_alarm").html()
-        }
-    });
-
-    notify_6 = notify("body", {
-        position: "bottom-right",
-        event: handler,
-        timeout: 2000,
-        showEasing: "linear",
-        tpl: {
-            item: $("#tpl_alarm").html()
-        }
-    });
-
-    notify_top_submit = function (type, data) {
-        if (type == 1) notify_1.add(data);
-        if (type == 2) notify_2.add(data);
-        if (type == 3) notify_3.add(data);
-        if (type == 4) notify_4.add(data);
-        if (type == 5) notify_5.add(data);
-        if (type == 6) notify_6.add(data);
-    }
-});
-
-jui.ready(["ui.combo"], function (combo) {
-    groups_combo = combo("#groups_combo", {
-        index: $('#current_group').text(),
-        width: 200,
-        keydown: true,
-        event: {
-            change: function (data) {
-                location.href = data.value;
-            }
-        }
-    });
-});

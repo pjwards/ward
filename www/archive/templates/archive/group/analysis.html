@@ -782,8 +782,8 @@
          */
         function changeStatistics(method, from, to) {
             statistics_method = method;
-            if(statisticsPlot) statisticsPlot.destroy();
-            if(controllerStatisticsPlot) controllerStatisticsPlot.destroy();
+            if (statisticsPlot) statisticsPlot.destroy();
+            if (controllerStatisticsPlot) controllerStatisticsPlot.destroy();
             loading_group_statistics.show();
             getStatistics(statistics_url, loading_group_statistics, method, from, to);
         }

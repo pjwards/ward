@@ -3,17 +3,27 @@
     <div class="sidebar-nav navbar-collapse">
         <ul class="nav" id="side-menu">
             <li class="sidebar-search">
+                <div class="form-group">
+                    <select id="sidebar_select_group" class="form-control">
+                        {% for grp in groups %}
+                            <option value="{% url 'archive:group' grp.id %}"
+                                    {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- /select-group -->
+            </li>
+            <li class="sidebar-search">
                 <form id="search_form" method="get" action="{% url 'archive:group_search' group.id %}"
                       style="display: inline;" role="form">
                     <div class="input-group custom-search-form">
-
-                        <input type="text" class="form-control" id="search_input" name="q" placeholder="Search..." value="{% if search %}{{ search }}{% endif %}">
+                        <input type="text" class="form-control" id="search_input" name="q" placeholder="Search..."
+                               value="{% if search %}{{ search }}{% endif %}">
                                 <span class="input-group-btn">
                                 <button class="btn btn-default" type="submit">
                                     <i class="fa fa-search"></i>
                                 </button>
                             </span>
-
                     </div>
                 </form>
                 <!-- /input-group -->
