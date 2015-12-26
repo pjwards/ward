@@ -46,13 +46,14 @@ class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
-    comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+    # comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+    user = FBUserSerializer(read_only=True)
 
     class Meta:
         model = Comment
         fields = '__all__'
         read_only_fields = '__all__'
-        depth = 1
+        # depth = 1
 
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
@@ -80,12 +81,16 @@ class BlacklistSerializer(serializers.HyperlinkedModelSerializer):
 
 class ReportSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
+    user = FBUserSerializer(read_only=True)
+    group = GroupSerializer(required=True)
+    post = PostSerializer(required=True)
+    comment = CommentSerializer(required=True)
 
     class Meta:
         model = Report
         fields = '__all__'
         read_only_fields = '__all__'
-        depth = 1
+        # depth = 1
 
 
 class BlacklistFBUserSerializer(FBUserSerializer):

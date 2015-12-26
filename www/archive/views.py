@@ -1089,7 +1089,7 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Report View Set
     """
-    queryset = Report.objects.all().order_by('-updated_time')
+    queryset = Report.objects.all().exclude(status='checked').order_by('-updated_time')
     serializer_class = ReportSerializer
 
 

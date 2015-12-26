@@ -358,7 +358,7 @@ var pcDisplay = function (rows, row) {
     var user_url = '/archive/user/' + row["user"].id + '/';
     var fb_url = "https://www.facebook.com/";
     var ward_btn = is_authenticated ? '&nbsp; &nbsp;<btn class="btn mini" onclick="postWard(\'' + row["id"] + '\')" style="color:#ffa500;"><i class="icon-pin"></i> Ward</btn>' : '';
-    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + row["id"] + '\')" style="color:#de615e;"><i class="icon-caution2"></i> Report</btn>';
+    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Is this spam?\')) postReport(\'' + row["id"] + '\');" style="color:#de615e;"><i class="icon-caution2"></i> Report</btn>';
     var message = row["message"] ? String(row["message"]).replace(/</gi, "&lt;") : "(photo)";
     var fb_link = function (message) {
         message = message.length < detectWidthToSubstring() ? message : message.substring(0, detectWidthToSubstring()) + "...";
@@ -370,39 +370,6 @@ var pcDisplay = function (rows, row) {
         "message": fb_link(message),
         "like_count": '<div class="h5">' + row["like_count"] + '</div>',
         "comment_count": '<div class="h5">' + row["comment_count"] + '</div>',
-    });
-}
-
-
-/**
- * Post and comment Display for report
- *
- * @param rows
- * @param row
- */
-var pcDisplayR = function (rows, row) {
-    var object = row["post"] ? row["post"] : row["comment"] ? row["comment"] : undefined;
-    var user_url = '/archive/user/' + getIdFromUrl(row["user"].url) + '/';
-    var group_url = '/archive/group/' + getIdFromUrl(row["group"].url) + '/';
-    var fb_url = "https://www.facebook.com/";
-    if (object) {
-        var object_id = getIdFromUrl(object.url);
-        var btn = '&nbsp; &nbsp;<a class="btn btn-block btn-social-icon btn-facebook mini" href="' + fb_url + object_id + '" target="_blank"><span class="fa fa-facebook"></span></a>';
-        var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
-    }
-    var checked_btn = '<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'checked\'); reload()" style="color:#ffa500;">checked</btn>';
-    var hide_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'hide\'); reload()" style="color:#2f4f4f;">hide</btn>';
-    var show_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'show\'); reload()" style="color:#6495ed;">show</btn>';
-    var delete_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Are you sure delete?\')) reportAction(\'' + row["id"] + '\', \'delete\'); reload()" style="color:#ff1493;">deleted</btn>';
-    rows.push({
-        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
-        "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a>' + (object ? '<div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>' : ''),
-        "message": object ? message.length < 100 ? message + btn : message.substring(0, 100) + "..." + btn : 'deleted',
-        "like_count": object ? object["like_count"] : 'deleted',
-        "comment_count": object ? object["comment_count"] : 'deleted',
-        "group": '<div class="more-link"><a href="' + group_url + '"><div class="h5">' + row["group"]["name"] + '</div></a></div>',
-        "status": row["status"],
-        "action": row["status"] == 'deleted' ? '' : (row["status"] == 'hide' ? show_btn : (row["status"] == 'checked' ? '' : checked_btn) + hide_btn) + delete_btn,
     });
 }
 
@@ -420,7 +387,7 @@ var pcDisplayW = function (rows, row) {
     var fb_url = "https://www.facebook.com/";
     var new_label = row["updated_time"] < object["updated_time"] ? '<span class="label mini success">New</span> &nbsp; &nbsp;' : '';
     var btn = '&nbsp; &nbsp;<btn class="btn btn-block btn-social-icon btn-facebook mini" onclick="updateWard(' + row["id"] + ',\'' + fb_url + object_id + '\')"><span class="fa fa-facebook"></span></btn>';
-    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="postReport(\'' + object_id + '\')" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
+    var report_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Is this spam?\')) postReport(\'' + object_id + '\');" style="color:#de615e;"><i class="icon-caution2"></i></btn>';
     var remove_ward_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Are you sure delete?\')) deleteWard(\'' + row["id"] + '\'); reload()" style="color:#de615e;"><i class="icon-trashcan"></i></btn>'
     var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
     rows.push({
@@ -533,39 +500,7 @@ jui.ready(["ui.combo"], function (combo) {
     });
 });
 
-/**
- * Get reports
- */
-var getReports = function (url, table, limit, page, paging) {
-    var fun = function (source) {
-        var results = source["results"];
-        var rows = []
-        for (var i in results) {
-            pcDisplayR(rows, results[i]);
-        }
-        ;
 
-        table.reset()
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.setOption("count", source["count"]);
-            paging.reload(source["count"]);
-            paging.first();
-        }
-    }
-
-    if (!page) {
-        page = 1;
-    }
-
-    data = {
-        limit: limit,
-        offset: (page - 1) * limit,
-    }
-
-    getAjaxResult(url, data, fun);
-}
 
 /**
  * Get wards
