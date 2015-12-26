@@ -181,7 +181,7 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="post_issue_limit">Limit</label>
+                                        <label for="comment_issue_limit">Limit</label>
                                         <input type="text" class="input" id="comment_issue_limit" placeholder="Limit"
                                                value="10" style="width: 80%; text-align: center;"/>
                                     </li>
@@ -248,7 +248,7 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="post_issue_limit">Limit</label>
+                                        <label for="post_archive_limit">Limit</label>
                                         <input type="text" class="input" id="post_archive_limit" placeholder="Limit"
                                                value="10" style="width: 80%; text-align: center;"/>
                                     </li>
@@ -307,7 +307,7 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="post_issue_limit">Limit</label>
+                                        <label for="comment_archive_limit">Limit</label>
                                         <input type="text" class="input" id="comment_archive_limit" placeholder="Limit"
                                                value="10" style="width: 80%; text-align: center;"/>
                                     </li>
@@ -419,7 +419,7 @@
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasAxisLabelRenderer.min.js' %}"></script>
 
     <script>
-        var is_authenticated = {{ user.is_authenticated|lower }};
+        var is_authenticated = {% if user.is_authenticated %}true{% else %}false{% endif %}
         var statistics_method = 'month';
 
         var post_issue_limit = 10;

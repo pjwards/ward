@@ -357,11 +357,12 @@ function changeIssue(url, table, limit, from, to, loading, page, paging) {
  * @param table
  * @param limit
  * @param from
+ * @param user_id
  * @param loading
  * @param page
  * @param paging
  */
-var getArchive = function (url, table, limit, from, loading, page, paging) {
+var getArchive = function (url, table, limit, from, user_id, loading, page, paging) {
     var fun = function (source) {
         var results = source["results"];
         var rows = []
@@ -391,6 +392,10 @@ var getArchive = function (url, table, limit, from, loading, page, paging) {
         from: from,
     }
 
+    if (user_id) {
+        data["user_id"] = user_id;
+    }
+
     getAjaxResult(url, data, fun);
 }
 
@@ -407,6 +412,25 @@ var getArchive = function (url, table, limit, from, loading, page, paging) {
  * @param paging
  */
 function changeArchive(url, table, limit, from, loading, page, paging) {
+    var user_id = undefined;
     loading.show();
-    getArchive(url, table, limit, from, loading, page, paging);
+    getArchive(url, table, limit, from, user_id, loading, page, paging);
+}
+
+
+/**
+ * Change Archive by user
+ *
+ * @param url
+ * @param table
+ * @param limit
+ * @param from
+ * @param user_id
+ * @param loading
+ * @param page
+ * @param paging
+ */
+function changeArchiveByUser(url, table, limit, from, user_id, loading, page, paging) {
+    loading.show();
+    getArchive(url, table, limit, from, user_id, loading, page, paging);
 }

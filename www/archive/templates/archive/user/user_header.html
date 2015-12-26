@@ -1,9 +1,50 @@
-<div class="col col-3">
-    <span>{{ user.name }}</span>
-</div>
-
-<div class="col col-3">
-</div>
-
-<div class="col col-3">
+{% load staticfiles %}
+<br>
+<!-- /.row -->
+<div class="row">
+    <div class="col-lg-4 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-list fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ fb_user.posts.all|length }}</div>
+                        <div>Total Posts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-comments fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ fb_user.comments.all|length }}</div>
+                        <div>Total Comments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-12">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-users fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ fb_user.groups.all|length }}</div>
+                        <div>Total Groups</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

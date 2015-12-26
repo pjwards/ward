@@ -9,11 +9,13 @@
  */
 var detectWidthToScreenCount =  function () {
     var width = window.innerWidth;
-   if(width >= 800) {
+   if(width >= 1366) {
      return 10;
-   } if(width >= 500) {
+   } else if(width >= 800) {
+     return 7;
+   } else if(width >= 500) {
      return 5;
-   }  if(width >= 350) {
+   } else if(width >= 350) {
      return 3;
    } else {
      return 1;
@@ -429,48 +431,6 @@ var pcDisplayW = function (rows, row) {
         "comment_count": object["comment_count"],
     });
 }
-
-
-/**
- * Get archive for user by using ajax
- */
-var getArchiveByUser = function (url, user_id, table, limit, from, page, paging) {
-    var fun = function (source) {
-        var results = source["results"];
-        var rows = []
-        for (var i in results) {
-            pcDisplay(rows, results[i]);
-        }
-        ;
-
-        table.reset()
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.setOption("count", source["count"]);
-            paging.reload(source["count"]);
-            paging.first();
-        }
-    }
-
-    if (!page) {
-        page = 1;
-    }
-
-    if (!user_id) {
-        return;
-    }
-
-    data = {
-        user_id: user_id,
-        limit: limit,
-        offset: (page - 1) * limit,
-        from: from,
-    }
-
-    getAjaxResult(url, data, fun);
-}
-
 
 
 /**
