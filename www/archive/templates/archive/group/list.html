@@ -46,13 +46,11 @@
                         <table id="groups_table" class="table simple hover">
                             <thead>
                             <tr>
+                                <th style="width: 30px"></th>
                                 <th style="text-align: center;"><i class="icon-text"></i> Name</th>
                                 <th style="text-align: center;"><i class="icon-realtime"></i> Updated Time</th>
                                 <th style="text-align: center;"><i class="icon-report"></i> Post</th>
                                 <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                <th style="text-align: center;"><i class="icon-user"></i> Owner</th>
-                                <th style="text-align: center;"><i class="icon-save"></i> Stored</th>
-                                <th style="text-align: center;"><i class="icon-refresh"></i> Action</th>
                             </tr>
                             </thead>
                             <tbody></tbody>
@@ -95,19 +93,41 @@
 
         <script id="tpl_row" type="text/template">
             <tr>
+                <td>
+                    <div class="h4"><i class='icon-left'></i></div>
+                </td>
                 <td style="text-align: center;"><!= name !></td>
                 <td style="text-align: center;"><!= updated_time !></td>
                 <td style="text-align: center;"><!= post_count !></td>
                 <td style="text-align: center;"><!= comment_count !></td>
-                <td style="text-align: center;"><!= owner !></td>
-                <td style="text-align: center;"><!= is_stored !></td>
-                <td style="text-align: center;"><!= action !></td>
             </tr>
+        </script>
+
+        <script data-jui="#groups_table" data-tpl="expand" type="text/template">
+            <div class="jui" style="margin-left: 30px;">
+                <div class="row">
+                    <div class="group">
+                        <label class="label large">Owner</label>
+                        <label class="label large"><!= owner !></label>
+                    </div>
+                    <div class="group">
+                        <label class="label large">Is stored?</label>
+                        <label class="label large"><!= is_stored !></label>
+                    </div>
+                </div>
+                <br/>
+
+                <div class="row">
+                    <div class="group">
+                        <!= action !>
+                    </div>
+                </div>
+            </div>
         </script>
 
         <script id="tpl_none" type="text/template">
             <tr>
-                <td colspan="7" class="none" align="center">Data does not exist.</td>
+                <td colspan="5" class="none" align="center">Data does not exist.</td>
             </tr>
         </script>
 
@@ -151,10 +171,20 @@
             });
 
             groups_table = table("#groups_table", {
-                fields: ["name", "updated_time", "post_count", "comment_count", "owner", "is_stored", "action"],
+                fields: ["", "name", "updated_time", "post_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 500,
                 resize: true,
+                expand: true,
+                animate: true,
+                event: {
+                    expand: function (row, e) {
+                        $(row.list[0]).html("<div class='h4'><i class='icon-right'></i></div>");
+                    },
+                    expandend: function (row, e) {
+                        $(row.list[0]).html("<div class='h4'><i class='icon-left'></i></div>");
+                    }
+                },
                 tpl: {
                     row: $("#tpl_row").html(),
                     none: $("#tpl_none").html()

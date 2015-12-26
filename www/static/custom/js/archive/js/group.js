@@ -20,20 +20,16 @@ var getGroups = function (url, table, limit, search, loading, page, paging) {
         for (var i in results) {
             var row = results[i];
             var group_url = '/archive/group/' + row["id"] + '/';
-            var owner = '<div class="h4">Empty</div>'
-            if(row["owner"]) {
-                var owner_url = '/archive/user/' + row["owner"]["id"] + '/';
-                owner = '<div class="more-link"><a href="' + owner_url + '"><div class="h4">' + row["owner"]["name"] + '</div></a></div>';
-            }
-            var is_stored = row["is_stored"] ? '<i class="icon-check"></i>' : '<i class="icon-close"></i>';
+            var is_stored = row["is_stored"] ? '<i class="icon-check"> Yes</i>' : '<i class="icon-close"> No</i>';
+            var name = row["name"].length < detectWidthToSubstring() ? row["name"] : row["name"].substring(0, detectWidthToSubstring()) + "...";
             rows.push({
-                "name": '<div class=" more-link"><a href="' + group_url + '"><div class="h4">' + row["name"] + '</div></a></div>',
+                "name": '<div class=" more-link"><a href="' + group_url + '"><div class="h4">' + name + '</div></a></div>',
                 "updated_time": '<div class="h4"><i class="icon-realtime"></i> ' + timeSince(row["updated_time"]) + '</div>',
                 "post_count": '<div class="h4">' + row["post_count"] + '</div>',
                 "comment_count": '<div class="h4">' + row["comment_count"] + '</div>',
-                "owner": owner,
-                "is_stored": '<div class="h4">' + is_stored + '</div>',
-                "action": '<a class="btn mini" href="/archive/group/' + row["id"] + '/update/" style="color:#ffa500;">Update</a>',
+                "owner": row["owner"] ? row["owner"]["name"] : 'Empty',
+                "is_stored": is_stored,
+                "action": '<a class="btn large" href="/archive/group/' + row["id"] + '/update/" style="color:#ffa500;">Update</a>',
             });
         }
         ;
@@ -98,22 +94,18 @@ var getGroupsAdmin = function (url, table, limit, search, loading, page, paging)
         for (var i in results) {
             var row = results[i];
             var group_url = '/archive/group/' + row["id"] + '/';
-            var owner = '<div class="h4">Empty</div>'
-            if(row["owner"]) {
-                var owner_url = '/archive/user/' + row["owner"]["id"] + '/';
-                owner = '<div class="more-link"><a href="' + owner_url + '"><div class="h4">' + row["owner"]["name"] + '</div></a></div>';
-            }
-            var is_stored = row["is_stored"] ? '<i class="icon-check"></i>' : '<i class="icon-close"></i>';
-            var update_btn = '<a class="btn mini" href="/archive/group/' + row["id"] + '/update/" style="color:#ffa500;">Update</a>';
-            var store_btn = '&nbsp; &nbsp;<a class="btn mini" href="/archive/group/' + row["id"] + '/store/" style="color:#6495ed;">Store</a>';
-            var check_btn = '&nbsp; &nbsp;<a class="btn mini" href="/archive/group/' + row["id"] + '/check/" style="color:#ff1493;">Check</a>';
+            var is_stored = row["is_stored"] ? '<i class="icon-check"> Yes</i>' : '<i class="icon-close"> No</i>';
+            var name = row["name"].length < detectWidthToSubstring() ? row["name"] : row["name"].substring(0, detectWidthToSubstring()) + "...";
+            var update_btn = '<a class="btn large" href="/archive/group/' + row["id"] + '/update/" style="color:#ffa500;">Update</a>';
+            var store_btn = '<a class="btn large" href="/archive/group/' + row["id"] + '/store/" style="color:#6495ed;">Store</a>';
+            var check_btn = '<a class="btn large" href="/archive/group/' + row["id"] + '/check/" style="color:#ff1493;">Check</a>';
             rows.push({
-                "name": '<div class=" more-link"><a href="' + group_url + '"><div class="h4">' + row["name"] + '</div></a></div>',
+                "name": '<div class=" more-link"><a href="' + group_url + '"><div class="h4">' + name + '</div></a></div>',
                 "updated_time": '<div class="h4"><i class="icon-realtime"></i> ' + timeSince(row["updated_time"]) + '</div>',
                 "post_count": '<div class="h4">' + row["post_count"] + '</div>',
                 "comment_count": '<div class="h4">' + row["comment_count"] + '</div>',
-                "owner": owner,
-                "is_stored": '<div class="h4">' + is_stored + '</div>',
+                "owner": row["owner"] ? row["owner"]["name"] : 'Empty',
+                "is_stored": is_stored,
                 "action": update_btn + store_btn + check_btn,
             });
         }

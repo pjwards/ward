@@ -50,31 +50,60 @@ var timeSince = function (date) {
         date = new Date(date);
     }
 
+    var is_small = false;
+    if (window.innerWidth <= 500) {
+        is_small = true;
+    }
+
     var seconds = Math.floor((new Date() - date) / 1000);
     var intervalType;
 
     var interval = Math.floor(seconds / 31536000);
     if (interval >= 1) {
-        intervalType = 'year';
+        if (is_small) {
+            intervalType = 'yr';
+        } else {
+            intervalType = 'year';
+        }
     } else {
         interval = Math.floor(seconds / 2592000);
         if (interval >= 1) {
-            intervalType = 'month';
+            if (is_small) {
+                intervalType = 'mon';
+            } else {
+                intervalType = 'month';
+            }
         } else {
             interval = Math.floor(seconds / 86400);
             if (interval >= 1) {
-                intervalType = 'day';
+                if (is_small) {
+                    intervalType = 'day';
+                } else {
+                    intervalType = 'day';
+                }
             } else {
                 interval = Math.floor(seconds / 3600);
                 if (interval >= 1) {
-                    intervalType = "hour";
+                    if (is_small) {
+                        intervalType = 'hr';
+                    } else {
+                        intervalType = 'hour';
+                    }
                 } else {
                     interval = Math.floor(seconds / 60);
                     if (interval >= 1) {
-                        intervalType = "minute";
+                        if (is_small) {
+                            intervalType = 'min';
+                        } else {
+                            intervalType = 'minute';
+                        }
                     } else {
+                        if (is_small) {
+                            intervalType = 'sec';
+                        } else {
+                            intervalType = 'second';
+                        }
                         interval = seconds;
-                        intervalType = "second";
                     }
                 }
             }
@@ -85,7 +114,7 @@ var timeSince = function (date) {
         intervalType += 's';
     }
 
-    return interval + ' ' + intervalType + ' ago';
+    return interval + (is_small? '<br>':'') + ' ' + intervalType + (is_small? '<br>':'') + ' ago';
 };
 
 
