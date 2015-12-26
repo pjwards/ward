@@ -172,10 +172,21 @@
         $(function () {
             changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
 
+            /**
+             * Window Resize
+             */
             window.onresize = function (event) {
                 reports_table.resize();
                 reLoadPaging(reports_paging);
             }
+
+            /**
+             * Mobile Rotate
+             */
+            $(window).on("orientationchange", function () {
+                reports_table.resize();
+                reLoadPaging(reports_paging);
+            });
 
             $("#reports_limit").on("input", function () {
                 reports_limit = $("#reports_limit").val();

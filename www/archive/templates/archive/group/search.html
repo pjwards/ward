@@ -386,6 +386,9 @@
             changeSearchPC(comment_search_url, comment_table, comment_limit, search, loading_comment, 1, comment_paging);
             changeUserArchive(user_search_url, group_id, user_table, user_limit, search, loading_user, 1, user_paging);
 
+            /**
+             * Window Resize
+             */
             window.onresize = function (event) {
                 post_table.resize();
                 comment_table.resize();
@@ -394,6 +397,18 @@
                 reLoadPaging(comment_paging);
                 reLoadPaging(user_paging);
             }
+
+            /**
+             * Mobile Rotate
+             */
+            $(window).on("orientationchange", function () {
+                post_table.resize();
+                comment_table.resize();
+                user_table.resize();
+                reLoadPaging(post_paging);
+                reLoadPaging(comment_paging);
+                reLoadPaging(user_paging);
+            });
 
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();

@@ -25,7 +25,24 @@ var detectWidthToScreenCount = function () {
     } else if (width >= 350) {
         return 3;
     } else {
-        return 1;
+        return 2;
+    }
+}
+
+
+/**
+ * Detect Inner Width For Page Count
+ *
+ * @returns {number}
+ */
+var detectWidthToPageCount = function () {
+    var width = window.innerWidth;
+    if (width >= 1366) {
+        return 10;
+    } else if (width >= 800) {
+        return 7;
+    } else {
+        return 5;
     }
 }
 

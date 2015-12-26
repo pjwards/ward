@@ -290,12 +290,25 @@
                 changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, 1, comment_ward_paging);
             {% endif %}
 
+            /**
+             * Window Resize
+             */
             window.onresize = function (event) {
                 post_ward_table.resize();
                 comment_ward_table.resize();
                 reLoadPaging(post_ward_paging);
                 reLoadPaging(comment_ward_paging);
             }
+
+            /**
+             * Mobile Rotate
+             */
+            $(window).on("orientationchange", function () {
+                post_ward_table.resize();
+                comment_ward_table.resize();
+                reLoadPaging(post_ward_paging);
+                reLoadPaging(comment_ward_paging);
+            });
 
             $("#post_ward_limit").on("input", function () {
                 post_ward_limit = $("#post_ward_limit").val();

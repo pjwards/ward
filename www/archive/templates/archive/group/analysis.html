@@ -737,6 +737,9 @@
             changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, 1, post_archive_paging);
             changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
 
+            /**
+             * Window Resize
+             */
             window.onresize = function (event) {
                 statisticsPlot.replot();
                 controllerStatisticsPlot.replot();
@@ -751,6 +754,24 @@
                 reLoadPaging(post_archive_paging);
                 reLoadPaging(comment_archive_paging);
             }
+
+            /**
+             * Mobile Rotate
+             */
+            $(window).on("orientationchange", function () {
+                statisticsPlot.replot();
+                controllerStatisticsPlot.replot();
+                totalHourStatisticsPlot.replot();
+                controllerTotalHourStatisticsPlot.replot();
+                post_issue_table.resize();
+                comment_issue_table.resize();
+                post_archive_table.resize();
+                comment_archive_table.resize();
+                reLoadPaging(post_issue_paging);
+                reLoadPaging(comment_issue_paging);
+                reLoadPaging(post_archive_paging);
+                reLoadPaging(comment_archive_paging);
+            });
 
             $("#post_issue_limit").on("input", function () {
                 post_issue_limit = $("#post_issue_limit").val();

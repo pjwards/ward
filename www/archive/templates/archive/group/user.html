@@ -318,6 +318,9 @@
             changeProportion(proportion_url, loading_proportion_post, loading_proportion_comment);
             changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
 
+            /**
+             * Window Resize
+             */
             window.onresize = function (event) {
                 postProportion.replot();
                 commentProportion.replot();
@@ -326,6 +329,18 @@
                 user_archive_table.resize();
                 reLoadPaging(user_archive_paging);
             }
+
+            /**
+             * Mobile Rotate
+             */
+            $(window).on("orientationchange", function () {
+                postProportion.replot();
+                commentProportion.replot();
+                post_activity_table.resize();
+                comment_activity_table.resize();
+                user_archive_table.resize();
+                reLoadPaging(user_archive_paging);
+            });
 
             $("#user_archive_limit").on("input", function () {
                 user_archive_limit = $("#user_archive_limit").val();
