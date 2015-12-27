@@ -4,99 +4,112 @@
 {% block title %}Reports{% endblock %}
 
 {% block css %}
-    <style type="text/css">
-        /* Base */
-        .body {
-            padding: 10px;
-        }
-
-        .dashed {
-            border-top: 1px dashed #e5e5e5;
-
-        }
-    </style>
 {% endblock %}
 
-
 {% block content %}
-    <div class="panel">
-        <div class="body">
-            <h1 class="title"><i class="icon-report"></i> <strong>Reports</strong></h1>
+    <div id="custom-page-wrapper">
+        <br>
+        <br>
 
-            <div class="panel" style="border:1px solid #ababab; border-radius: 10px;">
-                <div class="head">
-                    <strong>Report List</strong>
-
-                    <div class="group" style="float: right">
-                        <input type="text" class="input" id="reports_limit" placeholder="Limit" value="10"
-                               style="width: 60px; text-align: right;"/>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-tasks fa-fw"></i> Reports
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="reports_limit">Limit</label>
+                                        <input type="text" class="input" id="reports_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <table id="reports_table" class="table simple hover">
+                            <colgroup>
+                                <col style="width: 60px;">
+                                <col style="width: 100px;">
+                                <col style="width: 40%;">
+                                <col style="width: 10%;">
+                                <col style="width: 10%;">
+                                <col style="width: 10%;">
+                                <col style="width: 10%;">
+                                <col style="width: 20%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
+                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
+                                <th style="text-align: center;"><i class="icon-document"></i> Group</th>
+                                <th style="text-align: center;"><i class="icon-was"></i> Status</th>
+                                <th style="text-align: center;"><i class="icon-gear"></i> Action</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <div id="reports_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
                 </div>
-                <table id="reports_table" class="table simple hover">
-                    <colgroup>
-                        <col style="width: 60px;">
-                        <col style="width: 100px;">
-                        <col style="width: 40%;">
-                        <col style="width: 10%;">
-                        <col style="width: 10%;">
-                        <col style="width: 10%;">
-                        <col style="width: 10%;">
-                        <col style="width: 20%;">
-                    </colgroup>
-                    <thead>
-                    <tr>
-                        <th></th>
-                        <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                        <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                        <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                        <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                        <th style="text-align: center;"><i class="icon-document"></i> Group</th>
-                        <th style="text-align: center;"><i class="icon-was"></i> Status</th>
-                        <th style="text-align: center;"><i class="icon-gear"></i> Action</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <div id="reports_paging" class="paging" style="margin-top: 3px;">
-                <a href="#" class="prev">Previous</a>
-
-                <div class="list"></div>
-                <a href="#" class="next">Next</a>
             </div>
         </div>
-    </div>
-    </div>
+        <!-- /.row -->
+        <br>
 
-    <script id="tpl_row" type="text/template">
-        <tr>
-            <td style="text-align: right;"><!= picture !></td>
-            <td><!= from !></td>
-            <td><!= message !></td>
-            <td style="text-align: center;"><!= like_count !></td>
-            <td style="text-align: center;"><!= comment_count !></td>
-            <td style="text-align: center;"><!= group !></td>
-            <td style="text-align: center;"><!= status !></td>
-            <td style="text-align: center;"><!= action !></td>
-        </tr>
-    </script>
+        <script id="tpl_row" type="text/template">
+            <tr>
+                <td style="text-align: right;"><!= picture !></td>
+                <td><!= from !></td>
+                <td><!= message !></td>
+                <td style="text-align: center;"><!= like_count !></td>
+                <td style="text-align: center;"><!= comment_count !></td>
+                <td style="text-align: center;"><!= group !></td>
+                <td style="text-align: center;"><!= status !></td>
+                <td style="text-align: center;"><!= action !></td>
+            </tr>
+        </script>
 
-    <script id="tpl_none" type="text/template">
-        <tr>
-            <td colspan="8" class="none" align="center">Data does not exist.</td>
-        </tr>
-    </script>
+        <script id="tpl_none" type="text/template">
+            <tr>
+                <td colspan="8" class="none" align="center">Data does not exist.</td>
+            </tr>
+        </script>
 
-    <script id="tpl_pages" type="text/template">
-        <! for(var i = 0; i < pages.length; i++) { !>
-        <a href="#" class="page"><!= pages[i] !></a>
-        <! } !>
-    </script>
+        <script id="tpl_pages" type="text/template">
+            <! for(var i = 0; i < pages.length; i++) { !>
+            <a href="#" class="page"><!= pages[i] !></a>
+            <! } !>
+        </script>
+
+        <div id="loading_reports_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+    </div><!-- /.custom-page-wrapper -->
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/archive.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/report.js' %}" type="text/javascript"></script>
     <script>
         var reports_limit = 10;
         var reports_url = "/api/reports/";
@@ -107,10 +120,10 @@
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
             reports_paging = paging("#reports_paging", {
                 pageCount: 10,
-                screenCount: 10,
+                screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
-                        getReports(reports_url, reports_table, reports_limit, pNo);
+                        changeReports(reports_url, reports_table, reports_limit, loading_reports, pNo);
                     }
                 },
                 tpl: {
@@ -121,7 +134,7 @@
             reports_table = table("#reports_table", {
                 fields: ["", "from", "message", "like_count", "comment_count", "group", "status", "action"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -142,19 +155,46 @@
         });
 
         /**
-         * Init analysis.html
+         * Loading message
          */
-        $(function () {
-            getReports(reports_url, reports_table, reports_limit, 1, reports_paging);
-
-            $("#reports_limit").on("input", function () {
-                reports_limit = $("#reports_limit").val();
-                getReports(reports_url, reports_table, reports_limit, 1, reports_paging);
+        jui.ready(["ui.modal"], function (modal) {
+            loading_reports = modal("#loading_reports_msg", {
+                target: "#reports_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
             });
         });
 
-        function reload () {
-            getReports(reports_url, reports_table, reports_limit, 1, reports_paging);
+        /**
+         * Init analysis.html
+         */
+        $(function () {
+            changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
+
+            /**
+             * Window Resize
+             */
+            window.onresize = function (event) {
+                reports_table.resize();
+                reLoadPaging(reports_paging);
+            }
+
+            /**
+             * Mobile Rotate
+             */
+            $(window).on("orientationchange", function () {
+                changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
+            });
+
+            $("#reports_limit").on("input", function () {
+                reports_limit = $("#reports_limit").val();
+                changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
+            });
+        });
+
+        function reload() {
+            changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
         }
     </script>
 {% endblock %}

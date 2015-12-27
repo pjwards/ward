@@ -9,34 +9,18 @@ __email__ = "egaoneko@naver.com"
 # Serializers define the API representation.
 class FBUserSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
-    comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
-    posts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='post-detail')
+    # comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+    # posts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='post-detail')
 
     class Meta:
         model = FBUser
-        fields = '__all__'
+        exclude = ('groups',)
         read_only_fields = '__all__'
-
-
-class ActivityFBUserSerializer(FBUserSerializer):
-    count = serializers.IntegerField()
-
-    class Meta:
-        model = FBUser
-        exclude = ('posts', 'comments')
-        read_only_fields = '__all__'
-
-
-class ActivityForArchiveFBUserSerializer(serializers.Serializer):
-    id = serializers.CharField()
-    name = serializers.CharField()
-    picture = serializers.CharField()
-    p_count = serializers.IntegerField()
-    c_count = serializers.IntegerField()
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
+    owner = FBUserSerializer(read_only=True)
 
     class Meta:
         model = Group
@@ -62,27 +46,29 @@ class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
-    comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+    # comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+    user = FBUserSerializer(read_only=True)
 
     class Meta:
         model = Comment
         fields = '__all__'
         read_only_fields = '__all__'
-        depth = 1
+        # depth = 1
 
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     # attachments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='attachment-detail')
-    comments = serializers.HyperlinkedIdentityField(many=True, read_only=True, view_name='comment-detail')
+    # comments = serializers.HyperlinkedIdentityField(many=True, read_only=True, view_name='comment-detail')
     # comments = CommentSerializer(many=True, read_only=True)
-    attachments = AttachmentSerializer(many=True, read_only=True)
+    # attachments = AttachmentSerializer(many=True, read_only=True)
+    user = FBUserSerializer(read_only=True)
 
     class Meta:
         model = Post
         fields = '__all__'
         read_only_fields = '__all__'
-        depth = 1
+        # depth = 1
 
 
 class BlacklistSerializer(serializers.HyperlinkedModelSerializer):
@@ -95,12 +81,16 @@ class BlacklistSerializer(serializers.HyperlinkedModelSerializer):
 
 class ReportSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
+    user = FBUserSerializer(read_only=True)
+    group = GroupSerializer(required=True)
+    post = PostSerializer(required=True)
+    comment = CommentSerializer(required=True)
 
     class Meta:
         model = Report
         fields = '__all__'
         read_only_fields = '__all__'
-        depth = 1
+        # depth = 1
 
 
 class BlacklistFBUserSerializer(FBUserSerializer):
@@ -109,6 +99,8 @@ class BlacklistFBUserSerializer(FBUserSerializer):
 
 class WardSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
+    post = PostSerializer(required=True)
+    comment = CommentSerializer(required=True)
 
     class Meta:
         model = Ward
@@ -119,6 +111,8 @@ class WardSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserActivitySerializer(serializers.HyperlinkedModelSerializer):
+    user = FBUserSerializer(read_only=True)
+
     class Meta:
         model = UserActivity
         # fields = '__all__'

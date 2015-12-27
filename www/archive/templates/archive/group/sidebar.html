@@ -1,0 +1,60 @@
+{% load staticfiles %}
+<div class="navbar-default sidebar" role="navigation">
+    <div class="sidebar-nav navbar-collapse">
+        <ul class="nav" id="side-menu">
+            <li class="sidebar-search">
+                <div class="form-group">
+                    <select id="sidebar_select_group" class="form-control">
+                        {% for grp in groups %}
+                            <option value="{% url 'archive:group' grp.id %}"
+                                    {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- /select-group -->
+            </li>
+            <li class="sidebar-search">
+                <form id="search_form" method="get" action="{% url 'archive:group_search' group.id %}"
+                      style="display: inline;" role="form">
+                    <div class="input-group custom-search-form">
+                        <input type="text" class="form-control" id="search_input" name="q" placeholder="Search..."
+                               value="{% if search %}{{ search }}{% endif %}">
+                                <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                    </div>
+                </form>
+                <!-- /input-group -->
+            </li>
+            <li>
+                <a href="{% url 'archive:group_analysis' group.id %}"><i
+                        class="fa fa-bar-chart-o fa-fw"></i>Analysis</a>
+            </li>
+            <li>
+                <a href="{% url 'archive:group_user' group.id %}"><i class="fa fa-users fa-fw"></i>User</a>
+            </li>
+            <li>
+                {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}
+                    <a href="{% url 'archive:group_management' group.id %}"><i class="fa fa-sitemap fa-fw"></i>Management</a>
+                    {#                {% else %}#}
+                    {#                    <a href="#" class="btn disabled"><i class="fa fa-sitemap fa-fw"></i> Management</a>#}
+                {% endif %}
+            </li>
+            {#            <li>#}
+            {#                <a href="#"><i class="fa fa-files-o fa-fw"></i> Sample Pages<span class="fa arrow"></span></a>#}
+            {#                <ul class="nav nav-second-level">#}
+            {#                    <li>#}
+            {#                        <a href="blank.html">Blank Page</a>#}
+            {#                    </li>#}
+            {#                    <li>#}
+            {#                        <a href="login.html">Login Page</a>#}
+            {#                    </li>#}
+            {#                </ul>#}
+            {#                <!-- /.nav-second-level -->#}
+            {#            </li>#}
+        </ul>
+    </div>
+    <!-- /.sidebar-collapse -->
+</div>

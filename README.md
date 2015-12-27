@@ -25,28 +25,20 @@
 * uwsgi (tested with version 2.0.11.2)
 * pylibmc (tested with version 1.5.0)
 * psycopg2 (tested with version 2.6.1)
-
-
 * MeCab
 
 
 #### Front-End
 
+* Bootstrap
+* Bootstrap Social
 * jQuery
 * jQuery UI
 * Font Awesome
 * JUI
-* Bootstrap
-* Bootstrap Social
-
-
-* js-cookie
-* wow
-* jquery-easing
-* animate.css
-* FitText.js
-* jquery-backstretch
-
+* Start Bootstrap Creative ([Start Bootstrap](http://www.startbootstrap.com))
+* Start Bootstrap SB Admin 2 ([Start Bootstrap](http://www.startbootstrap.com))
+* Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/))
 
 
 ## Installation
