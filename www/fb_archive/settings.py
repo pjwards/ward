@@ -347,10 +347,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'METHOD': 'js_sdk',
         # 'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
     },
-    'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'}
-    }
 }
 
 #####################

@@ -13,6 +13,7 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^$', views.groups, name="home"),
     url(r'^about/$', views.about, name='about'),
+    url(r'^alert/$', views.alert, name='alert'),
     url(r"^admin/", include(admin.site.urls)),
 
     url(r'^', include('registration.auth_urls')),

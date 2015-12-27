@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import connection
 import logging
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Q, F
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
@@ -553,6 +553,22 @@ def wards(request):
         'archive/wards.html',
         {
             'groups': _groups,
+        }
+    )
+
+
+@login_required()
+def alert(request):
+    """
+    Display alert
+
+    :param request: request
+    :return: render
+    """
+    return render(
+        request,
+        'archive/alert.html',
+        {
         }
     )
 
@@ -1109,6 +1125,20 @@ class WardViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Ward.objects.all().order_by('-created_time')
     serializer_class = WardSerializer
+
+    @list_route()
+    def ward_alert(self, request):
+        user_id = self.request.query_params.get('user_id', None)
+        _user = get_object_or_404(User, pk=user_id)
+
+        _wards = Ward.objects.all().filter(user=_user).filter(Q(updated_time__lte=F('post__updated_time')))
+        page = self.paginate_queryset(_wards)
+        if page is not None:
+            serializers = WardSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializers.data)
+
+        serializers = WardSerializer(_wards, many=True, context={'request': request})
+        return Response(serializers.data)
 
 
 class UserActivityViewSet(viewsets.ReadOnlyModelViewSet):

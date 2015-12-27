@@ -1,4 +1,17 @@
 $(function () {
+    // First, checks if it isn't implemented yet.
+    if (!String.prototype.format) {
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function (match, number) {
+                return typeof args[number] != 'undefined'
+                    ? args[number]
+                    : match
+                    ;
+            });
+        };
+    }
+
     $("#search_input").keypress(function (event) {
         var key_code = event.keyCode || window.event.keyCode;
         if (key_code == 13) document.getElementById('search_form').submit();
@@ -116,7 +129,7 @@ jui.ready(["ui.notify"], function (notify) {
  * @param date
  * @returns {string}
  */
-var timeSince = function (date) {
+var timeSince = function (date, small_check) {
     if (typeof date !== 'object') {
         date = new Date(date);
     }
@@ -124,6 +137,10 @@ var timeSince = function (date) {
     var is_small = false;
     if (window.innerWidth <= 500) {
         is_small = true;
+    }
+
+    if (small_check == false) {
+        is_small = false;
     }
 
     var seconds = Math.floor((new Date() - date) / 1000);
@@ -185,7 +202,7 @@ var timeSince = function (date) {
         intervalType += 's';
     }
 
-    return interval + (is_small? '<br>':'') + ' ' + intervalType + (is_small? '<br>':'') + ' ago';
+    return interval + (is_small ? '<br>' : '') + ' ' + intervalType + (is_small ? '<br>' : '') + ' ago';
 };
 
 
@@ -206,4 +223,43 @@ var getToday = function () {
         mm = '0' + mm
     }
     return yyyy + '-' + mm + '-' + dd;
+}
+
+
+var getAlert = function (user_id) {
+    var ward_url = '/api/wards/ward_alert/';
+
+    var ward_display = function (id, fb_url, name, date, message) {
+        return '<li><a  onclick="updateWard({0},\'{1}\');getAlert({2});"><div><strong>{3}</strong><span class="pull-right text-muted"><em>{4}</em></span></div><div>{5}</div></a></li><li class="divider"></li>'.format(id, fb_url , user_id, name, date, message)
+    }
+
+    var ward_fun = function (source) {
+        $("#alert").empty();
+
+        var results = source["results"];
+        var rows = []
+        for (var i in results) {
+            var row = results[i];
+            var object = row["post"];
+            if (!object) return;
+
+            var fb_url = "https://www.facebook.com/" + object.id;
+            var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
+            message = message.length < 100 ? message : message.substring(0, 100) + "...";
+            $("#alert").append(ward_display(row["id"], fb_url, object["user"]["name"], timeSince(object["updated_time"], false), message));
+        }
+        $("#alert").append('<li><a class="text-center" href="/alert"><strong>Read All Messages</strong><i class="fa fa-angle-right"></i></a></li>');
+        ;
+    }
+
+    if (!user_id) {
+        return;
+    }
+
+    data = {
+        limit: 5,
+        user_id: user_id
+    }
+
+    getAjaxResult(ward_url, data, ward_fun);
 }

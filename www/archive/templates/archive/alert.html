@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{% block title %}Reports{% endblock %}
+{% block title %}{{ user.username }}'s wards{% endblock %}
 
 {% block css %}
 {% endblock %}
@@ -16,7 +16,7 @@
             <div class="col-lg-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="fa fa-tasks fa-fw"></i> Reports
+                        <i class="fa fa-list fa-fw"></i> Wards
                         <div class="pull-right">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-default btn-xs dropdown-toggle"
@@ -26,8 +26,8 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="reports_limit">Limit</label>
-                                        <input type="text" class="input" id="reports_limit" placeholder="Limit"
+                                        <label for="post_ward_limit">Limit</label>
+                                        <input type="text" class="input" id="post_ward_limit" placeholder="Limit"
                                                value="10" style="width: 80%; text-align: center;"/>
                                     </li>
                                 </ul>
@@ -36,15 +36,12 @@
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body jui">
-                        <table id="reports_table" class="table simple hover">
+                        <table id="post_ward_table" class="table simple hover">
                             <colgroup>
                                 <col style="width: 60px;">
                                 <col style="width: 100px;">
-                                <col style="width: 40%;">
-                                <col style="width: 10%;">
-                                <col style="width: 10%;">
-                                <col style="width: 10%;">
-                                <col style="width: 10%;">
+                                <col style="width: 60%;">
+                                <col style="width: 20%;">
                                 <col style="width: 20%;">
                             </colgroup>
                             <thead>
@@ -54,15 +51,12 @@
                                 <th style="text-align: center;"><i class="icon-report"></i> Message</th>
                                 <th style="text-align: center;"><i class="icon-like"></i> Like</th>
                                 <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                                <th style="text-align: center;"><i class="icon-document"></i> Group</th>
-                                <th style="text-align: center;"><i class="icon-was"></i> Status</th>
-                                <th style="text-align: center;"><i class="icon-gear"></i> Action</th>
                             </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
 
-                        <div id="reports_paging" class="paging" style="margin-top: 3px;">
+                        <div id="post_ward_paging" class="paging" style="margin-top: 3px;">
                             <a href="#" class="prev">Previous</a>
 
                             <div class="list"></div>
@@ -83,15 +77,12 @@
                 <td><!= message !></td>
                 <td style="text-align: center;"><!= like_count !></td>
                 <td style="text-align: center;"><!= comment_count !></td>
-                <td style="text-align: center;"><!= group !></td>
-                <td style="text-align: center;"><!= status !></td>
-                <td style="text-align: center;"><!= action !></td>
             </tr>
         </script>
 
         <script id="tpl_none" type="text/template">
             <tr>
-                <td colspan="8" class="none" align="center">Data does not exist.</td>
+                <td colspan="5" class="none" align="center">Data does not exist.</td>
             </tr>
         </script>
 
@@ -101,28 +92,32 @@
             <! } !>
         </script>
 
-        <div id="loading_reports_msg" style="display: none; font-size: 20px; color: red;">
+        <div id="loading_post_ward_msg" style="display: none; font-size: 20px; color: red;">
             NOW LOADING...
         </div>
+
     </div><!-- /.custom-page-wrapper -->
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/archive/js/report.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/js/ward.js' %}" type="text/javascript"></script>
     <script>
-        var reports_limit = 10;
-        var reports_url = "/api/reports/";
+        var post_ward_limit = 10;
+
+        var post_ward_url = "/api/wards/ward_alert/?user_id={{ user.id }}";
+
+        var user_id = '{{ user.id }}';
 
         /**
-         * Generate Reports
+         * Generate ward
          */
         jui.ready(["ui.paging", "uix.table"], function (paging, table) {
-            reports_paging = paging("#reports_paging", {
+            post_ward_paging = paging("#post_ward_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
                 event: {
                     page: function (pNo) {
-                        changeReports(reports_url, reports_table, reports_limit, loading_reports, pNo);
+                        changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, pNo);
                     }
                 },
                 tpl: {
@@ -130,8 +125,8 @@
                 }
             });
 
-            reports_table = table("#reports_table", {
-                fields: ["", "from", "message", "like_count", "comment_count", "group", "status", "action"],
+            post_ward_table = table("#post_ward_table", {
+                fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
                 scrollHeight: 2000,
                 resize: true,
@@ -157,43 +152,43 @@
          * Loading message
          */
         jui.ready(["ui.modal"], function (modal) {
-            loading_reports = modal("#loading_reports_msg", {
-                target: "#reports_table",
+            loading_post_ward = modal("#loading_post_ward_msg", {
+                target: "#post_ward_table",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
             });
-        });
+        })
 
         /**
          * Init analysis.html
          */
         $(function () {
-            changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
+            changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
 
             /**
              * Window Resize
              */
             window.onresize = function (event) {
-                reports_table.resize();
-                reLoadPaging(reports_paging);
+                post_ward_table.resize();
+                reLoadPaging(post_ward_paging);
             }
 
             /**
              * Mobile Rotate
              */
             $(window).on("orientationchange", function () {
-                changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
+                changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
             });
 
-            $("#reports_limit").on("input", function () {
-                reports_limit = $("#reports_limit").val();
-                changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
+            $("#post_ward_limit").on("input", function () {
+                post_ward_limit = $("#post_ward_limit").val();
+                changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
             });
         });
 
         function reload() {
-            changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
+            changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
         }
     </script>
 {% endblock %}
