@@ -23,6 +23,16 @@ logger = logging.getLogger(__name__)
 fb_request = FBRequest()
 
 
+def about(request):
+    """
+    About page
+
+    :param request:
+    :return:
+    """
+    return render(request, 'about.html', {})
+
+
 def groups(request):
     """
     Get a group list by HTTP GET Method and enter a group by HTTP POST METHOD
@@ -547,7 +557,7 @@ def wards(request):
     )
 
 
-# ViewSets define the view behavior.
+# ViewSets define the view behavior for restful api.
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     User View Set
@@ -1107,7 +1117,3 @@ class UserActivityViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = UserActivity.objects.all()
     serializer_class = UserActivitySerializer
-
-
-def about(request):
-    return render(request, 'about.html', {})
