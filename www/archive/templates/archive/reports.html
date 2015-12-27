@@ -134,7 +134,7 @@
             reports_table = table("#reports_table", {
                 fields: ["", "from", "message", "like_count", "comment_count", "group", "status", "action"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -184,8 +184,7 @@
              * Mobile Rotate
              */
             $(window).on("orientationchange", function () {
-                reports_table.resize();
-                reLoadPaging(reports_paging);
+                changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
             });
 
             $("#reports_limit").on("input", function () {

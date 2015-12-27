@@ -249,7 +249,7 @@
             user_archive_table = table("#user_archive_table", {
                 fields: ["", "from", "post_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -338,8 +338,7 @@
                 commentProportion.replot();
                 post_activity_table.resize();
                 comment_activity_table.resize();
-                user_archive_table.resize();
-                reLoadPaging(user_archive_paging);
+                changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
             });
 
             $("#user_archive_limit").on("input", function () {

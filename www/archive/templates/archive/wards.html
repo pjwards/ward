@@ -207,7 +207,7 @@
             post_ward_table = table("#post_ward_table", {
                 fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -242,7 +242,7 @@
             comment_ward_table = table("#comment_ward_table", {
                 fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -304,10 +304,10 @@
              * Mobile Rotate
              */
             $(window).on("orientationchange", function () {
-                post_ward_table.resize();
-                comment_ward_table.resize();
-                reLoadPaging(post_ward_paging);
-                reLoadPaging(comment_ward_paging);
+                {% if groups %}
+                    changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
+                    changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, 1, comment_ward_paging);
+                {% endif %}
             });
 
             $("#post_ward_limit").on("input", function () {

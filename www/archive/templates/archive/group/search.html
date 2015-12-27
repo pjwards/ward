@@ -261,7 +261,7 @@
             post_table = table("#post_table", {
                 fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -296,7 +296,7 @@
             comment_table = table("#comment_table", {
                 fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -331,7 +331,7 @@
             user_table = table("#user_table", {
                 fields: ["", "from", "post_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -402,12 +402,9 @@
              * Mobile Rotate
              */
             $(window).on("orientationchange", function () {
-                post_table.resize();
-                comment_table.resize();
-                user_table.resize();
-                reLoadPaging(post_paging);
-                reLoadPaging(comment_paging);
-                reLoadPaging(user_paging);
+                changeSearchPC(post_search_url, post_table, post_limit, search, loading_post, 1, post_paging);
+                changeSearchPC(comment_search_url, comment_table, comment_limit, search, loading_comment, 1, comment_paging);
+                changeUserArchive(user_search_url, group_id, user_table, user_limit, search, loading_user, 1, user_paging);
             });
 
             $("#post_limit").on("input", function () {

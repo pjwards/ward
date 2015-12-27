@@ -222,7 +222,7 @@
             post_archive_table = table("#post_archive_table", {
                 fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -257,7 +257,7 @@
             comment_archive_table = table("#comment_archive_table", {
                 fields: ["", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -348,10 +348,8 @@
              * Mobile Rotate
              */
             $(window).on("orientationchange", function () {
-                post_archive_table.resize();
-                comment_archive_table.resize();
-                reLoadPaging(post_archive_paging);
-                reLoadPaging(comment_archive_paging);
+                changeArchiveByUser(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), user_id, loading_post_archive, 1, post_archive_paging);
+                changeArchiveByUser(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), user_id, loading_comment_archive, 1, comment_archive_paging);
             });
 
             $("#post_archive_limit").on("input", function () {

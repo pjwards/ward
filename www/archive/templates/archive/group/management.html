@@ -506,7 +506,7 @@
             post_table = table("#post_table", {
                 fields: ["", "", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 800,
+                scrollHeight: 2500,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -541,7 +541,7 @@
             comment_table = table("#comment_table", {
                 fields: ["", "", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 800,
+                scrollHeight: 2500,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -576,7 +576,7 @@
             user_table = table("#user_table", {
                 fields: ["", "from", "post_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -611,7 +611,7 @@
             blacklist_table = table("#blacklist_table", {
                 fields: ["", "from", "count", "post_count", "comment_count", "updated_time"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -646,7 +646,7 @@
             user_search_helper_table = table("#user_search_helper_table", {
                 fields: ["", "from"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 event: {
                     sort: function (column, e) {
@@ -778,14 +778,10 @@
              * Mobile Rotate
              */
             $(window).on("orientationchange", function () {
-                post_table.resize();
-                comment_table.resize();
-                user_table.resize();
-                blacklist_table.resize();
-                reLoadPaging(post_paging);
-                reLoadPaging(comment_paging);
-                reLoadPaging(user_paging);
-                reLoadPaging(blacklist_paging);
+                changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
+                changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
+                changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
+                changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
             });
 
             $("#post_limit").on("input", function () {

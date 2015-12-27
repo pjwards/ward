@@ -173,7 +173,7 @@
             groups_table = table("#groups_table", {
                 fields: ["", "name", "updated_time", "post_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 500,
+                scrollHeight: 2000,
                 resize: true,
                 expand: true,
                 animate: true,
@@ -223,8 +223,7 @@
              * Mobile Rotate
              */
             $(window).on("orientationchange", function () {
-                groups_table.resize();
-                reLoadPaging(groups_paging);
+                changeGroupsAdmin(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, 1, groups_paging);
             });
 
             $("#groups_limit").on("input", function () {
