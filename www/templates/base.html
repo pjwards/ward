@@ -125,6 +125,36 @@
 {% block content %}
 {% endblock %}
 
+<!-- Modal -->
+<div class="modal fade" id="save_img" tabindex="-1" role="dialog" aria-labelledby="save_img_label"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="save_img_label">Save as image</h4>
+            </div>
+            <div class="modal-body">
+                <div style="overflow: auto; text-align: center;" id="img-out"></div>
+                <br>
+                <div style="color: red;">
+                    <h4 style="text-align: center;">Caution</h4>
+                    <ol>
+                        <li>If you use safari browser, download does not work well. Please use 'save image as..' with 'right mouse button'.</li>
+                        <li>This image is affected by original chart size. If you want to get large size image, please resize your browser and download again.</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" id="download_img_btn" target="_blank">DOWNLOAD ME!</a>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
 <script id="tpl_alarm" type="text/template">
     <div class="jui">
         <div class="notify <!= color !>">
@@ -156,16 +186,11 @@
 <!-- Metis Menu Plugin JavaScript -->
 <script src="{% static 'metisMenu/dist/metisMenu.min.js' %}"></script>
 
-<!-- Morris Charts JavaScript -->
-<script src="{% static 'raphael/raphael-min.js' %}"></script>
-<script src="{% static 'morrisjs/morris.min.js' %}"></script>
-
 <!-- Custom Theme JavaScript -->
 <script src="{% static 'startbootstrap-sb-admin-2/dist/js/sb-admin-2.js' %}"></script>
 
-<!-- DataTables JavaScript -->
-<script src="{% static 'datatables/media/js/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
+<!-- html2canvas Javascript -->
+<script src="{% static 'html2canvas/build/html2canvas.min.js' %}" type="text/javascript"></script>
 
 <!-- Analytics -->
 <script>

@@ -39,6 +39,7 @@
 * Start Bootstrap Creative ([Start Bootstrap](http://www.startbootstrap.com))
 * Start Bootstrap SB Admin 2 ([Start Bootstrap](http://www.startbootstrap.com))
 * Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/))
+* html2canvas
 
 
 ## Installation

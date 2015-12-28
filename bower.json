@@ -27,7 +27,8 @@
     "jquery.easing": ">= 1.3.1",
     "animate.css": ">= 3.4.0",
     "FitText.js": ">= 1.2.0",
-    "jquery-backstretch": ">= 2.0.4"
+    "jquery-backstretch": ">= 2.0.4",
+    "html2canvas": ">= 0.4.1"
   },
   "devDependencies": {
   },

@@ -226,11 +226,16 @@ var getToday = function () {
 }
 
 
+/**
+ * Get Alert
+ *
+ * @param user_id
+ */
 var getAlert = function (user_id) {
     var ward_url = '/api/wards/ward_alert/';
 
     var ward_display = function (id, fb_url, name, date, message) {
-        return '<li><a  onclick="updateWard({0},\'{1}\');getAlert({2});"><div><strong>{3}</strong><span class="pull-right text-muted"><em>{4}</em></span></div><div>{5}</div></a></li><li class="divider"></li>'.format(id, fb_url , user_id, name, date, message)
+        return '<li><a  onclick="updateWard({0},\'{1}\');getAlert({2});"><div><strong>{3}</strong><span class="pull-right text-muted"><em>{4}</em></span></div><div>{5}</div></a></li><li class="divider"></li>'.format(id, fb_url, user_id, name, date, message)
     }
 
     var ward_fun = function (source) {
@@ -262,4 +267,28 @@ var getAlert = function (user_id) {
     }
 
     getAjaxResult(ward_url, data, ward_fun);
+}
+
+
+/**
+ * Save as image with canvas
+ *
+ * @param id
+ * @param filename
+ */
+var saveAsImage = function (id, filename) {
+    html2canvas($("#" + id), {
+        onrendered: function (canvas) {
+            theCanvas = canvas;
+            document.body.appendChild(canvas);
+
+            // Convert and download as image
+            $("#download_img_btn").attr("href", canvas.toDataURL("image/png"));
+            $("#download_img_btn").attr("download", filename + ".png");
+            $("#img-out").empty();
+            $("#img-out").append(canvas);
+            // Clean up
+            //document.body.removeChild(canvas);
+        }
+    });
 }
