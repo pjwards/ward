@@ -1131,7 +1131,8 @@ class WardViewSet(viewsets.ReadOnlyModelViewSet):
         user_id = self.request.query_params.get('user_id', None)
         _user = get_object_or_404(User, pk=user_id)
 
-        _wards = Ward.objects.all().filter(user=_user).filter(Q(updated_time__lte=F('post__updated_time')))
+        _wards = Ward.objects.all().filter(user=_user).filter(Q(updated_time__lte=F('post__updated_time')))\
+            .order_by('-post__updated_time')
         page = self.paginate_queryset(_wards)
         if page is not None:
             serializers = WardSerializer(page, many=True, context={'request': request})
