@@ -13,6 +13,7 @@
     <!-- Fonts -->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <link href="{% static 'font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'font-awesome-animation/dist/font-awesome-animation.min.css' %}" rel="stylesheet" type="text/css">
 
     <!-- jQuery Theme -->
     <link rel="stylesheet" href="{% static 'jquery-ui/themes/smoothness/jquery-ui.min.css' %}"/>
@@ -77,8 +78,8 @@
             </li>
             {% if user.is_authenticated %}
                 <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="fa fa-bell fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    <a id="alert_icon" class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i id="alert_icon_bell" class="fa fa-bell fa-fw"></i> <i class="fa fa-caret-down"></i>
                     </a>
                     <ul id="alert" class="dropdown-menu dropdown-messages">
                     </ul>
@@ -137,11 +138,16 @@
             <div class="modal-body">
                 <div style="overflow: auto; text-align: center;" id="img-out"></div>
                 <br>
+
                 <div style="color: red;">
                     <h4 style="text-align: center;">Caution</h4>
                     <ol>
-                        <li>If you use safari browser, download does not work well. Please use 'save image as..' with 'right mouse button'.</li>
-                        <li>This image is affected by original chart size. If you want to get large size image, please resize your browser and download again.</li>
+                        <li>If you use safari browser, download does not work well. Please use 'save image as..' with
+                            'right mouse button'.
+                        </li>
+                        <li>This image is affected by original chart size. If you want to get large size image, please
+                            resize your browser and download again.
+                        </li>
                     </ol>
                 </div>
             </div>

@@ -242,7 +242,6 @@ var getAlert = function (user_id) {
         $("#alert").empty();
 
         var results = source["results"];
-        var rows = []
         for (var i in results) {
             var row = results[i];
             var object = row["post"];
@@ -253,6 +252,18 @@ var getAlert = function (user_id) {
             message = message.length < 100 ? message : message.substring(0, 100) + "...";
             $("#alert").append(ward_display(row["id"], fb_url, object["user"]["name"], timeSince(object["updated_time"], false), message));
         }
+
+        /**
+         * Ring Animate
+         */
+        if (results.length > 0) {
+            $("#alert_icon").css("color", "#ff1493");
+            $("#alert_icon_bell").addClass("faa-ring animated");
+        } else {
+            $("#alert_icon").css("color", "");
+            $("#alert_icon_bell").removeClass("faa-ring animated");
+        }
+
         $("#alert").append('<li><a class="text-center" href="/alert"><strong>Read All Messages</strong><i class="fa fa-angle-right"></i></a></li>');
         ;
     }

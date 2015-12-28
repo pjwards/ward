@@ -35,6 +35,7 @@
 * jQuery
 * jQuery UI
 * Font Awesome
+* Font Awesome Animation
 * JUI
 * Start Bootstrap Creative ([Start Bootstrap](http://www.startbootstrap.com))
 * Start Bootstrap SB Admin 2 ([Start Bootstrap](http://www.startbootstrap.com))
