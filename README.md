@@ -1,8 +1,18 @@
 [![Stories in Ready](https://badge.waffle.io/egaoneko/ward.png?label=ready&title=Ready)](https://waffle.io/egaoneko/ward)
 
 # [Ward](http://pjwards.com)
+Ward는 Facebook의 Group에 대한 정보 및 분석을 제공하는 사이트입니다.
 
-## Requirements
+개발과 관련된 Facebook Group의 게시글들을 보다보면, 특정 게시글에 대하여 달려질 댓글들에 대한 알림을 받기 위해 “와드를 박습니다.”라는
+댓글을 작성하거나 좋아요를 누르는 것을 볼 수 있었습니다. 이런 현상을 보며, Facebook Group의 타임라인 저편으로 사라져 찾아보기 힘든
+많은 좋아요나 댓글이 달린 글들을 모아 보고 싶다는 생각을 기반으로 만들어진 사이트입니다.
+
+이를 위해 Facebook Graph API를 이용하여 그룹에 대한 데이터를 수집하여 저장하고, 이에 대한 다양한 정보를 보여주는 기능과
+관심있는 게시글이나 댓글들을 저장하여 간편하게 확인할 수 있는 기능을 제공합니다.
+또한 그룹 관리자들이 Facebook Group에 올라오는 스팸들을 지우기 위해 많은 시간을 들이고 있는데, 게시글에 대한 일괄 삭제 기능을 제공하고 있으며,
+추후 게시글을 분석하여 스팸에 대한 알림 등의 추가 기능을 구현할 예정입니다.
+
+## 필요한 도구들
 
 #### Back-End
 
@@ -41,25 +51,29 @@
 * Start Bootstrap SB Admin 2 ([Start Bootstrap](http://www.startbootstrap.com))
 * Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/))
 * html2canvas
-* jqplot
+* jqPlot
 
 
-## Installation
+#### Database
 
-#### How to install?
+* PostgreSQL
 
-##### Docker
 
-Ward uses Docker, so you can easy to install by using Docker.
-If you learn more about Docker, [this site](https://docs.docker.com) helps you.
+## 설치방법
+
+##### Docker의 경우
+
+와드는 Docker를 사용하고 있으며, 이를 이용하여 손쉽게 설치할 수 있습니다.
+Docker를 더 자세히 알고 싶으시면, 이 [사이트](https://docs.docker.com)를 방문해 주세요.
 
 ```bash
+cd [product_forder]
 docker build -t=ward .
 docker run --name ward -it -p 80:80 -v /var/log/ward:/var/log ward:latest
 ```
 
 
-##### Mac
+##### Mac의 경우
 
 ```bash
 pip install -r requirements.txt
@@ -67,9 +81,9 @@ brew install redis
 brew install node
 npm install bower
 
-cd product_forder
+cd [product_forder]
 bower install
-cd product_folder/www
+cd [product_forder]/www
 mkdir logs
 python manage.py migrate
 python manage.py createsuperuser
@@ -79,7 +93,7 @@ sudo redis-server
 ```
 
 
-##### Ubuntu
+##### Ubuntu의 경우
 
 ```bash
 # JPype1-py3
@@ -113,52 +127,45 @@ sudo apt-get install redis-server
 cd workspace
 sudo chown www-data:www-data -R *
 
-cd product_forder
+cd [product_forder]
 bower install
-cd product_folder/www
+cd [product_forder]/www
 mkdir logs
 python manage.py migrate
 python manage.py createsuperuser
 
 ```
 
-
-#### setting.py
-
-You must set your own `local_settings.py` in `ward/wwww/fb_archive`.
+## 환경설정
 
 
-#### OAuth Setting
+#### setting.py 설정
 
-Go to admin sites and add social application.
-You need app id, app secret for facebook oauth.
-If you learn more, [this site](https://godjango.com/65-starting-with-django-allauth/) helps you.
+반드시 `ward/wwww/fb_archive`안에 있는 `local_settings.py`파일을 자신의 환경에 맞추어 설정해 주세요.
 
 
-#### MeCab
+#### OAuth Setting 설정
 
-##### Ubuntu
+1. admin 페이지([http://localhost/admin](http://localhost/admin))에 있는 `Social application`카테고리에 들어갑니다.
+2. `Add social application`를 클릭하고 `Name`에 facebook을, `Client id`에 app id를, `Secret key`에 app secret을 입력해주시면 됩니다.
+더 자세한 사항은 이 [사이트](https://godjango.com/65-starting-with-django-allauth/)를 방문해 주세요
 
-```bash
-sudo yum install curl
-bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
-```
 
-##### Mac
-
-```bash
-bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
-```
-
-## Tip
+## 기타설정
 
 ### Pycharm
 
-If you face unresolved reference issue in pycharm, you should make 'www' Source root. And you set 'add source roots to PYTHONPATH' in pycharm preference.
+만약 Pycharm을 사용하시는 도중 `unresolved reference issue`가 발생하면 아래와 같은 방법으로 설정 해주세요.
 
-[This site](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm) helps you to set.
+1. `www`폴더를 오른쪽 클릭하여, `Mark Directory As`에 있는 `Source root`를 설정 해주세요.
+2. Pycharm의 `Preferences...`에 `Build, Execution, Deployment` > `Console` > `Python Console`에 있는
+`add source roots to PYTHONPATH`에 체크해 주세요.
+3. 상단의 내용이 이해가 안가실경우 이 [사이트](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm)를 방문해 주세요.
+4. `Preferences...` > `Languages & Frameworks` > `Django`에 가셔서 `Django project root`를 상단의 첫번째 설정하셨던 `www`폴더로 설정해주시고
+`Settings`를 `fb_archive/settings.py`로, `Manage script`를 `manage.py`로 설정해주세요
 
-And set 'Django Support' in pycharm preference, such as 'Django project root', 'Settings' and 'manage.py'.
 
+## 라이센스
+[MIT 라이센스](../LICENSE)하에 배포 됩니다.
 
 
