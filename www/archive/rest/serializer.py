@@ -1,13 +1,12 @@
 from archive.models import *
 from rest_framework import serializers
 
-__author__ = "Donghyun Seo"
-__copyright__ = "Copyright ⓒ 2015, All rights reserved."
-__email__ = "egaoneko@naver.com"
-
 
 # Serializers define the API representation.
 class FBUserSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for facebook user
+    """
     id = serializers.ReadOnlyField()
     # comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
     # posts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='post-detail')
@@ -19,6 +18,9 @@ class FBUserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for facebook group
+    """
     id = serializers.ReadOnlyField()
     owner = FBUserSerializer(read_only=True)
 
@@ -29,6 +31,9 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MediaSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for facebook media
+    """
     class Meta:
         model = Media
         fields = '__all__'
@@ -36,6 +41,9 @@ class MediaSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for facebook attachment
+    """
     class Meta:
         model = Attachment
         # fields = '__all__'
@@ -45,6 +53,9 @@ class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for facebook comment
+    """
     id = serializers.ReadOnlyField()
     # comments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
     user = FBUserSerializer(read_only=True)
@@ -57,11 +68,14 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serialiser for facebook post
+    """
     id = serializers.ReadOnlyField()
     # attachments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='attachment-detail')
     # comments = serializers.HyperlinkedIdentityField(many=True, read_only=True, view_name='comment-detail')
-    # comments = CommentSerializer(many=True, read_only=True)
     # attachments = AttachmentSerializer(many=True, read_only=True)
+    # comments = CommentSerializer(many=True, read_only=True)
     user = FBUserSerializer(read_only=True)
 
     class Meta:
@@ -72,7 +86,9 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BlacklistSerializer(serializers.HyperlinkedModelSerializer):
-
+    """
+    Serializer for blacklist
+    """
     class Meta:
         model = Blacklist
         fields = '__all__'
@@ -80,12 +96,14 @@ class BlacklistSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ReportSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for report
+    """
     id = serializers.ReadOnlyField()
     user = FBUserSerializer(read_only=True)
     group = GroupSerializer(required=True)
     post = PostSerializer(required=True)
     comment = CommentSerializer(required=True)
-
     class Meta:
         model = Report
         fields = '__all__'
@@ -94,10 +112,16 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BlacklistFBUserSerializer(FBUserSerializer):
+    """
+    Serializer for blacklist facebook user inherited Facebook User Serializer
+    """
     blacklist = BlacklistSerializer(many=True, read_only=True)
 
 
 class WardSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for ward
+    """
     id = serializers.ReadOnlyField()
     post = PostSerializer(required=True)
     comment = CommentSerializer(required=True)
@@ -111,6 +135,9 @@ class WardSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserActivitySerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for user activity
+    """
     user = FBUserSerializer(read_only=True)
 
     class Meta:

@@ -1,8 +1,4 @@
 /**
- * Created by donghyun on 12/24/15.
- */
-
-/**
  * Get active by using ajax
  *
  * @param url

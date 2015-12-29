@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import connection
 import logging
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Max, Q, F
+from django.db.models import Count, Q, F
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
@@ -11,7 +11,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from archive.fb.fb_query import get_feed_query, get_comment_query
+from archive.fb.fb_query import get_feed_query
 from archive.fb.fb_request import FBRequest
 from archive.fb.fb_lookup import lookup_id
 from allauth.socialaccount.models import SocialAccount
@@ -89,7 +89,7 @@ def groups_admin(request):
 
 def group_analysis(request, group_id):
     """
-    Display a group analysis page by HTTP GET METHOD
+    Display a group analysis page
 
     :param request: request
     :param group_id: group id
@@ -112,7 +112,7 @@ def group_analysis(request, group_id):
 
 def group_user(request, group_id):
     """
-    Display a group user page by HTTP GET METHOD
+    Display a group user page
 
     :param request: request
     :param group_id: group id
@@ -135,7 +135,7 @@ def group_user(request, group_id):
 
 def group_search(request, group_id):
     """
-    Search from group
+    Display a search page about group
 
     :param request: request
     :param group_id: group_id
@@ -162,7 +162,7 @@ def group_search(request, group_id):
 @login_required
 def group_management(request, group_id):
     """
-    Manage group
+    Display manage page for group owner
 
     :param request: request
     :param group_id: group_id
@@ -250,7 +250,7 @@ def group_management(request, group_id):
 @user_passes_test(lambda u: u.is_superuser)
 def group_store(request, group_id):
     """
-    Store group method
+    Store group method for super user
 
     :param request: request
     :param group_id: group id
@@ -286,7 +286,7 @@ def group_update(request, group_id):
 @user_passes_test(lambda u: u.is_superuser)
 def group_check(request, group_id):
     """
-    Check group method
+    Check group method for super user
 
     :param request: request
     :param group_id: group id
@@ -308,7 +308,7 @@ def group_check(request, group_id):
 @user_passes_test(lambda u: u.is_superuser)
 def group_comments_check(request, group_id):
     """
-    Check group comments
+    Check group comments for super user
 
     :param request: request
     :param group_id: group id
@@ -326,7 +326,7 @@ def group_comments_check(request, group_id):
 
 def user(request, user_id):
     """
-    Display a user
+    Display a user page
 
     :param request: request
     :param user_id: user id
@@ -347,7 +347,7 @@ def user(request, user_id):
 
 def report(request, object_id):
     """
-    Report object
+    Enroll a report about a spam
 
     :param request: request
     :param object_id: object id
@@ -392,7 +392,7 @@ def report(request, object_id):
 @user_passes_test(lambda u: u.is_superuser)
 def report_action(request, report_id, action):
     """
-    Report action
+    Report action like hide, show, checked and delete for super user
 
     :param request: request
     :param report_id: report id
@@ -452,7 +452,7 @@ def report_action(request, report_id, action):
 @user_passes_test(lambda u: u.is_superuser)
 def reports(request):
     """
-    Display reports
+    Display report page
 
     :param request: request
     :return: render
@@ -464,7 +464,7 @@ def reports(request):
 @login_required()
 def ward(request, object_id):
     """
-    Report object
+    Enroll ward which is a post or comment saved by user for wathching
 
     :param request: request
     :param object_id: object id
@@ -524,7 +524,7 @@ def ward(request, object_id):
 @login_required()
 def ward_update(request, ward_id):
     """
-    Update Ward
+    Update ward status
 
     :param request: request
     :param ward_id: ward id
@@ -540,7 +540,7 @@ def ward_update(request, ward_id):
 @login_required()
 def wards(request):
     """
-    Display wards
+    Display ward page
 
     :param request: request
     :return: render
@@ -560,7 +560,7 @@ def wards(request):
 @login_required()
 def alert(request):
     """
-    Display alert
+    Display alert page
 
     :param request: request
     :return: render
@@ -576,7 +576,7 @@ def alert(request):
 # ViewSets define the view behavior for restful api.
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    User View Set
+    User View Set for django restful framework
     """
     queryset = FBUser.objects.all()
     serializer_class = FBUserSerializer
@@ -584,7 +584,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Group View Set
+    Group View Set for django restful framework
     """
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
@@ -1073,7 +1073,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Post View Set
+    Post View Set for django restful framework
     """
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -1081,7 +1081,7 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
 
 class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Comment View Set
+    Comment View Set for django restful framework
     """
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -1089,7 +1089,7 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
 
 class MediaViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Media View Set
+    Media View Set for django restful framework
     """
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
@@ -1097,7 +1097,7 @@ class MediaViewSet(viewsets.ReadOnlyModelViewSet):
 
 class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Attachment View Set
+    Attachment View Set for django restful framework
     """
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
@@ -1105,7 +1105,7 @@ class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
 
 class BlacklistViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Blacklist View Set
+    Blacklist View Set for django restful framework
     """
     queryset = Blacklist.objects.all()
     serializer_class = BlacklistSerializer
@@ -1113,7 +1113,7 @@ class BlacklistViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ReportViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Report View Set
+    Report View Set for django restful framework
     """
     queryset = Report.objects.all().exclude(status='checked').order_by('-updated_time')
     serializer_class = ReportSerializer
@@ -1121,7 +1121,7 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
 
 class WardViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Ward View Set
+    Ward View Set for django restful framework
     """
     queryset = Ward.objects.all().order_by('-created_time')
     serializer_class = WardSerializer
@@ -1131,7 +1131,7 @@ class WardViewSet(viewsets.ReadOnlyModelViewSet):
         user_id = self.request.query_params.get('user_id', None)
         _user = get_object_or_404(User, pk=user_id)
 
-        _wards = Ward.objects.all().filter(user=_user).filter(Q(updated_time__lte=F('post__updated_time')))\
+        _wards = Ward.objects.all().filter(user=_user).filter(Q(updated_time__lte=F('post__updated_time'))) \
             .order_by('-post__updated_time')
         page = self.paginate_queryset(_wards)
         if page is not None:
@@ -1144,7 +1144,38 @@ class WardViewSet(viewsets.ReadOnlyModelViewSet):
 
 class UserActivityViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Ward View Set
+    Ward View Set for django restful framework
     """
     queryset = UserActivity.objects.all()
     serializer_class = UserActivitySerializer
+
+
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+
+
+# Error page
+def handler404(request):
+    """
+    Return 404 error response
+
+    :param request: request
+    :return:
+    """
+    response = render_to_response('errors/404.html', {},
+                                  context_instance=RequestContext(request))
+    response.status_code = 404
+    return response
+
+
+def handler500(request):
+    """
+    Return 500 error response
+
+    :param request: request
+    :return:
+    """
+    response = render_to_response('errors/500.html', {},
+                                  context_instance=RequestContext(request))
+    response.status_code = 500
+    return response

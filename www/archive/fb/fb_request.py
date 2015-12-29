@@ -3,9 +3,6 @@ from django.conf import settings
 from urllib.parse import urlparse, unquote
 import logging
 
-__author__ = "Donghyun Seo"
-__copyright__ = "Copyright ⓒ 2015, All rights reserved."
-__email__ = "egaoneko@naver.com"
 
 logger = logging.getLogger(__name__)
 

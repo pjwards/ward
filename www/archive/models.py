@@ -3,10 +3,6 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from mezzanine.core.managers import SearchableManager
 
-__author__ = "Donghyun Seo"
-__copyright__ = "Copyright ⓒ 2015, All rights reserved."
-__email__ = "egaoneko@naver.com"
-
 
 def get_different_time(time):
     """
@@ -33,6 +29,9 @@ def get_different_time(time):
 
 
 class Group(models.Model):
+    """
+    Facebook Group model
+    """
     id = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
@@ -43,6 +42,7 @@ class Group(models.Model):
     comment_count = models.IntegerField(default=0)
     owner = models.ForeignKey('FBUser', null=True, related_name='group_owner')
 
+    # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
     search_fields = ("name",)
 
@@ -68,11 +68,15 @@ class Group(models.Model):
 
 
 class FBUser(models.Model):
+    """
+    Facebook User model
+    """
     id = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=50)
     picture = models.CharField(max_length=2083, null=True, blank=True)
     groups = models.ManyToManyField(Group)
 
+    # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
     search_fields = ("name",)
 
@@ -81,6 +85,9 @@ class FBUser(models.Model):
 
 
 class Post(models.Model):
+    """
+    Facebook Post model
+    """
     id = models.CharField(max_length=50, primary_key=True)
     user = models.ForeignKey(FBUser, related_name='posts')
     created_time = models.DateTimeField()
@@ -93,6 +100,7 @@ class Post(models.Model):
     group = models.ForeignKey(Group, related_name='posts')
     is_show = models.BooleanField(default=True)
 
+    # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
     search_fields = ("message",)
 
@@ -126,6 +134,9 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    """
+    Facebook Comment model
+    """
     id = models.CharField(max_length=20, primary_key=True)
     user = models.ForeignKey(FBUser, related_name='comments')
     created_time = models.DateTimeField()
@@ -137,6 +148,7 @@ class Comment(models.Model):
     group = models.ForeignKey(Group, related_name='comments')
     is_show = models.BooleanField(default=True)
 
+    # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
     search_fields = ("message",)
 
@@ -153,18 +165,25 @@ class Comment(models.Model):
 
 
 class Media(models.Model):
+    """
+    Facebook Media model that is part of Attachment
+    """
     height = models.IntegerField(null=True)
     width = models.IntegerField(null=True)
     src = models.CharField(max_length=2083, null=True, blank=True)
 
 
 class Attachment(models.Model):
+    """
+    Facebook Attachment model that is part of Post and Comment
+    """
     post = models.ForeignKey(Post, null=True, related_name='attachments')
     comment = models.ForeignKey(Comment, null=True, related_name='attachments')
     url = models.CharField(max_length=2083, null=True, blank=True)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=30, null=True, blank=True)
+
     # photo, share, unavailable, album(sub), video_autoplay, multi_share(sub), video_share_youtube, note
     media = models.ForeignKey(Media, null=True, related_name='media')
 
@@ -173,6 +192,9 @@ class Attachment(models.Model):
 
 
 class Blacklist(models.Model):
+    """
+    Blacklist model for facebook user who wrote spams
+    """
     group = models.ForeignKey(Group, related_name='blacklist')
     user = models.ForeignKey(FBUser, related_name='blacklist')
     count = models.IntegerField(default=0)
@@ -180,6 +202,9 @@ class Blacklist(models.Model):
 
 
 class Report(models.Model):
+    """
+    Report model about spams
+    """
     post = models.ForeignKey(Post, null=True, related_name='reports')
     comment = models.ForeignKey(Comment, null=True, related_name='reports')
     group = models.ForeignKey(Group, related_name='reports')
@@ -189,6 +214,9 @@ class Report(models.Model):
 
 
 class DeletedPost(models.Model):
+    """
+    Deleted Post model for post deleted by group owner or super user
+    """
     id = models.CharField(max_length=50, primary_key=True)
     user = models.ForeignKey(FBUser, related_name='delete_posts')
     created_time = models.DateTimeField()
@@ -200,6 +228,7 @@ class DeletedPost(models.Model):
     share_count = models.IntegerField(default=0)
     group = models.ForeignKey(Group, related_name='delete_posts')
 
+    # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
     search_fields = ("message",)
 
@@ -239,6 +268,9 @@ class DeletedPost(models.Model):
 
 
 class DeletedComment(models.Model):
+    """
+    Deleted Comment model for comment deleted by group owner or super user
+    """
     id = models.CharField(max_length=20, primary_key=True)
     user = models.ForeignKey(FBUser, related_name='delete_comments')
     created_time = models.DateTimeField()
@@ -249,6 +281,7 @@ class DeletedComment(models.Model):
     parent = models.CharField(max_length=20, null=True)
     group = models.ForeignKey(Group, related_name='delete_comments')
 
+    # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
     search_fields = ("message",)
 
@@ -275,6 +308,9 @@ class DeletedComment(models.Model):
 
 
 class Ward(models.Model):
+    """
+    Ward model for ward that is a post or comment saved by user for watching
+    """
     user = models.ForeignKey(User, related_name='wards')
     group = models.ForeignKey(Group, related_name='wards')
     post = models.ForeignKey(Post, null=True, related_name='wards')
@@ -293,6 +329,9 @@ class Ward(models.Model):
 
 
 class UserActivity(models.Model):
+    """
+    Table about user activity for performance
+    """
     user = models.ForeignKey(FBUser, related_name='user_activities')
     group = models.ForeignKey(Group, related_name='user_activities')
     post_count = models.IntegerField(default=0)
@@ -300,6 +339,13 @@ class UserActivity(models.Model):
 
     @classmethod
     def add_post_count(cls, user, group):
+        """
+        Add post count
+
+        :param user: user
+        :param group: group
+        :return:
+        """
         if not UserActivity.objects.filter(user=user, group=group).exists():
             user_activity = UserActivity(user=user, group=group, post_count=1)
             user_activity.save()
@@ -310,6 +356,13 @@ class UserActivity(models.Model):
 
     @classmethod
     def add_comment_count(cls, user, group):
+        """
+        Add comment count
+
+        :param user: user
+        :param group: group
+        :return:
+        """
         if not UserActivity.objects.filter(user=user, group=group).exists():
             user_activity = UserActivity(user=user, group=group, comment_count=1)
             user_activity.save()
@@ -320,6 +373,13 @@ class UserActivity(models.Model):
 
     @classmethod
     def sub_post_count(cls, user, group):
+        """
+        Subtract post count
+
+        :param user: user
+        :param group: group
+        :return:
+        """
         if not UserActivity.objects.filter(user=user, group=group).exists():
             user_activity = UserActivity(user=user, group=group)
             user_activity.save()
@@ -333,6 +393,13 @@ class UserActivity(models.Model):
 
     @classmethod
     def sub_comment_count(cls, user, group):
+        """
+        Subtract comment count
+
+        :param user: user
+        :param group: group
+        :return:
+        """
         if not UserActivity.objects.filter(user=user, group=group).exists():
             user_activity = UserActivity(user=user, group=group)
             user_activity.save()

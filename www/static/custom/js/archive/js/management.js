@@ -1,8 +1,4 @@
 /**
- * Created by donghyun on 12/25/15.
- */
-
-/**
  * Post and comment Display for management
  *
  * @param rows

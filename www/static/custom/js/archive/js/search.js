@@ -1,8 +1,4 @@
 /**
- * Created by donghyun on 12/25/15.
- */
-
-/**
  * Get search post and comment by using ajax
  *
  * @param url

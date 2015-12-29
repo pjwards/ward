@@ -5,9 +5,6 @@ import os
 from celery import Celery
 from django.conf import settings
 
-__author__ = "Donghyun Seo"
-__copyright__ = "Copyright ⓒ $YEAR, All rights reserved."
-__email__ = "egaoneko@naver.com"
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fb_archive.settings')

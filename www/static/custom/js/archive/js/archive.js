@@ -1,7 +1,3 @@
-/**
- * Created by donghyun on 11/14/15.
- */
-
 $(function () {
     $("#sidebar_select_group").change(function () {
         location.href = $("#sidebar_select_group option:selected").val();

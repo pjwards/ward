@@ -1,8 +1,3 @@
-__author__ = "Donghyun Seo"
-__copyright__ = "Copyright ⓒ 2015, All rights reserved."
-__email__ = "egaoneko@naver.com"
-
-
 FEED_QUERY = '?fields=feed.limit(%d){' \
              'message,' \
              'from,' \

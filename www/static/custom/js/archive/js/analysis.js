@@ -1,8 +1,4 @@
 /**
- * Created by donghyun on 12/22/15.
- */
-
-/**
  * Generate Statistics
  *
  * @param url

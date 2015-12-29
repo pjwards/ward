@@ -1,8 +1,4 @@
 /**
- * Created by donghyun on 12/26/15.
- */
-
-/**
  * Get groups by using ajax
  *
  * @param url

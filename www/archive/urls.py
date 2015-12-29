@@ -3,9 +3,6 @@ from django.views.generic import RedirectView
 
 from . import views
 
-__author__ = "Donghyun Seo"
-__copyright__ = "Copyright ⓒ 2015, All rights reserved."
-__email__ = "egaoneko@naver.com"
 
 urlpatterns = [
     url(r'^groups/$', views.groups, name='groups'),
