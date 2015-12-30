@@ -16,47 +16,46 @@ Ward는 Facebook의 Group에 대한 정보 및 분석을 제공하는 사이트�
 
 #### Back-End
 
-* python >= 3.5 (tested with version 3.5)
-* django >= 1.8.5 (tested with version 1.8.5)
-* celery (tested with version 3.1.18)
-* django-celery (tested with version 3.1.17)
-* facebook-sdk (tested with version 1.0.0a0)
-* mezzanine (tested with version 4.0.1)
-* django-rest-framework (tested with version 3.3.0)
-* markdown (tested with version 2.6.3)
-* django-filter (tested with version 0.11.0)
-* beautifulsoup4 (tested with version 4.4.1)
-* lxml (tested with version 3.5.0)
-* django-registration (tested with version 2.0.2)
-* JPype1-py3 (tested with version 0.5.5.2)
-* konlpy (tested with version 0.4.4)
-* django-allauth (tested with version 0.24.1)
-* redis (tested with version 2.10.3)
-* uwsgi (tested with version 2.0.11.2)
-* pylibmc (tested with version 1.5.0)
-* psycopg2 (tested with version 2.6.1)
-* MeCab
+* python >= 3.5 (tested with version 3.5) ([python](https://www.python.org))
+* django >= 1.8.5 (tested with version 1.8.5) ([django](https://www.djangoproject.com))
+* celery (tested with version 3.1.18) ([celery](http://www.celeryproject.org))
+* django-celery (tested with version 3.1.17) ([django-celery](https://pypi.python.org/pypi/django-celery))
+* facebook-sdk (tested with version 1.0.0a0) ([facebook-sdk](https://github.com/pythonforfacebook/facebook-sdk))
+* mezzanine (tested with version 4.0.1) ([mezzanine](http://mezzanine.jupo.org))
+* django-rest-framework (tested with version 3.3.0) ([django-rest-framework](http://www.django-rest-framework.org))
+* markdown (tested with version 2.6.3) ([markdown](https://pypi.python.org/pypi/Markdown))
+* django-filter (tested with version 0.11.0) ([django-filter](https://github.com/alex/django-filter))
+* beautifulsoup4 (tested with version 4.4.1) ([beautifulsoup4](http://www.crummy.com/software/BeautifulSoup/))
+* lxml (tested with version 3.5.0) ([lxml](http://lxml.de))
+* django-registration (tested with version 2.0.2) ([django-registration](https://github.com/macropin/django-registration))
+* JPype1-py3 (tested with version 0.5.5.2) ([JPype1-py3](https://pypi.python.org/pypi/JPype1-py3))
+* konlpy (tested with version 0.4.4) ([konlpy](http://konlpy.org/ko/v0.4.3/))
+* django-allauth (tested with version 0.24.1) ([django-allauth](https://github.com/pennersr/django-allauth))
+* redis (tested with version 2.10.3) ([redis](http://redis.io))
+* uwsgi (tested with version 2.0.11.2) ([uwsgi](https://github.com/unbit/uwsgi))
+* pylibmc (tested with version 1.5.0) ([pylibmc](https://pypi.python.org/pypi/pylibmc))
+* psycopg2 (tested with version 2.6.1) ([psycopg2](http://initd.org/psycopg/))
 
 
 #### Front-End
 
-* Bootstrap
-* Bootstrap Social
-* jQuery
-* jQuery UI
-* Font Awesome
-* Font Awesome Animation
-* JUI
+* Bootstrap ([Bootstrap](http://getbootstrap.com))
+* Bootstrap Social ([Bootstrap Social](http://lipis.github.io/bootstrap-social/))
+* jQuery ([jQuery](https://jquery.com))
+* jQuery UI ([jQuery UI](https://jqueryui.com))
+* Font Awesome ([Font Awesome](https://fortawesome.github.io/Font-Awesome/))
+* Font Awesome Animation ([Font Awesome Animation](https://github.com/l-lin/font-awesome-animation))
+* JUI ([JUI](http://jui.io/ko/index.php))
 * Start Bootstrap Creative ([Start Bootstrap](http://www.startbootstrap.com))
 * Start Bootstrap SB Admin 2 ([Start Bootstrap](http://www.startbootstrap.com))
 * Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/))
-* html2canvas
-* jqPlot
+* html2canvas ([html2canvas](https://html2canvas.hertzen.com))
+* jqPlot ([jqPlot](http://www.jqplot.com))
 
 
 #### Database
 
-* PostgreSQL
+* PostgreSQL ([PostgreSQL](http://www.postgresql.org))
 
 
 ## 설치방법
@@ -165,7 +164,34 @@ python manage.py createsuperuser
 `Settings`를 `fb_archive/settings.py`로, `Manage script`를 `manage.py`로 설정해주세요
 
 
+## 주요화면
+
+### 그룹 목록 화면
+![group list](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/list.png)
+
+
+### analysis 화면
+![group analysis](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/analysis1.png)
+![group analysis](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/analysis2.png)
+![group analysis](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/analysis3.png)
+
+
+### user 화면
+![group user](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/user1.png)
+![group user](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/user2.png)
+
+
+### management 화면
+![group management](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/management1.png)
+![group management](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/management2.png)
+![group management](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/management3.png)
+
+
+### ward 화면
+![group ward](https://raw.githubusercontent.com/egaoneko/ward/master/www/static/images/readme/ward.png)
+
+
 ## 라이센스
-[MIT 라이센스](../LICENSE)하에 배포 됩니다.
+[MIT 라이센스](https://github.com/egaoneko/ward/blob/master/LICENSE)하에 배포 됩니다.
 
 
