@@ -38,8 +38,6 @@
             <li>
                 {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}
                     <a href="{% url 'archive:group_management' group.id %}"><i class="fa fa-sitemap fa-fw"></i>Management</a>
-                    {#                {% else %}#}
-                    {#                    <a href="#" class="btn disabled"><i class="fa fa-sitemap fa-fw"></i> Management</a>#}
                 {% endif %}
             </li>
             {#            <li>#}

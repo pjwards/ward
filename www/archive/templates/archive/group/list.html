@@ -11,6 +11,7 @@
 
         <!-- /.row -->
         <div class="row">
+            <!-- Groups -->
             <div class="col-lg-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -66,6 +67,7 @@
                     <!-- /.panel-body -->
                 </div>
             </div>
+            <!-- /Groups -->
         </div>
         <!-- /.row -->
         <br>
@@ -91,6 +93,7 @@
         </div>
         <!-- /.modal -->
 
+        <!-- table templates -->
         <script id="tpl_row" type="text/template">
             <tr>
                 <td>
@@ -136,10 +139,14 @@
             <a href="#" class="page"><!= pages[i] !></a>
             <! } !>
         </script>
+        <!-- /table templates -->
 
+        <!-- loading messages -->
         <div id="loading_groups_msg" style="display: none; font-size: 20px; color: red;">
             NOW LOADING...
         </div>
+        <!-- /loading messages -->
+
     </div><!-- /.custom-page-wrapper -->
 {% endblock content %}
 

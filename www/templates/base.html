@@ -13,7 +13,8 @@
     <!-- Fonts -->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <link href="{% static 'font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'font-awesome-animation/dist/font-awesome-animation.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'font-awesome-animation/dist/font-awesome-animation.min.css' %}" rel="stylesheet"
+          type="text/css">
 
     <!-- jQuery Theme -->
     <link rel="stylesheet" href="{% static 'jquery-ui/themes/smoothness/jquery-ui.min.css' %}"/>
@@ -161,6 +162,7 @@
 </div>
 <!-- /.modal -->
 
+<!-- alarm template -->
 <script id="tpl_alarm" type="text/template">
     <div class="jui">
         <div class="notify <!= color !>">
@@ -169,6 +171,7 @@
         </div>
     </div>
 </script>
+<!-- / alarm template -->
 
 <!-- jQuery -->
 <script type="text/javascript" src='{% static 'jquery/dist/jquery.min.js' %}'></script>
@@ -217,6 +220,8 @@
 </script>
 
 <!--
+    https://opensourcehacker.com/2012/01/09/zoom-on-orientation-change-fix-for-mobile-
+    browsers-mobilizing-websites-with-responsive-design-and-html5-part-8/
 
     Don't break scale on iPad rotate.
 
