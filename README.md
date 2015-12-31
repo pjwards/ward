@@ -151,7 +151,7 @@ python manage.py createsuperuser
 
 1. admin 페이지([http://localhost/admin](http://localhost/admin))에 있는 `Social application`카테고리에 들어갑니다.
 2. `Add social application`를 클릭하고 `Name`에 facebook을, `Client id`에 app id를, `Secret key`에 app secret을 입력해주시면 됩니다.
-더 자세한 사항은 이 [사이트](https://godjango.com/65-starting-with-django-allauth/)를 방문해 주세요
+더 자세한 사항은 이 [사이트](https://godjango.com/65-starting-with-django-allauth/)를 방문해 주세요.
 
 
 ## 기타설정
@@ -165,11 +165,11 @@ python manage.py createsuperuser
 `add source roots to PYTHONPATH`에 체크해 주세요.
 3. 상단의 내용이 이해가 안가실경우 이 [사이트](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm)를 방문해 주세요.
 4. `Preferences...` > `Languages & Frameworks` > `Django`에 가셔서 `Django project root`를 상단의 첫번째 설정하셨던 `www`폴더로 설정해주시고
-`Settings`를 `fb_archive/settings.py`로, `Manage script`를 `manage.py`로 설정해주세요
+`Settings`를 `fb_archive/settings.py`로, `Manage script`를 `manage.py`로 설정해주세요.
 
 
 ## 라이센스
-[MIT 라이센스](./LICENSE)하에 배포 됩니다.
+Ward는 [MIT 라이센스](./LICENSE)하에 배포 됩니다.
 
 
 ## 주요화면
