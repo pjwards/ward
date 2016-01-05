@@ -12,6 +12,9 @@ Ward는 Facebook의 Group에 대한 정보 및 분석을 제공하는 사이트�
 또한 그룹 관리자들이 Facebook Group에 올라오는 스팸들을 지우기 위해 많은 시간을 들이고 있는데, 게시글에 대한 일괄 삭제 기능을 제공하고 있으며,
 추후 게시글을 분석하여 스팸에 대한 알림 등의 추가 기능을 구현할 예정입니다.
 
+## 소개 영상
+
+[Youtube Link](https://youtu.be/ViPfu0FLGmw)
 
 ## 필요한 도구들
 
@@ -151,7 +154,7 @@ python manage.py createsuperuser
 
 1. admin 페이지([http://localhost/admin](http://localhost/admin))에 있는 `Social application`카테고리에 들어갑니다.
 2. `Add social application`를 클릭하고 `Name`에 facebook을, `Client id`에 app id를, `Secret key`에 app secret을 입력해주시면 됩니다.
-더 자세한 사항은 이 [사이트](https://godjango.com/65-starting-with-django-allauth/)를 방문해 주세요
+더 자세한 사항은 이 [사이트](https://godjango.com/65-starting-with-django-allauth/)를 방문해 주세요.
 
 
 ## 기타설정
@@ -165,11 +168,11 @@ python manage.py createsuperuser
 `add source roots to PYTHONPATH`에 체크해 주세요.
 3. 상단의 내용이 이해가 안가실경우 이 [사이트](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm)를 방문해 주세요.
 4. `Preferences...` > `Languages & Frameworks` > `Django`에 가셔서 `Django project root`를 상단의 첫번째 설정하셨던 `www`폴더로 설정해주시고
-`Settings`를 `fb_archive/settings.py`로, `Manage script`를 `manage.py`로 설정해주세요
+`Settings`를 `fb_archive/settings.py`로, `Manage script`를 `manage.py`로 설정해주세요.
 
 
 ## 라이센스
-[MIT 라이센스](./LICENSE)하에 배포 됩니다.
+Ward는 [MIT 라이센스](./LICENSE)하에 배포 됩니다.
 
 
 ## 주요화면
