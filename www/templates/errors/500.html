@@ -63,17 +63,26 @@
 
 {% block script %}
     <script>
+        $(function () {
+            var width = window.innerWidth;
+            if (width >= 850) {
+                $("#mobile").hide();
+                $("#desktop").show();
+            } else {
+                $("#mobile").show();
+                $("#desktop").hide();
+            }
+        });
+
         window.onresize = function (event) {
-            $(function () {
-                var width = window.innerWidth;
-                if (width >= 850) {
-                    $("#mobile").hide();
-                    $("#desktop").show();
-                } else {
-                    $("#mobile").show();
-                    $("#desktop").hide();
-                }
-            });
+            var width = window.innerWidth;
+            if (width >= 850) {
+                $("#mobile").hide();
+                $("#desktop").show();
+            } else {
+                $("#mobile").show();
+                $("#desktop").hide();
+            }
         }
     </script>
 {% endblock %}
