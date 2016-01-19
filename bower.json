@@ -16,7 +16,7 @@
   "dependencies": {
     "jquery": ">= 2.1.4",
     "jquery-ui": ">= 1.11.4",
-    "jui": ">= 1.4.2",
+    "jui": "<= 1.4.3",
     "startbootstrap-sb-admin-2": ">= 1.0.8",
     "bootstrap": ">= 3.3.6",
     "font-awesome": ">= 4.4.0",
