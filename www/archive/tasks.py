@@ -335,15 +335,13 @@ def check_cp_cnt_group(group):
 
 
 @shared_task
-def store_group_feed(group_id, query, use_celery=False, is_whole=False):
+def store_group_feed(group_id, query, use_celery=False):
     """
     This method is storing group's feeds by using facebook group api.
-    If you want to get whole data, put that 'is_whole' is true.
 
     :param group_id: param group_id: group id for getting feeds
     :param query: query for facebook graph api
     :param use_celery: use celery?
-    :param is_whole: whole or parts
     :return:
     """
     logger.info('=== Start saving %s feed ===', group_id)
@@ -376,8 +374,6 @@ def store_group_feed(group_id, query, use_celery=False, is_whole=False):
                     store_feed(feed, group.id, use_celery)
                 except Exception as e:
                     logger.error('Fail to store again by exception : %s', e)
-        if not is_whole:
-            break
 
     group.is_stored = True
     group.save()
@@ -390,15 +386,13 @@ def store_group_feed(group_id, query, use_celery=False, is_whole=False):
 
 
 @shared_task
-def update_group_feed(group_id, query, use_celery=False, is_whole=False):
+def update_group_feed(group_id, query, use_celery=False):
     """
     This method is updating group's feeds by using facebook group api.
-    If you want to get whole data, put that 'is_whole' is true.
 
     :param group_id: param group_id: group id for getting feeds
     :param query: query for facebook graph api
     :param use_celery: use celery?
-    :param is_whole: whole or parts
     :return: success?
     """
     logger.info('=== Start updating %s feed ===', group_id)
@@ -456,8 +450,6 @@ def update_group_feed(group_id, query, use_celery=False, is_whole=False):
                     logger.error('Fail to update again by exception : %s', e)
             if not res:
                 return True
-        if not is_whole:
-            break
 
     end_time = timezone.datetime.now().replace(microsecond=0)
     logger.info('End time : %s', end_time)
@@ -467,14 +459,12 @@ def update_group_feed(group_id, query, use_celery=False, is_whole=False):
 
 
 @shared_task
-def update_groups_feed(query, use_celery=False, is_whole=False):
+def update_groups_feed(query, use_celery=False):
     """
     This method is updating group's feeds by using facebook group api for celery schedule.
-    If you want to get whole data, put that 'is_whole' is true.
 
     :param query: query for facebook graph api
     :param use_celery: use celery?
-    :param is_whole: whole or parts
     :return:
     """
     logger.info('=== Start updating groups ===')
@@ -483,7 +473,7 @@ def update_groups_feed(query, use_celery=False, is_whole=False):
     groups = Group.objects.values('id')
 
     for group in groups:
-        update_group_feed.delay(group.get('id'), query, use_celery, is_whole)
+        update_group_feed.delay(group.get('id'), query, use_celery)
 
     end_time = timezone.datetime.now().replace(microsecond=0)
     logger.info('End time : %s', end_time)
@@ -492,15 +482,13 @@ def update_groups_feed(query, use_celery=False, is_whole=False):
 
 
 @shared_task
-def check_group_feed(group_id, query, use_celery=False, is_whole=False):
+def check_group_feed(group_id, query, use_celery=False):
     """
     This method is checking group's feeds by using facebook group api.
-    If you want to get whole data, put that 'is_whole' is true.
 
     :param group_id: param group_id: group id for getting feeds
     :param query: query for facebook graph api
     :param use_celery: use celery?
-    :param is_whole: whole or parts
     :return:
     """
     logger.info('=== Start checking %s feed ===', group_id)
@@ -533,8 +521,6 @@ def check_group_feed(group_id, query, use_celery=False, is_whole=False):
                     store_feed(feed, group.id, use_celery, True)
                 except Exception as e:
                     logger.error('Fail to check again by exception : %s', e)
-        if not is_whole:
-            break
 
     group.is_stored = True
     group.save()
@@ -547,15 +533,13 @@ def check_group_feed(group_id, query, use_celery=False, is_whole=False):
 
 
 @shared_task
-def check_group_comments(group_id, query, use_celery=False, is_whole=False):
+def check_group_comments(group_id, query, use_celery=False):
     """
     This method is storing group's comments by using facebook group api.
-    If you want to get whole data, put that 'is_whole' is true.
 
     :param group_id: param group_id: group id for getting feeds
     :param query: query for facebook graph api
     :param use_celery: use celery?
-    :param is_whole: whole or parts
     :return:
     """
     logger.info('=== Start checking %s comments ===', group_id)
@@ -588,8 +572,6 @@ def check_group_comments(group_id, query, use_celery=False, is_whole=False):
                     store_feed(feed, group.id, use_celery, False, True)
                 except Exception as e:
                     logger.error('Fail to check again by exception : %s', e)
-        if not is_whole:
-            break
 
     group.is_stored = True
     group.save()

@@ -94,7 +94,7 @@ def groups(request):
         _group = tasks.store_group(group_data)
 
         if settings.ARCHIVE_GROUP_AUTO_SAVE:
-            tasks.store_group_feed.delay(_group.id, get_feed_query(), settings.ARCHIVE_USE_CELERY, True)
+            tasks.store_group_feed.delay(_group.id, get_feed_query(), settings.ARCHIVE_USE_CELERY)
 
         return JsonResponse({'success': 'Success to enroll ' + _group.id})
 
@@ -286,7 +286,7 @@ def group_store(request, group_id):
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.store_group_feed.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY, True)
+    tasks.store_group_feed.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY)
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
@@ -303,7 +303,7 @@ def group_update(request, group_id):
         error = 'Does not exist group.'
         return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, 'error': error})
 
-    if tasks.update_group_feed.delay(group_id, get_feed_query(), True, True):
+    if tasks.update_group_feed.delay(group_id, get_feed_query(), True):
         return HttpResponseRedirect(reverse('archive:groups'))
 
 
@@ -325,7 +325,7 @@ def group_check(request, group_id):
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.check_group_feed.delay(group_id, get_feed_query(p_limit, c_limit), settings.ARCHIVE_USE_CELERY, True)
+    tasks.check_group_feed.delay(group_id, get_feed_query(p_limit, c_limit), settings.ARCHIVE_USE_CELERY)
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
@@ -344,7 +344,7 @@ def group_comments_check(request, group_id):
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.check_group_comments.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY, True)
+    tasks.check_group_comments.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY)
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 

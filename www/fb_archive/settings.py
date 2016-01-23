@@ -408,7 +408,7 @@ CELERYBEAT_SCHEDULE = {
     'add-every-120-seconds': {
         'task': 'archive.tasks.update_groups_feed',
         'schedule': timedelta(seconds=120),
-        'args': (get_feed_query(), True, True)
+        'args': (get_feed_query(), True)
     },
 }
 
