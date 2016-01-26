@@ -21,7 +21,9 @@
 # SOFTWARE.
 # ==================================================================================
 """ Views for default pages and for django rest framework """
-
+import json
+import urllib.parse
+import urllib.request
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import connection
 import logging
@@ -31,6 +33,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidde
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.models import User as DjangoUser
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
@@ -45,7 +48,6 @@ from .rest.serializer import *
 from .utils import date_utils
 
 logger = logging.getLogger(__name__)
-fb_request = FBRequest()
 
 
 def about(request):
@@ -58,6 +60,30 @@ def about(request):
     return render(request, 'about.html', {})
 
 
+def request_to_archive_server(request):
+    if request.method == "GET":
+        parameter = request.GET
+    elif request.method == "POST":
+        parameter = request.POST
+
+    if not settings.ARCHIVE_SERVER:
+        try:
+            details = urllib.parse.urlencode(parameter)
+            details = details.encode('UTF-8')
+            url = urllib.request.Request(settings.ARCHIVE_SERVER_URL + request.path, details)
+            url.add_header("User-Agent",
+                           "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.2.149.29 Safari/525.13")
+            response_data = urllib.request.urlopen(url).read().decode("utf-8")
+        except Exception:
+            error = 'Server that enroll facebook group does currently not work.'
+            return {'error': error}
+
+        try:
+            return json.loads(response_data)
+        except Exception:
+            pass
+
+@csrf_exempt
 def groups(request):
     """
     Get a group list by HTTP GET Method and enter a group by HTTP POST METHOD
@@ -68,6 +94,10 @@ def groups(request):
     if request.method == "GET":
         return render(request, 'archive/group/list.html', {})
     elif request.method == "POST":
+        # Check this server is archive server
+        if not settings.ARCHIVE_SERVER:
+            return JsonResponse(request_to_archive_server(request))
+
         # Get a url and validate the url
         fb_url = request.POST.get("fb_url", None)
         if fb_url is None:
@@ -81,6 +111,7 @@ def groups(request):
             return JsonResponse({'error': error})
 
         # Get group data from graph api and validate the group data
+        fb_request = FBRequest()
         group_data = fb_request.group(group_id)
         if group_data is None:
             error = 'Did not exist group or privacy group.'
@@ -125,13 +156,13 @@ def group_analysis(request, group_id):
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
     return render(
-        request,
-        'archive/group/analysis.html',
-        {
-            'groups': _groups,
-            'group': _group,
-            'posts': posts,
-        }
+            request,
+            'archive/group/analysis.html',
+            {
+                'groups': _groups,
+                'group': _group,
+                'posts': posts,
+            }
     )
 
 
@@ -148,13 +179,13 @@ def group_user(request, group_id):
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
     return render(
-        request,
-        'archive/group/user.html',
-        {
-            'groups': _groups,
-            'group': _group,
-            'posts': posts,
-        }
+            request,
+            'archive/group/user.html',
+            {
+                'groups': _groups,
+                'group': _group,
+                'posts': posts,
+            }
     )
 
 
@@ -174,13 +205,13 @@ def group_search(request, group_id):
         search = None
 
     return render(
-        request,
-        'archive/group/search.html',
-        {
-            'groups': _groups,
-            'group': _group,
-            'search': search,
-        }
+            request,
+            'archive/group/search.html',
+            {
+                'groups': _groups,
+                'group': _group,
+                'search': search,
+            }
     )
 
 
@@ -203,13 +234,13 @@ def group_management(request, group_id):
         _groups = Group.objects.all()
         posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
         return render(
-            request,
-            'archive/group/management.html',
-            {
-                'groups': _groups,
-                'group': _group,
-                'posts': posts,
-            }
+                request,
+                'archive/group/management.html',
+                {
+                    'groups': _groups,
+                    'group': _group,
+                    'posts': posts,
+                }
         )
     elif request.method == "POST":
         # Get a model and validate a model
@@ -264,11 +295,11 @@ def group_management(request, group_id):
 
         # Return result json
         return JsonResponse(
-            {
-                'model': model,
-                'result': {'total': total, 'success': success, 'fail': fail},
-                'error': list(error)
-            })
+                {
+                    'model': model,
+                    'result': {'total': total, 'success': success, 'fail': fail},
+                    'error': list(error)
+                })
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -280,9 +311,16 @@ def group_store(request, group_id):
     :param group_id: group id
     :return: if you succeed, redirect groups page
     """
-    p_limit = int(request.POST.get("post_limit", '100'))
-    c_limit = int(request.POST.get("comment_limit", '100'))
-    c_c_limit = int(request.POST.get("child_comment_limit", '100'))
+    p_limit = int(request.GET.get("post_limit", '100'))
+    c_limit = int(request.GET.get("comment_limit", '100'))
+    c_c_limit = int(request.GET.get("child_comment_limit", '100'))
+
+    # Check this server is archive server
+    if not settings.ARCHIVE_SERVER:
+        latest_group_list = Group.objects.order_by('name')
+        error = 'This is wrong connection.'
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
 
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
@@ -294,6 +332,7 @@ def group_store(request, group_id):
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
+@csrf_exempt
 def group_update(request, group_id):
     """
     Update group method
@@ -302,8 +341,15 @@ def group_update(request, group_id):
     :param group_id: group id
     :return: if you succeed, redirect groups page
     """
-    p_limit = int(request.POST.get("post_limit", '100'))
-    c_limit = int(request.POST.get("comment_limit", '100'))
+    p_limit = int(request.GET.get("post_limit", '100'))
+    c_limit = int(request.GET.get("comment_limit", '100'))
+
+    # Check this server is archive server
+    if not settings.ARCHIVE_SERVER:
+        latest_group_list = Group.objects.order_by('name')
+        request_to_archive_server(request)
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list})
 
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
@@ -323,8 +369,15 @@ def group_check(request, group_id):
     :param group_id: group id
     :return: if you succeed, redirect groups page
     """
-    c_limit = int(request.POST.get("comment_limit", '100'))
-    c_c_limit = int(request.POST.get("child_comment_limit", '100'))
+    c_limit = int(request.GET.get("comment_limit", '100'))
+    c_c_limit = int(request.GET.get("child_comment_limit", '100'))
+
+    # Check this server is archive server
+    if not settings.ARCHIVE_SERVER:
+        latest_group_list = Group.objects.order_by('name')
+        error = 'This is wrong connection.'
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
 
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
@@ -345,8 +398,15 @@ def group_post_check(request, post_id):
     :param post_id: post id
     :return: if you succeed, redirect groups page
     """
-    c_limit = int(request.POST.get("comment_limit", '100'))
-    c_c_limit = int(request.POST.get("child_comment_limit", '100'))
+    c_limit = int(request.GET.get("comment_limit", '100'))
+    c_c_limit = int(request.GET.get("child_comment_limit", '100'))
+
+    # Check this server is archive server
+    if not settings.ARCHIVE_SERVER:
+        latest_group_list = Group.objects.order_by('name')
+        error = 'This is wrong connection.'
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
 
     if not Post.objects.filter(id=post_id).exists():
         latest_group_list = Group.objects.order_by('name')
@@ -370,12 +430,12 @@ def user(request, user_id):
     _groups = _user.groups
 
     return render(
-        request,
-        'archive/user/user.html',
-        {
-            'fb_user': _user,
-            'groups': _groups.exclude(privacy='CLOSED'),
-        }
+            request,
+            'archive/user/user.html',
+            {
+                'fb_user': _user,
+                'groups': _groups.exclude(privacy='CLOSED'),
+            }
     )
 
 
@@ -583,11 +643,11 @@ def wards(request):
     _groups = list(set(Group.objects.filter(wards__user=_user).all()))
 
     return render(
-        request,
-        'archive/wards.html',
-        {
-            'groups': _groups,
-        }
+            request,
+            'archive/wards.html',
+            {
+                'groups': _groups,
+            }
     )
 
 
@@ -600,10 +660,10 @@ def alert(request):
     :return: render
     """
     return render(
-        request,
-        'archive/alert.html',
-        {
-        }
+            request,
+            'archive/alert.html',
+            {
+            }
     )
 
 
@@ -648,7 +708,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if method != 'year' and method != 'month' and method != 'day' and method != 'hour' and method != 'hour_total':
             raise ValueError(
-                "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
+                    "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
 
         all_posts = self.get_objects_by_time(Post, from_date, to_date)
         all_comments = self.get_objects_by_time(Comment, from_date, to_date)
@@ -947,10 +1007,10 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if search:
             blacklist = _group.fbuser_set.filter(blacklist__group=_group).exclude(blacklist=None).order_by(
-                '-blacklist__updated_time').search(search)
+                    '-blacklist__updated_time').search(search)
         else:
             blacklist = _group.fbuser_set.filter(blacklist__group=_group).exclude(blacklist=None).order_by(
-                '-blacklist__updated_time')
+                    '-blacklist__updated_time')
 
         return self.response_models(blacklist, request, BlacklistFBUserSerializer)
 
@@ -1054,8 +1114,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         models = self.get_objects_by_time(model, from_date, to_date)
 
         models = models.extra(
-            select={'field_sum': 'like_count + comment_count'},
-            order_by=('-field_sum',)
+                select={'field_sum': 'like_count + comment_count'},
+                order_by=('-field_sum',)
         )
 
         return models

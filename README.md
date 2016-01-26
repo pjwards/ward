@@ -265,8 +265,9 @@ Ward는 [MIT 라이센스](./LICENSE)하에 배포 됩니다.
         │   ├── urls.py
         │   ├── utils                               : 도구 모음
         │   │   ├── __init__.py
-        │   │   ├── data_utils.py                   : 데이타 관련된 유틸들
-        │   │   └── date_utils.py                   : 날짜와 관련된 유틸들
+        │   │   ├── data_utils.py                   : 데이터 관련된 유틸들
+        │   │   ├── date_utils.py                   : 날짜와 관련된 유틸들
+        │   │   └── utils.py                        : 기타 유틸들
         │   └── views.py                            : views (Django Rest Framework의 View들도 포함
         ├── deploy
         ├── fabfile.py

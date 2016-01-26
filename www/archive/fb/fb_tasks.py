@@ -28,9 +28,12 @@ from facebook import GraphAPIError
 
 from archive.fb.fb_request import FBRequest
 from archive.models import *
+from archive.utils.utils import is_connected
 
 logger = logging.getLogger(__name__)
-fb_request = FBRequest()
+
+if is_connected():
+    fb_request = FBRequest()
 
 
 def store_user(user_id, user_name, group):
