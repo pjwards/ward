@@ -35,9 +35,10 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from archive.fb.fb_query import get_feed_query
+from archive.fb.fb_query import get_feed_query, get_comment_query, get_feed_with_comment_query
 from archive.fb.fb_request import FBRequest
 from archive.fb.fb_lookup import lookup_id
+from archive.fb import fb_tasks
 from allauth.socialaccount.models import SocialAccount
 from . import tasks
 from .rest.serializer import *
@@ -94,7 +95,7 @@ def groups(request):
         _group = tasks.store_group(group_data)
 
         if settings.ARCHIVE_GROUP_AUTO_SAVE:
-            tasks.store_group_feed.delay(_group.id, get_feed_query(), settings.ARCHIVE_USE_CELERY)
+            tasks.store_group_feed_task.delay(_group.id, get_feed_query(), get_comment_query())
 
         return JsonResponse({'success': 'Success to enroll ' + _group.id})
 
@@ -251,8 +252,7 @@ def group_management(request, group_id):
         success = 0
         fail = 0
         for object_id in check_box:
-            # res, e = tasks.delete_group_content(object_id, model)
-            res, e = tasks.delete_group_content_by_fb(object_id, model, fb_request_del)
+            res, e = fb_tasks.delete_group_content_by_fb(object_id, model, fb_request_del)
             if res:
                 success += 1
             else:
@@ -280,13 +280,17 @@ def group_store(request, group_id):
     :param group_id: group id
     :return: if you succeed, redirect groups page
     """
+    p_limit = int(request.POST.get("post_limit", '100'))
+    c_limit = int(request.POST.get("comment_limit", '100'))
+    c_c_limit = int(request.POST.get("child_comment_limit", '100'))
+
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
         error = 'Does not exist group.'
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.store_group_feed.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY)
+    tasks.store_group_feed_task.delay(group_id, get_feed_query(p_limit), get_comment_query(c_limit, c_c_limit))
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
@@ -298,12 +302,15 @@ def group_update(request, group_id):
     :param group_id: group id
     :return: if you succeed, redirect groups page
     """
+    p_limit = int(request.POST.get("post_limit", '100'))
+    c_limit = int(request.POST.get("comment_limit", '100'))
+
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
         error = 'Does not exist group.'
         return render(request, 'archive/group/list.html', {'latest_group_list': latest_group_list, 'error': error})
 
-    if tasks.update_group_feed.delay(group_id, get_feed_query(), True):
+    if tasks.update_group_feed_task.delay(group_id, get_feed_with_comment_query(p_limit, c_limit)):
         return HttpResponseRedirect(reverse('archive:groups'))
 
 
@@ -316,8 +323,8 @@ def group_check(request, group_id):
     :param group_id: group id
     :return: if you succeed, redirect groups page
     """
-    p_limit = int(request.POST.get("post_limit", '100'))
     c_limit = int(request.POST.get("comment_limit", '100'))
+    c_c_limit = int(request.POST.get("child_comment_limit", '100'))
 
     if not Group.objects.filter(id=group_id).exists():
         latest_group_list = Group.objects.order_by('name')
@@ -325,26 +332,29 @@ def group_check(request, group_id):
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.check_group_feed.delay(group_id, get_feed_query(p_limit, c_limit), settings.ARCHIVE_USE_CELERY)
+    tasks.check_group_task.delay(group_id, get_comment_query(c_limit, c_c_limit))
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
 @user_passes_test(lambda u: u.is_superuser)
-def group_comments_check(request, group_id):
+def group_post_check(request, post_id):
     """
-    Check group comments for super user
+    Check post comments for super user
 
     :param request: request
-    :param group_id: group id
+    :param post_id: post id
     :return: if you succeed, redirect groups page
     """
-    if not Group.objects.filter(id=group_id).exists():
+    c_limit = int(request.POST.get("comment_limit", '100'))
+    c_c_limit = int(request.POST.get("child_comment_limit", '100'))
+
+    if not Post.objects.filter(id=post_id).exists():
         latest_group_list = Group.objects.order_by('name')
-        error = 'Does not exist group.'
+        error = 'Does not exist post.'
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.check_group_comments.delay(group_id, get_feed_query(), settings.ARCHIVE_USE_CELERY)
+    tasks.check_group_post.delay(post_id, get_comment_query(c_limit, c_c_limit))
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
@@ -458,9 +468,9 @@ def report_action(request, report_id, action):
             _report.save()
         elif action == 'delete':
             if _report.post:
-                res, e = tasks.delete_group_content(_report.post.id, 'post')
+                res, e = fb_tasks.delete_group_content(_report.post.id, 'post')
             elif _report.comment:
-                res, e = tasks.delete_group_content(_report.comment.id, 'comment')
+                res, e = fb_tasks.delete_group_content(_report.comment.id, 'comment')
 
             if res:
                 _report.status = 'deleted'

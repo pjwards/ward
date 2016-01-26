@@ -434,3 +434,11 @@ class UserActivity(models.Model):
             else:
                 user_activity.comment_count = 0
             user_activity.save()
+
+
+class GroupStoreList(models.Model):
+    group = models.OneToOneField(Group)
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    query = models.CharField(max_length=2083, null=True, blank=True)
+    status = models.CharField(max_length=30, default='new')

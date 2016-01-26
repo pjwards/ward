@@ -124,6 +124,10 @@ class UserActivityAdmin(admin.ModelAdmin):
     search_fields = ['user__id', 'group__id']
 
 
+class GroupStoreListAdmin(admin.ModelAdmin):
+    list_display = ('id', 'group', 'start_time', 'end_time', 'query', 'status')
+
+
 admin.site.register(FBUser, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
@@ -136,3 +140,4 @@ admin.site.register(DeletedPost, DeletedPostAdmin)
 admin.site.register(DeletedComment, DeletedCommentAdmin)
 admin.site.register(Ward, WardAdmin)
 admin.site.register(UserActivity, UserActivityAdmin)
+admin.site.register(GroupStoreList, GroupStoreListAdmin)
