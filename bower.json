@@ -14,16 +14,19 @@
     "tests"
   ],
   "dependencies": {
-    "jquery": ">= 2.1.4",
+    "jquery": ">= 2.2.0",
     "jquery-ui": ">= 1.11.4",
-    "jui": "<= 1.4.3",
+    "jui": ">= 2.0.0",
+    "jui-core": ">= 2.0.2",
+    "jui-grid": ">= 2.0.0",
+    "jui-chart": ">= 2.0.1",
     "startbootstrap-sb-admin-2": ">= 1.0.8",
     "bootstrap": ">= 3.3.6",
-    "font-awesome": ">= 4.4.0",
-    "font-awesome-animation": "0.0.7",
-    "bootstrap-social": ">= 4.10.1",
+    "font-awesome": ">= 4.5.0",
+    "font-awesome-animation": ">= 0.0.8",
+    "bootstrap-social": ">= 4.12.0",
     "jqplot-bower": ">= 1.0.8",
-    "js-cookie": ">= 2.0.4",
+    "js-cookie": ">= 2.1.0",
     "wow": ">= 1.1.2",
     "jquery.easing": ">= 1.3.1",
     "animate.css": ">= 3.4.0",
@@ -35,7 +38,7 @@
   },
   "resolutions": {
     "jquery": ">= 2.1.4",
-    "bootstrap-social": ">= 4.10.1",
+    "bootstrap-social": ">= 4.12.0",
     "font-awesome": ">= 4.5.0"
   }
 }

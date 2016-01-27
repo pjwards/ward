@@ -20,8 +20,12 @@
     <link rel="stylesheet" href="{% static 'jquery-ui/themes/smoothness/jquery-ui.min.css' %}"/>
 
     <!-- JUI for Bootstrap -->
-    <link rel="stylesheet" href="{% static 'jui/dist/jui.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'jui/dist/jennifer.theme.min.css' %}"/>
+    <!-- Basic style components -->
+    <link rel="stylesheet" href="{% static 'jui/dist/ui.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'jui/dist/ui-jennifer.min.css' %}"/>
+    <!-- Grid style components -->
+    <link rel="stylesheet" href="{% static 'jui-grid/dist/grid.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'jui-grid/dist/grid-jennifer.min.css' %}"/>
 
     <!-- Bootstrap Core CSS -->
     <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
@@ -178,7 +182,12 @@
 <script type="text/javascript" src='{% static 'jquery-ui/jquery-ui.min.js' %}'></script>
 
 <!-- JUI for Bootstrap -->
-<script src="{% static 'jui/dist/jui.min.js' %}"></script>
+<!-- Required script files -->
+<script src="{% static 'jui-core/dist/core.min.js' %}"></script>
+<!-- Basic script components -->
+<script src="{% static 'jui/dist/ui.min.js' %}"></script>
+<!-- Grid script components -->
+<script src="{% static 'jui-grid/dist/grid.min.js' %}"></script>
 
 <!-- JS Cookie -->
 <script src="{% static 'js-cookie/src/js.cookie.js' %}"></script>

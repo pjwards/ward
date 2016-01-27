@@ -261,9 +261,12 @@
         var user_archive_search = $('#user_archive_search');
 
         /**
-         * Generate Activity
+         * Generate JUI Init
          */
-        jui.ready(["uix.tab", "uix.table"], function (tab, table) {
+        jui.ready(["ui.paging", "grid.table", "ui.modal"], function (paging, table, modal) {
+            /**
+             * Generate Activity
+             */
             post_activity_table = table("#post_activity_table", {
                 tpl: {
                     row: $("#tpl_row").html(),
@@ -275,12 +278,10 @@
                     row: $("#tpl_row").html(),
                 }
             });
-        });
 
-        /**
-         * Generate Archive
-         */
-        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+            /**
+             * Generate Archive
+             */
             user_archive_paging = paging("#user_archive_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
@@ -299,28 +300,15 @@
                 scroll: true,
                 scrollHeight: 2000,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row2").html(),
                     none: $("#tpl_none2").html()
                 }
-            });
-        });
+            })
 
-        /**
-         * Loading message
-         */
-        jui.ready(["ui.modal"], function (modal) {
+            /**
+             * Loading message
+             */
             loading_activity_post = modal("#loading_activity_post_msg", {
                 target: "#post_activity_table",
                 opacity: 0.5,
@@ -355,26 +343,26 @@
                 color: 'white',
                 autoHide: false,
             });
+
+            /**
+             * Load list
+             */
+            changeActivity(activity_url, 10, "post", post_activity_table, loading_activity_post);
+            changeActivity(activity_url, 10, "comment", comment_activity_table, loading_activity_comment);
+            changeProportion(proportion_url, loading_proportion_post, loading_proportion_comment);
+            changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
         });
 
         /**
          * Init user.html
          */
         $(function () {
-            changeActivity(activity_url, 10, "post", post_activity_table, loading_activity_post);
-            changeActivity(activity_url, 10, "comment", comment_activity_table, loading_activity_comment);
-            changeProportion(proportion_url, loading_proportion_post, loading_proportion_comment);
-            changeUserArchive(user_archive_url, group_id, user_archive_table, user_archive_limit, user_archive_search.val(), loading_archive_user, 1, user_archive_paging);
-
             /**
              * Window Resize
              */
             window.onresize = function (event) {
                 postProportion.replot();
                 commentProportion.replot();
-                post_activity_table.resize();
-                comment_activity_table.resize();
-                user_archive_table.resize();
                 reLoadPaging(user_archive_paging);
             }
 

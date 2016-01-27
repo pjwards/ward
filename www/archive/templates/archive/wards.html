@@ -198,9 +198,12 @@
         var user_id = '{{ user.id }}';
 
         /**
-         * Generate ward
+         * Generate JUI Init
          */
-        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+        jui.ready(["ui.paging", "grid.table", "ui.modal"], function (paging, table, modal) {
+            /**
+             * Generate ward
+             */
             post_ward_paging = paging("#post_ward_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
@@ -219,17 +222,6 @@
                 scroll: true,
                 scrollHeight: 2000,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row").html(),
                     none: $("#tpl_none").html()
@@ -254,28 +246,15 @@
                 scroll: true,
                 scrollHeight: 2000,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row").html(),
                     none: $("#tpl_none").html()
                 }
             });
-        });
 
-        /**
-         * Loading message
-         */
-        jui.ready(["ui.modal"], function (modal) {
+            /**
+             * Loading message
+             */
             loading_post_ward = modal("#loading_post_ward_msg", {
                 target: "#post_ward_table",
                 opacity: 0.5,
@@ -289,23 +268,24 @@
                 color: 'white',
                 autoHide: false,
             });
-        })
+
+            /**
+             * Load list
+             */
+            {% if groups %}
+                changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
+                changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, 1, comment_ward_paging);
+            {% endif %}
+        });
 
         /**
          * Init analysis.html
          */
         $(function () {
-            {% if groups %}
-                changeWards(post_ward_url, user_id, post_ward_table, post_ward_limit, loading_post_ward, 1, post_ward_paging);
-                changeWards(comment_ward_url, user_id, comment_ward_table, comment_ward_limit, loading_comment_ward, 1, comment_ward_paging);
-            {% endif %}
-
             /**
              * Window Resize
              */
             window.onresize = function (event) {
-                post_ward_table.resize();
-                comment_ward_table.resize();
                 reLoadPaging(post_ward_paging);
                 reLoadPaging(comment_ward_paging);
             }
