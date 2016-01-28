@@ -121,9 +121,12 @@
         var reports_url = "/api/reports/";
 
         /**
-         * Generate Reports
+         * Generate JUI Init
          */
-        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+        jui.ready(["ui.paging", "grid.table", "ui.modal"], function (paging, table, modal) {
+            /**
+             * Generate Reports
+             */
             reports_paging = paging("#reports_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
@@ -142,47 +145,36 @@
                 scroll: true,
                 scrollHeight: 2000,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row").html(),
                     none: $("#tpl_none").html()
                 }
             });
-        });
 
-        /**
-         * Loading message
-         */
-        jui.ready(["ui.modal"], function (modal) {
+            /**
+             * Loading message
+             */
             loading_reports = modal("#loading_reports_msg", {
                 target: "#reports_table",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
             });
+
+            /**
+             * Load list
+             */
+            changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
         });
 
         /**
          * Init analysis.html
          */
         $(function () {
-            changeReports(reports_url, reports_table, reports_limit, loading_reports, 1, reports_paging);
-
             /**
              * Window Resize
              */
             window.onresize = function (event) {
-                reports_table.resize();
                 reLoadPaging(reports_paging);
             }
 

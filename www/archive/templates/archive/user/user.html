@@ -213,9 +213,12 @@
         var user_id = '{{ fb_user.id }}';
 
         /**
-         * Generate Archive
+         * Generate JUI Init
          */
-        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+        jui.ready(["ui.paging", "grid.table", "ui.modal"], function (paging, table, modal) {
+            /**
+             * Generate Archive
+             */
             post_archive_paging = paging("#post_archive_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
@@ -285,6 +288,29 @@
                     none: $("#tpl_none").html()
                 }
             });
+
+            /**
+             * Loading message
+             */
+            loading_post_archive = modal("#loading_post_archive_msg", {
+                target: "#post_archive_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            loading_comment_archive = modal("#loading_comment_archive_msg", {
+                target: "#comment_archive_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
+            /**
+             * Load list
+             */
+            changeArchiveByUser(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), user_id, loading_post_archive, 1, post_archive_paging);
+            changeArchiveByUser(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), user_id, loading_comment_archive, 1, comment_archive_paging);
         });
 
         /**
@@ -319,37 +345,13 @@
         });
 
         /**
-         * Loading message
-         */
-        jui.ready(["ui.modal"], function (modal) {
-            loading_post_archive = modal("#loading_post_archive_msg", {
-                target: "#post_archive_table",
-                opacity: 0.5,
-                color: 'white',
-                autoHide: false,
-            });
-
-            loading_comment_archive = modal("#loading_comment_archive_msg", {
-                target: "#comment_archive_table",
-                opacity: 0.5,
-                color: 'white',
-                autoHide: false,
-            });
-        });
-
-        /**
          * Init analysis.html
          */
         $(function () {
-            changeArchiveByUser(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), user_id, loading_post_archive, 1, post_archive_paging);
-            changeArchiveByUser(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), user_id, loading_comment_archive, 1, comment_archive_paging);
-
             /**
              * Window Resize
              */
             window.onresize = function (event) {
-                post_archive_table.resize();
-                comment_archive_table.resize();
                 reLoadPaging(post_archive_paging);
                 reLoadPaging(comment_archive_paging);
             }

@@ -159,9 +159,12 @@
         var page = 1;
 
         /**
-         * Generate Archive
+         * Generate JUI Init
          */
-        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+        jui.ready(["ui.paging", "grid.table", "ui.modal"], function (paging, table, modal) {
+            /**
+             * Generate Group List
+             */
             groups_paging = paging("#groups_paging", {
                 pageCount: detectWidthToPageCount(),
                 screenCount: detectWidthToScreenCount(),
@@ -196,32 +199,32 @@
                     none: $("#tpl_none").html()
                 }
             });
-        });
 
-        /**
-         * Loading message
-         */
-        jui.ready(["ui.modal"], function (modal) {
+            /**
+             * Loading message
+             */
             loading_groups = modal("#loading_groups_msg", {
                 target: "#groups_table",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
             });
+
+            /**
+             * Load list
+             */
+            $("#groups_limit").val(groups_limit);
+            changeGroups(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, 1, groups_paging);
         });
 
         /**
          * Init user.html
          */
         $(function () {
-            $("#groups_limit").val(groups_limit);
-            changeGroups(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, 1, groups_paging);
-
             /**
              * Window Resize
              */
             window.onresize = function (event) {
-                groups_table.resize();
                 reLoadPaging(groups_paging);
             }
 
