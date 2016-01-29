@@ -31,12 +31,13 @@
  * @param url
  * @param table
  * @param limit
+ * @param order
  * @param search
  * @param loading
  * @param page
  * @param paging
  */
-var getGroups = function (url, table, limit, search, loading, page, paging) {
+var getGroups = function (url, table, limit, order, search, loading, page, paging) {
     var fun = function (source) {
         var results = source["results"];
         var rows = []
@@ -76,6 +77,8 @@ var getGroups = function (url, table, limit, search, loading, page, paging) {
         limit: limit,
         offset: (page - 1) * limit,
         q: search,
+        order_column: order["order_column"],
+        order_keyword: order["order_keyword"],
     }
 
     getAjaxResult(url, data, fun);
@@ -88,14 +91,15 @@ var getGroups = function (url, table, limit, search, loading, page, paging) {
  * @param url
  * @param table
  * @param limit
+ * @param order
  * @param search
  * @param loading
  * @param page
  * @param paging
  */
-var changeGroups = function (url, table, limit, search, loading, page, paging) {
+var changeGroups = function (url, table, limit, order, search, loading, page, paging) {
     loading.show();
-    getGroups(url, table, limit, search, loading, page, paging);
+    getGroups(url, table, limit, order, search, loading, page, paging);
 }
 
 

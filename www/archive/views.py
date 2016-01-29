@@ -83,6 +83,7 @@ def request_to_archive_server(request):
         except Exception:
             pass
 
+
 @csrf_exempt
 def groups(request):
     """
@@ -943,7 +944,25 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param request: request
         :return: response model
         """
-        _groups = self.get_queryset().exclude(privacy='CLOSED').order_by('-updated_time')
+        order_column = self.request.query_params.get('order_column', 'updated_time')
+        order_keyword = self.request.query_params.get('order_keyword', 'desc')
+
+        if order_column != 'name' and order_column != 'updated_time' \
+                and order_column != 'post_count' and order_column != 'comment_count':
+            raise ValueError(
+                    "order_column can be used 'name', 'updated_time', 'post_count'or 'comment_count'. Input order_column:"
+                    + order_column)
+
+        if order_keyword != 'desc' and order_keyword != 'asc':
+            raise ValueError(
+                    "order_keyword can be used 'desc', 'asc'. Input order_keyword:" + order_keyword)
+
+        if order_keyword == 'desc':
+            order_keyword = '-'
+        else:
+            order_keyword = ''
+
+        _groups = self.get_queryset().exclude(privacy='CLOSED').order_by(order_keyword + order_column)
         search = self.request.query_params.get('q', '')
         if search:
             return self.response_models(_groups.search(search), request, GroupSerializer)
