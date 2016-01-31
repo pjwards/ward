@@ -165,6 +165,37 @@ var deleteWard = function (ward_id) {
 
 
 /**
+ * Control Interest Group by using ajax
+ *
+ * @param method
+ * @param group_id
+ */
+var controlInterestGroup = function (method, group_id, btn) {
+    var url = "/archive/interest_group/" + group_id + "/";
+    var data = {};
+    btn = $('#' + btn);
+
+    if (method == "post") {
+        postAsyncAjax(url, data);
+        btn.removeClass('btn-dropbox').addClass('btn-pinterest');
+        btn.children('i').removeClass('fa-check').addClass('fa-times');
+        btn.children('span').text('Uncheck this group');
+
+        var onclick = btn.attr('onclick').replace('post', 'delete');
+        btn.attr('onclick', onclick);
+    } else if (method == "delete") {
+        deleteAsyncAjax(url, data);
+        btn.removeClass('btn-pinterest').addClass('btn-dropbox');
+        btn.children('i').removeClass('fa-times').addClass('fa-check');
+        btn.children('span').text('Check this group');
+
+        var onclick = btn.attr('onclick').replace('delete', 'post');
+        btn.attr('onclick', onclick);
+    }
+}
+
+
+/**
  * Post and comment Display
  *
  * @param rows

@@ -442,3 +442,8 @@ class GroupStoreList(models.Model):
     end_time = models.DateTimeField(null=True, blank=True)
     query = models.CharField(max_length=2083, null=True, blank=True)
     status = models.CharField(max_length=30, default='new')
+
+
+class InterestGroupList(models.Model):
+    user = models.ForeignKey(User, related_name='interest_group_list')
+    group = models.ForeignKey(Group, related_name='interest_group_list')

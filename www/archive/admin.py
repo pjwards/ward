@@ -128,6 +128,10 @@ class GroupStoreListAdmin(admin.ModelAdmin):
     list_display = ('id', 'group', 'start_time', 'end_time', 'query', 'status')
 
 
+class InterestGroupListAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'group')
+
+
 admin.site.register(FBUser, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
@@ -141,3 +145,4 @@ admin.site.register(DeletedComment, DeletedCommentAdmin)
 admin.site.register(Ward, WardAdmin)
 admin.site.register(UserActivity, UserActivityAdmin)
 admin.site.register(GroupStoreList, GroupStoreListAdmin)
+admin.site.register(InterestGroupList, InterestGroupListAdmin)

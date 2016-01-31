@@ -52,4 +52,6 @@ urlpatterns = [
     url(r'^ward/(?P<object_id>[0-9_]+)/$', views.ward, name='ward'),
     url(r'^ward/(?P<ward_id>[0-9_]+)/update/$', views.ward_update, name='ward_update'),
     url(r'^wards/$', views.wards, name='wards'),
+
+    url(r'^interest_group/(?P<group_id>[0-9_]+)/$', views.interest_group, name='interest_group'),
 ]

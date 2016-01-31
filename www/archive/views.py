@@ -34,6 +34,8 @@ from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.models import User as DjangoUser
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
@@ -144,6 +146,26 @@ def groups_admin(request):
         return render(request, 'archive/group/list_admin.html', {})
 
 
+def is_interest_group(request, group_id):
+    """
+    Is interest group?
+
+    :param request: request
+    :param group_id: group id
+    :return:
+    """
+
+    if not request.user.is_authenticated():
+        return False
+
+    _user = request.user
+    _group = get_object_or_404(Group, id=group_id)
+
+    if InterestGroupList.objects.filter(user=_user, group=_group).exists():
+        return True
+    return False
+
+
 def group_analysis(request, group_id):
     """
     Display a group analysis page
@@ -163,6 +185,7 @@ def group_analysis(request, group_id):
                 'groups': _groups,
                 'group': _group,
                 'posts': posts,
+                'interest_group': is_interest_group(request, group_id),
             }
     )
 
@@ -186,6 +209,7 @@ def group_user(request, group_id):
                 'groups': _groups,
                 'group': _group,
                 'posts': posts,
+                'interest_group': is_interest_group(request, group_id),
             }
     )
 
@@ -212,6 +236,7 @@ def group_search(request, group_id):
                 'groups': _groups,
                 'group': _group,
                 'search': search,
+                'interest_group': is_interest_group(request, group_id),
             }
     )
 
@@ -241,6 +266,7 @@ def group_management(request, group_id):
                     'groups': _groups,
                     'group': _group,
                     'posts': posts,
+                    'interest_group': is_interest_group(request, group_id),
                 }
         )
     elif request.method == "POST":
@@ -668,6 +694,51 @@ def alert(request):
     )
 
 
+@login_required()
+def interest_group(request, group_id):
+    """
+    Add interest group
+
+    :param request: request
+    :param group_id: group id
+    :return: render
+    """
+    if request.method == "GET":
+        _user = request.user
+        _group = get_object_or_404(Group, id=group_id)
+
+        if InterestGroupList.objects.filter(user=_user, group=_group).exists():
+            return JsonResponse({'exist': True})
+        return JsonResponse({'exist': False})
+    elif request.method == "POST":
+        _user = request.user
+        _group = get_object_or_404(Group, id=group_id)
+
+        if InterestGroupList.objects.filter(user=_user, group=_group).exists():
+            error = 'This group is already added.'
+            return JsonResponse({'error': error})
+
+        _interest_group = InterestGroupList(user=_user, group=_group)
+        _interest_group.save()
+        return JsonResponse({'success': 'Add this group in interest group.'})
+    elif request.method == "DELETE":
+        _user = request.user
+        _group = get_object_or_404(Group, id=group_id)
+
+        _interest_group = InterestGroupList.objects.filter(user=_user, group=_group)
+        if not _interest_group.exists():
+            error = 'Did not exist this group in interest group list.'
+            return JsonResponse({'error': error})
+
+        _interest_group = _interest_group[0]
+        if _interest_group.user != _user:
+            error = 'Did not match the owner.'
+            return JsonResponse({'error': error})
+
+        _interest_group.delete()
+        return JsonResponse({'success': 'Delete this group in interest group.'})
+
+
 # ViewSets define the view behavior for restful api.
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -944,6 +1015,40 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param request: request
         :return: response model
         """
+        order = self.get_order()
+        _groups = self.get_queryset().exclude(privacy='CLOSED').order_by(order)
+        search = self.request.query_params.get('q', '')
+        if search:
+            return self.response_models(_groups.search(search), request, GroupSerializer)
+        else:
+            return self.response_models(_groups, request, GroupSerializer)
+
+    @list_route()
+    def interest_group(self, request):
+        """
+        Return interest group
+
+        :param request: request
+        :return: response model
+        """
+        order = self.get_order()
+        user_id = self.request.query_params.get('user_id', None)
+        _user = get_object_or_404(User, id=user_id)
+
+        _groups = InterestGroupList.objects.filter(user=_user).values_list('group')
+        _groups = self.get_queryset().filter(id__in=_groups).exclude(privacy='CLOSED').order_by(order)
+        search = self.request.query_params.get('q', '')
+        if search:
+            return self.response_models(_groups.search(search), request, GroupSerializer)
+        else:
+            return self.response_models(_groups, request, GroupSerializer)
+
+    def get_order(self):
+        """
+        Return order
+
+        :return: order
+        """
         order_column = self.request.query_params.get('order_column', 'updated_time')
         order_keyword = self.request.query_params.get('order_keyword', 'desc')
 
@@ -962,12 +1067,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             order_keyword = ''
 
-        _groups = self.get_queryset().exclude(privacy='CLOSED').order_by(order_keyword + order_column)
-        search = self.request.query_params.get('q', '')
-        if search:
-            return self.response_models(_groups.search(search), request, GroupSerializer)
-        else:
-            return self.response_models(_groups, request, GroupSerializer)
+        return order_keyword + order_column
 
     @detail_route()
     @renderer_classes((JSONRenderer,))
@@ -1261,10 +1361,6 @@ class UserActivityViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = UserActivity.objects.all()
     serializer_class = UserActivitySerializer
-
-
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 
 
 # Error page

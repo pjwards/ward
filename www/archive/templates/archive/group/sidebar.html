@@ -27,6 +27,21 @@
                     </div>
                 </form>
                 <!-- /input-group -->
+
+                {% if user.is_authenticated %}
+                    <br>
+                    {% if interest_group %}
+                        <button id="interest_group_btn" class="btn btn-block btn-social btn-pinterest" onclick="controlInterestGroup('delete', '{{ group.id }}', 'interest_group_btn')">
+                            <i class="fa fa-times"></i>
+                            <span>Uncheck this group</span>
+                        </button>
+                    {% else %}
+                        <button id="interest_group_btn"  class="btn btn-block btn-social btn-dropbox" onclick="controlInterestGroup('post', '{{ group.id }}', 'interest_group_btn')">
+                            <i class="fa fa-check"></i>
+                            <span>Check this group</span>
+                        </button>
+                    {% endif %}
+                {% endif %}
             </li>
             <li>
                 <a href="{% url 'archive:group_analysis' group.id %}"><i
