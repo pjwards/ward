@@ -2,7 +2,7 @@
 
 # [Ward](http://pjwards.com)
 Ward collects data of Facebook groups using Facebook Graph API and shows various information about each group of Facebook.
-* Ward do not collect all groups of Facebook. Only gets public groups and requested groups from users.
+* Ward does not collect data of all Facebook groups. Only gets data of requested public groups from users.
 
 
 ## Requirements
@@ -158,9 +158,9 @@ If you face unresolved reference issue in pycharm, check below.
 1. Right click `www` folder and go `Source root` in `Mark Directory As` and set this.
 2. Go `Preferences...` > `Build, Execution, Deployment` > `Console` > `Python Console` and check `add source roots to PYTHONPATH`.
 3. If you don't understand previous steps, [This site](http://stackoverflow.com/questions/21236824/unresolved-reference-issue-in-pycharm) helps you to set.
-4. GO `Preferences...` > `Languages & Frameworks` > `Django` and input `www` folder for `Django project root`, 
+4. Go `Preferences...` > `Languages & Frameworks` > `Django` and input `www` folder for `Django project root`, 
 `fb_archive/settings.py` for `Settings` and `manage.py` for `Manage script`. 
 
 
 ## License
-Ward uses the [MIT License](https://github.com/egaoneko/ward/blob/master/LICENSE).
+Ward uses the [MIT License](./LICENSE).
