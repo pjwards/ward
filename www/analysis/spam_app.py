@@ -23,6 +23,7 @@
 """ Provides spam app class """
 
 import ward.www.analysis.analysis_core as core
+from django.db.models import Q
 from .models import SpamList, SpamWordList
 
 
@@ -35,22 +36,31 @@ from .models import SpamList, SpamWordList
 
 def init_db(group):
     """
-    Load standard word from spam.txt to database when initialize database
+    save standard word from spam.txt to database when initialize database
     """
     data_set = [line.strip() for line in open("analysis/texts/spam.txt", 'r')]
     for i in data_set:
-        store_data = SpamWordList(word=i, group=group, auth=filter)
+        store_data = SpamWordList(word=i, group=group, status='filter')
         store_data.save()
+
+
+def save_user_word(group, word):
+    """
+    Load user's words in DB
+    """
+    store_data = SpamWordList(word=word, group=group, status='user')
+    store_data.save()
 
 
 def analyze_posts(analyzer, group, message):
     """
     Return true if analyzed words and spam words are same
+    :param analyzer: analyzer for analysis
+    :param group: group id
     :param message: message of post or comment
     :return: true or false
     """
-
-    spam_db = SpamWordList.objects.filter(group=group, auth=filter)     # all spamlist data loads in list
+    spam_db = SpamWordList.objects.filter(Q(group=group), Q(status='filter') | Q(status='user'))     # all spamlist data loads in list
     data_set = [sp.word for sp in spam_db]
     twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
     kkma_nouns = analyzer.analyzer_kkma(message, 'nouns')
@@ -78,13 +88,17 @@ def add_spam_list(message, group):
     :param group: group data set
     """
     try:
-        spam_data = SpamList(group=group, text=message)
-        spam_data.save()
+        spam_db = SpamList.objects.filter(group=group, status='temp')
+        for i in spam_db:
+            if i.text != message:
+                spam_data = SpamList(group=group, text=message)
+                spam_data.save()
+
     except Exception as expt:
         print("error occurred:"+expt)
 
 
-def delete_spam_list(group, message):
+def delete_from_spam_list(group, message):
     """
     change status of spam list to deleted
     :param message: message of post or comment
@@ -101,14 +115,56 @@ def delete_spam_list(group, message):
     ##remmadation function
 
 
-def analyze_deleted_spamlist(analyzer, group):
-    spam_list = SpamList.objects.filter(group=group, status='deleted')
-    spam_word = SpamWordList
+def analyze_deleted_spamlist(analyzer, message):
+    """
+    analyze deleted spam list
+    :param analyzer: analyzer for analysis
+    :param message: message of spam list
+    :return: spam words list
+    """
     tempword = []
-    for i in spam_list:
-        twitter_posmore = analyzer.analyzer_twitter(i, 'posmore')
-        kkma_nouns = analyzer.analyzer_kkma(i, 'nouns')
-        tempword = twitter_posmore + kkma_nouns
+
+    twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
+    kkma_nouns = analyzer.analyzer_kkma(message, 'nouns')
+
+    for i in twitter_posmore:
+        tempword.append(i[0])
+
+    tempword = tempword + kkma_nouns
+    returnword = list(set(tempword))        # remove duplicates
+
+    return returnword
+
+
+def add_spam_words(group, words):
+    """
+    add words in DB
+    :param group: group id
+    :param words: spam words list
+    """
+    try:
+        words_db = SpamWordList.objects.filter(group=group)
+        for i in words_db:
+            if i in words:
+                word = SpamWordList.objects.filter(group=group, word=i)
+                word.count += 1
+                word.save()
+            else:
+                spamword = SpamWordList(word=i, group=group)
+                spamword.save()
+    except Exception as expt:
+        print("error occurred:"+expt)
+
+
+def update_words_level(group):
+    """
+    change temp status of word to filter
+    :param group: group id
+    """
+    words_db = SpamWordList.objects.filter(group=group, status='temp', count__gte=10)
+    for i in words_db:
+        i.status = 'filter'
+        i.save()
 
 
 def update_analysis_level(self, message):

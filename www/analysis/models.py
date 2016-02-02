@@ -37,7 +37,6 @@ class SpamWordList(models.Model):
     group = models.ForeignKey(Group)
     word = models.CharField(max_length=255)
     count = models.IntegerField(default=1)
-    status = models.CharField(max_length=10, default="temp")        # temp, deleted
-    auth = models.CharField(max_length=10, default="temp")          # temp, filter
+    status = models.CharField(max_length=10, default="temp")          # temp, filter, user, deleted
 
 

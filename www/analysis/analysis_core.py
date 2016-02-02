@@ -103,7 +103,7 @@ def compare_and_make_words(words, comparison_words):
     Compare standard words with input words. If two words are same, collects that word
     :param words: analyzed words
     :param comparison_words: standard words
-    :return: colleting words list. If input list has no str or tuple type, return false
+    :return: collecting words list. If input list has no str or tuple type, return false
     """
     meanning_words = []
     if type(words[0]).__name__ == 'str':    # morphs, nouns
