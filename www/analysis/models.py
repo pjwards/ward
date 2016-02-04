@@ -23,20 +23,25 @@
 """ Sets models """
 
 from django.db import models
-from ward.www.archive.models import Group
+from ward.www.archive.models import Group, FBUser, Comment, Post
 
 
 class SpamList(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
-    group = models.ForeignKey(Group)
-    text = models.TextField(null=True, blank=True)
-    status = models.CharField(max_length=10, default="temp")        # deleted, temp
+    group = models.ForeignKey(Group, related_name='spamlist')
+    user = models.ForeignKey(FBUser, related_name='spamlist')
+    message = models.TextField(null=True, blank=True)
+    last_updated_time = models.DateTimeField()
+    status = models.CharField(max_length=10, default='temp')        # deleted, temp
+
+    def __str__(self):
+        return self.id
 
 
 class SpamWordList(models.Model):
-    group = models.ForeignKey(Group)
+    group = models.ForeignKey(Group, related_name='spamwords')
     word = models.CharField(max_length=255)
     count = models.IntegerField(default=1)
-    status = models.CharField(max_length=10, default="temp")          # temp, filter, user, deleted
+    status = models.CharField(max_length=10, default='temp')          # temp, filter, user, deleted
 
 

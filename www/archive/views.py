@@ -35,13 +35,15 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from archive.fb.fb_query import get_feed_query
-from archive.fb.fb_request import FBRequest
-from archive.fb.fb_lookup import lookup_id
+from ward.www.archive.fb.fb_query import get_feed_query
+from ward.www.archive.fb.fb_request import FBRequest
+from ward.www.archive.fb.fb_lookup import lookup_id
 from allauth.socialaccount.models import SocialAccount
 from . import tasks
 from .rest.serializer import *
 from .utils import date_utils
+from ward.www.archive.models import *
+from ward.www.analysis.models import *
 
 logger = logging.getLogger(__name__)
 fb_request = FBRequest()
@@ -226,6 +228,94 @@ def group_management(request, group_id):
         # Get a check box by using model
         if model == 'post':
             check_box = request.POST.getlist('del_post')
+        elif model == 'comment':
+            check_box = request.POST.getlist('del_comment')
+        else:
+            error = 'This model did not validate.'
+            return JsonResponse({'success': error})
+
+        # Validate the check box
+        if not check_box:
+            error = 'Did not check any check box.'
+            return JsonResponse({'error': error})
+
+        # Generate fb request by using the access token
+        fb_request_del = FBRequest(access_token=access_token)
+
+        # Validate access token
+        res, e = fb_request_del.validate_token()
+        if not res:
+            return JsonResponse({'error': e})
+
+        # Delete object in check box
+        total = len(check_box)
+        error = set()
+        success = 0
+        fail = 0
+        for object_id in check_box:
+            # res, e = tasks.delete_group_content(object_id, model)
+            res, e = tasks.delete_group_content_by_fb(object_id, model, fb_request_del)
+            if res:
+                success += 1
+            else:
+                fail += 1
+                error.add(e)
+
+        # Post and comment count in group size change
+        tasks.check_cp_cnt_group(_group)
+
+        # Return result json
+        return JsonResponse(
+            {
+                'model': model,
+                'result': {'total': total, 'success': success, 'fail': fail},
+                'error': list(error)
+            })
+
+
+@login_required
+def group_spam(request, group_id):
+    """
+    Display spam page for group owner
+
+    :param request: request
+    :param group_id: group_id
+    :return: searched data
+    """
+    _group = get_object_or_404(Group, pk=group_id)
+    if not request.user.is_superuser:
+        social_account = SocialAccount.objects.filter(user=request.user)
+        if not social_account or _group.owner.id != SocialAccount.objects.filter(user=request.user)[0].uid:
+            return HttpResponseForbidden()
+
+    if request.method == "GET":
+        _groups = Group.objects.all()
+        spams = SpamList.objects.filter(group=_group, last_updated_time__range=date_utils.week_delta())
+        return render(
+            request,
+            'archive/group/spam.html',
+            {
+                'groups': _groups,
+                'group': _group,
+                'posts': spams,
+            }
+        )
+    elif request.method == "POST":
+        # Get a model and validate a model
+        model = request.POST.get("model", None)
+        if model is None:
+            error = 'Did not exist this model.'
+            return JsonResponse({'error': error})
+
+        # Get a access token and validate the access token
+        access_token = request.POST.get("access_token", None)
+        if not access_token:
+            error = 'Did not exist this access token.'
+            return JsonResponse({'error': error})
+
+        # Get a check box by using model
+        if model == 'spam':
+            check_box = request.POST.getlist('del_spam')
         elif model == 'comment':
             check_box = request.POST.getlist('del_comment')
         else:

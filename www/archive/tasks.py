@@ -26,7 +26,7 @@ from __future__ import absolute_import
 import logging
 from facebook import GraphAPIError
 from celery import shared_task
-from archive.fb.fb_request import FBRequest
+from ward.www.archive.fb.fb_request import FBRequest
 from .models import *
 
 

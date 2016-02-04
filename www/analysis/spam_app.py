@@ -25,41 +25,53 @@
 import ward.www.analysis.analysis_core as core
 from django.db.models import Q
 from .models import SpamList, SpamWordList
+from ward.www.archive.models import Group, FBUser, Comment, Post
 
 
-#def __init__(self, group):
-#    """
-#    Initialize Spam class
-#    """
-#    self.analyzer = core.AnalysisDiction(True, True)
-#    self.group = group
-
-def init_db(group):
+def init_db(group_id):
     """
     save standard word from spam.txt to database when initialize database
+    :param group_id: group id
     """
+    group = Group.objects.filter(id=group_id)[0]
     data_set = [line.strip() for line in open("analysis/texts/spam.txt", 'r')]
     for i in data_set:
         store_data = SpamWordList(word=i, group=group, status='filter')
         store_data.save()
 
 
-def save_user_word(group, word):
+def save_user_word(group_id, word):
     """
     Save user's words in DB
+    :param group_id: group id
+    :param word: target word
     """
+    group = Group.objects.filter(id=group_id)[0]
     store_data = SpamWordList(word=word, group=group, status='user')
     store_data.save()
 
 
-def analyze_posts(analyzer, group, message):
+def delete_user_word(group_id, word):
+    """
+    Change user word to deleted word
+    :param group_id: group id
+    :param word: target word
+    """
+    group = Group.objects.filter(id=group_id)[0]
+    word_data = SpamWordList.objects.filter(word=word, group=group)
+    word_data.status = 'deleted'
+    word_data.save()
+
+
+def analyze_posts(analyzer, group_id, message):
     """
     Return true if analyzed words and spam words are same
     :param analyzer: analyzer for analysis
-    :param group: group id
+    :param group_id: group id
     :param message: message of post or comment
     :return: true or false
     """
+    group = Group.objects.filter(id=group_id)[0]
     spam_db = SpamWordList.objects.filter(Q(group=group), Q(status='filter') | Q(status='user'))     # all spamlist data loads in list
     data_set = [sp.word for sp in spam_db]
     twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
@@ -81,38 +93,45 @@ def analyze_posts(analyzer, group, message):
     #return analyzed_words
 
 
-def add_spam_list(group, message):
+def add_spam_list(group_id, user_id, object_id, message, time):
     """
     add to spam list
     :param message: message of post or comment
-    :param group: group data set
+    :param group_id: group id
+    :param object_id: id of post or comment
+    :param user_id: user id
+    :param time: time of object
     """
     try:
-        spam_db = SpamList.objects.filter(group=group, status='temp')
-        for i in spam_db:
-            if i.text != message:
-                spam_data = SpamList(group=group, text=message)
-                spam_data.save()
+        group = Group.objects.filter(id=group_id)[0]
+        user = FBUser.objects.filter(id=user_id)[0]
+        spamlist = SpamList()
+        spamlist.id = object_id
+        spamlist.group = group
+        spamlist.user = user
+        spamlist.message = message
+        spamlist.last_updated_time = time
+        spamlist.status = 'temp'
+        spamlist.save()
 
     except Exception as expt:
         print("error occurred:"+expt)
 
 
-def delete_from_spam_list(group, message):
+def delete_from_spam_list(group_id, object_id):
     """
     change status of spam list to deleted
-    :param message: message of post or comment
-    :param group: group data set
+    :param object_id: id of post or comment
+    :param group_id: group id
     """
     try:
-        spam_data = SpamList.objects.get(group=group, text=message)
+        group = Group.objects.filter(id=group_id)[0]
+        spam_data = SpamList.objects.get(group=group, id=object_id)
         spam_data.status = 'deleted'
         spam_data.save()
+
     except Exception as expt:
         print("error occurred:"+expt)
-
-    ##alarm about spam that deleted in other group
-    ##remmadation function
 
 
 def analyze_deleted_spamlist(analyzer, message):
@@ -136,10 +155,11 @@ def analyze_deleted_spamlist(analyzer, message):
     return returnword
 
 
-def analyze_restored_spamlist(analyzer, group, message):
+def analyze_restored_spamlist(analyzer, group_id, message):
     """
     analyze restored spam
     :param analyzer: analyzer for analysis
+    :param group_id: group id
     :param message: message of spam list
     """
     tempTwitter = []
@@ -154,6 +174,7 @@ def analyze_restored_spamlist(analyzer, group, message):
     words = list(set(tempWord))
 
     try:
+        group = Group.objects.filter(id=group_id)[0]
         words_db = SpamWordList.objects.filter(group=group)
         for i in words_db:
             if i.word in words:
@@ -163,39 +184,58 @@ def analyze_restored_spamlist(analyzer, group, message):
         print("error occurred:"+expt)
 
 
-def add_spam_words(group, words):
+def add_spam_words(group_id, words):
     """
     add words in DB
-    :param group: group id
+    :param group_id: group id
     :param words: spam words list
     """
     try:
+        group = Group.objects.filter(id=group_id)[0]
         words_db = SpamWordList.objects.filter(group=group)
         for i in words_db:
-            if i in words:
+            if i.word in words:
                 word = SpamWordList.objects.filter(group=group, word=i.word)
                 word.count += 1
                 word.save()
             else:
                 spamword = SpamWordList(word=i.word, group=group)
                 spamword.save()
+
     except Exception as expt:
         print("error occurred:"+expt)
 
 
-def update_words_level(group):
+def update_words_level(group_id):
     """
-    change temp status of word to filter
-    :param group: group id
+    change temp and deleted status of words which are greater than critical point to filter status
+    :param group_id: group id
     """
     try:
+        group = Group.objects.filter(id=group_id)[0]
         words_db = SpamWordList.objects.filter(group=group, status='temp', count__gte=10)
         for i in words_db:
-            i.status = 'filter'
-            i.save()
+            word = SpamWordList(group=group, word=i.word)
+            word.status = 'filter'
+            word.save()
+
+        words = SpamWordList.objects.filter(group=group, status='deleted', count__gte=30)
+        if words is not None:
+            for i in words:
+                word = SpamWordList(group=group, word=i.word)
+                word.status = 'filter'
+                word.save()
 
     except Exception as expt:
         print("error occurred:"+expt)
+
+
+# def __init__(self, group):
+#    """
+#    Initialize Spam class
+#    """
+#    self.analyzer = core.AnalysisDiction(True, True)
+#    self.group = group
 
 
 def run_app(group, message):      # test-only method
