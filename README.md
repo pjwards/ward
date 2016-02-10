@@ -93,7 +93,6 @@ npm install bower
 cd [product_forder]
 bower install
 cd [product_forder]/www
-mkdir logs
 python manage.py migrate
 python manage.py createsuperuser
 
@@ -139,7 +138,6 @@ sudo chown www-data:www-data -R *
 cd [product_forder]
 bower install
 cd [product_forder]/www
-mkdir logs
 python manage.py migrate
 python manage.py createsuperuser
 

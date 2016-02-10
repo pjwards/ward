@@ -432,22 +432,20 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
+        'default': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/mysite.log',
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
         'archive': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/archive.log',
+            'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['default'],
             'propagate': True,
             'level': 'DEBUG',
         },

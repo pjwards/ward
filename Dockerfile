@@ -97,7 +97,6 @@ ADD . ${PROJECT_DIR}
 RUN chown -R www-data:www-data ${PROJECT_DIR}
 RUN cd ${PROJECT_DIR} && bower --allow-root install
 RUN cd ${PROJECT_DIR} && pip3 install -r requirements.txt
-RUN mkdir ${PROJECT_DIR}/www/logs
 RUN cd ${PROJECT_DIR}/www && python3 manage.py migrate --noinput
 RUN cd ${PROJECT_DIR}/www && python3 manage.py collectstatic --noinput
 
