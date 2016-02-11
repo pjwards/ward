@@ -35,15 +35,15 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route, renderer_classes, list_route
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from ward.www.archive.fb.fb_query import get_feed_query
-from ward.www.archive.fb.fb_request import FBRequest
-from ward.www.archive.fb.fb_lookup import lookup_id
+from archive.fb.fb_query import get_feed_query
+from archive.fb.fb_request import FBRequest
+from archive.fb.fb_lookup import lookup_id
 from allauth.socialaccount.models import SocialAccount
 from . import tasks
 from .rest.serializer import *
 from .utils import date_utils
-from ward.www.archive.models import *
-from ward.www.analysis.models import *
+from archive.models import *
+from analysis.models import *
 
 logger = logging.getLogger(__name__)
 fb_request = FBRequest()

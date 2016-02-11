@@ -23,7 +23,7 @@
 """ Sets models """
 
 from django.db import models
-from ward.www.archive.models import Group, FBUser, Comment, Post
+from archive.models import Group, FBUser, Comment, Post
 
 
 class SpamList(models.Model):
