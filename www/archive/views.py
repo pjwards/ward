@@ -782,8 +782,39 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             raise ValueError(
                     "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
 
-        all_posts = self.get_objects_by_time(Post, from_date, to_date)
-        all_comments = self.get_objects_by_time(Comment, from_date, to_date)
+        statistics_model = self.get_statistics_model(method)
+
+        if not statistics_model.objects.filter(group=self.get_object()).exists():
+            posts, comments = self.get_statistics(method, from_date, to_date)
+            for post in posts:
+                temp_st = statistics_model(group=self.get_object(), time=post.get("date"), model='post', count=post.get("count"))
+                temp_st.save()
+
+            for comment in comments:
+                temp_st = statistics_model(group=self.get_object(), time=comment.get("date"), model='comment', count=comment.get("count"))
+                temp_st.save()
+            posts, comments = self.process_statistics(method, posts, comments)
+        else:
+            posts = statistics_model.objects.filter(group=self.get_object(), model='post').order_by('time')
+            comments = statistics_model.objects.filter(group=self.get_object(), model='comment').order_by('time')
+
+            # print(posts[len(posts)-1].time.year)
+
+            # from_date = posts[len(posts)-1].time
+            # for each in posts:
+            #     print(str(each.time) + " " + str(each.count))
+
+            posts, comments = self.process_statistics_model(method, posts, comments)
+
+        # Return json data after rearranging data
+        return Response({
+            'posts': posts,
+            'comments': comments
+        })
+
+    def get_statistics(self, method, from_date, to_date):
+        posts = self.get_objects_by_time(Post, from_date, to_date)
+        comments = self.get_objects_by_time(Comment, from_date, to_date)
 
         # Method Dictionary for group by time
         dic = {
@@ -795,36 +826,72 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         }
 
         # Get posts and comment count in some date
-        all_posts = all_posts.extra(select={'date': dic[method]}).order_by().values('date') \
+        posts = posts.extra(select={'date': dic[method]}).order_by().values('date') \
             .annotate(count=Count('created_time'))
-        all_comments = all_comments.extra(select={'date': dic[method]}).order_by().values('date') \
+        comments = comments.extra(select={'date': dic[method]}).order_by().values('date') \
             .annotate(count=Count('created_time'))
 
-        # Merge post and comment data
-        posts = []
-        comments = []
+        return posts, comments
 
-        for post in all_posts:
+    def process_statistics(self, method, posts, comments):
+
+        processed_posts = []
+        processed_comments = []
+
+        for post in posts:
             if method == "hour_total":
                 date = '{0:0.0f}'.format(post.get('date')).zfill(2)
             else:
                 date = post.get("date").strftime("%Y-%m-%d %I:%M%p")
             count = post.get("count")
-            posts.append([date, count])
+            processed_posts.append([date, count])
 
-        for comment in all_comments:
+        for comment in comments:
             if method == "hour_total":
                 date = '{0:0.0f}'.format(comment.get('date')).zfill(2)
             else:
                 date = comment.get("date").strftime("%Y-%m-%d %I:%M%p")
             count = comment.get("count")
-            comments.append([date, count])
+            processed_comments.append([date, count])
 
-        # Return json data after rearranging data
-        return Response({
-            'posts': sorted(posts, key=lambda k: k[0]),
-            'comments': sorted(comments, key=lambda k: k[0])
-        })
+        return sorted(processed_posts, key=lambda k: k[0]), sorted(processed_comments, key=lambda k: k[0])
+
+    def process_statistics_model(self, method, posts, comments):
+
+        processed_posts = []
+        processed_comments = []
+
+        for post in posts:
+            if method == "hour_total":
+                date = '{0:0.0f}'.format(post.time).zfill(2)
+            else:
+                date = post.time.strftime("%Y-%m-%d %I:%M%p")
+            count = post.count
+            processed_posts.append([date, count])
+
+        for comment in comments:
+            if method == "hour_total":
+                date = '{0:0.0f}'.format(comment.time).zfill(2)
+            else:
+                date = comment.time.strftime("%Y-%m-%d %I:%M%p")
+            count = comment.count
+            processed_comments.append([date, count])
+
+        return sorted(processed_posts, key=lambda k: k[0]), sorted(processed_comments, key=lambda k: k[0])
+
+    def get_statistics_model(self, method):
+        if method == 'year':
+            return YearGroupStatistics
+        elif method == 'month':
+            return MonthGroupStatistics
+        elif method == 'day':
+            return DayGroupStatistics
+        elif method == 'hour':
+            return HourGroupStatistics
+        elif method == 'hour_total':
+            return TimeOverviewGroupStatistics
+        else:
+            return None
 
     @detail_route()
     def post_issue(self, request, pk=None):

@@ -447,3 +447,44 @@ class GroupStoreList(models.Model):
 class InterestGroupList(models.Model):
     user = models.ForeignKey(User, related_name='interest_group_list')
     group = models.ForeignKey(Group, related_name='interest_group_list')
+
+
+class GroupStatisticsUpdateList(models.Model):
+    group = models.ForeignKey(Group)
+    method = models.CharField(max_length=30)
+    updated_time = models.DateTimeField(auto_now_add=True)
+
+
+class YearGroupStatistics(models.Model):
+    group = models.ForeignKey(Group)
+    time = models.DateTimeField()
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)
+
+
+class MonthGroupStatistics(models.Model):
+    group = models.ForeignKey(Group)
+    time = models.DateTimeField()
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)
+
+
+class DayGroupStatistics(models.Model):
+    group = models.ForeignKey(Group)
+    time = models.DateTimeField()
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)
+
+
+class HourGroupStatistics(models.Model):
+    group = models.ForeignKey(Group)
+    time = models.DateTimeField()
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)
+
+
+class TimeOverviewGroupStatistics(models.Model):
+    group = models.ForeignKey(Group)
+    time = models.IntegerField(default=0)
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)

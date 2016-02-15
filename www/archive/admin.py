@@ -132,6 +132,26 @@ class InterestGroupListAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'group')
 
 
+class YearGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
+class MonthGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
+class DayGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
+class HourGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
+class TimeOverviewGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
 admin.site.register(FBUser, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
@@ -146,3 +166,8 @@ admin.site.register(Ward, WardAdmin)
 admin.site.register(UserActivity, UserActivityAdmin)
 admin.site.register(GroupStoreList, GroupStoreListAdmin)
 admin.site.register(InterestGroupList, InterestGroupListAdmin)
+admin.site.register(YearGroupStatistics, YearGroupStatisticsAdmin)
+admin.site.register(MonthGroupStatistics, MonthGroupStatisticsAdmin)
+admin.site.register(DayGroupStatistics, DayGroupStatisticsAdmin)
+admin.site.register(HourGroupStatistics, HourGroupStatisticsAdmin)
+admin.site.register(TimeOverviewGroupStatistics, TimeOverviewGroupStatisticsAdmin)
