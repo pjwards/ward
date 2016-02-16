@@ -476,13 +476,6 @@ class DayGroupStatistics(models.Model):
     count = models.IntegerField(default=0)
 
 
-class HourGroupStatistics(models.Model):
-    group = models.ForeignKey(Group)
-    time = models.DateTimeField()
-    model = models.CharField(max_length=10)
-    count = models.IntegerField(default=0)
-
-
 class TimeOverviewGroupStatistics(models.Model):
     group = models.ForeignKey(Group)
     time = models.IntegerField(default=0)

@@ -144,10 +144,6 @@ class DayGroupStatisticsAdmin(admin.ModelAdmin):
     list_display = ('group', 'time', 'model', 'count')
 
 
-class HourGroupStatisticsAdmin(admin.ModelAdmin):
-    list_display = ('group', 'time', 'model', 'count')
-
-
 class TimeOverviewGroupStatisticsAdmin(admin.ModelAdmin):
     list_display = ('group', 'time', 'model', 'count')
 
@@ -169,5 +165,4 @@ admin.site.register(InterestGroupList, InterestGroupListAdmin)
 admin.site.register(YearGroupStatistics, YearGroupStatisticsAdmin)
 admin.site.register(MonthGroupStatistics, MonthGroupStatisticsAdmin)
 admin.site.register(DayGroupStatistics, DayGroupStatisticsAdmin)
-admin.site.register(HourGroupStatistics, HourGroupStatisticsAdmin)
 admin.site.register(TimeOverviewGroupStatistics, TimeOverviewGroupStatisticsAdmin)

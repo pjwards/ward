@@ -778,9 +778,9 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if to_date:
             to_date = date_utils.get_date_from_str(to_date)
 
-        if method != 'year' and method != 'month' and method != 'day' and method != 'hour' and method != 'hour_total':
+        if method != 'year' and method != 'month' and method != 'day' and method != 'hour_total':
             raise ValueError(
-                    "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
+                    "Method can be used 'year', 'month', 'day' or 'hour_total'. Input method:" + method)
 
         statistics_model = self.get_statistics_model(method)
 
@@ -886,8 +886,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             return MonthGroupStatistics
         elif method == 'day':
             return DayGroupStatistics
-        elif method == 'hour':
-            return HourGroupStatistics
         elif method == 'hour_total':
             return TimeOverviewGroupStatistics
         else:
