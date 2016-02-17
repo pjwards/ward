@@ -437,6 +437,9 @@ class UserActivity(models.Model):
 
 
 class GroupStoreList(models.Model):
+    """
+    Group store list to check group is store,
+    """
     group = models.OneToOneField(Group)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
@@ -445,17 +448,30 @@ class GroupStoreList(models.Model):
 
 
 class InterestGroupList(models.Model):
+    """
+    Interest group list for easy to check interested group
+    """
     user = models.ForeignKey(User, related_name='interest_group_list')
     group = models.ForeignKey(Group, related_name='interest_group_list')
 
 
 class GroupStatisticsUpdateList(models.Model):
+    """
+    Group statistics update list for check statistics is update
+    """
     group = models.ForeignKey(Group)
     method = models.CharField(max_length=30)
     updated_time = models.DateTimeField(auto_now_add=True)
 
     @classmethod
     def update(cls, group, method):
+        """
+        Update list
+
+        :param group: group
+        :param method: method
+        :return:
+        """
         oj = GroupStatisticsUpdateList.objects.filter(group=group, method=method)
         if oj:
             oj[0].updated_time = timezone.now()
@@ -465,6 +481,11 @@ class GroupStatisticsUpdateList(models.Model):
             oj.save()
 
     def is_update(self):
+        """
+        Check update is possible. (per 1 day)
+
+        :return:
+        """
         now = timezone.now()
         diff = now - self.updated_time
 
@@ -474,6 +495,9 @@ class GroupStatisticsUpdateList(models.Model):
 
 
 class YearGroupStatistics(models.Model):
+    """
+    Memoization about year group statistics
+    """
     group = models.ForeignKey(Group)
     time = models.DateTimeField()
     model = models.CharField(max_length=10)
@@ -481,6 +505,9 @@ class YearGroupStatistics(models.Model):
 
 
 class MonthGroupStatistics(models.Model):
+    """
+    Memoization about month group statistics
+    """
     group = models.ForeignKey(Group)
     time = models.DateTimeField()
     model = models.CharField(max_length=10)
@@ -488,6 +515,9 @@ class MonthGroupStatistics(models.Model):
 
 
 class DayGroupStatistics(models.Model):
+    """
+    Memoization about day group statistics
+    """
     group = models.ForeignKey(Group)
     time = models.DateTimeField()
     model = models.CharField(max_length=10)
@@ -495,6 +525,9 @@ class DayGroupStatistics(models.Model):
 
 
 class TimeOverviewGroupStatistics(models.Model):
+    """
+    Memoization about time overview group statistics
+    """
     group = models.ForeignKey(Group)
     time = models.IntegerField(default=0)
     model = models.CharField(max_length=10)

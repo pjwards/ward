@@ -792,6 +792,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         })
 
     def get_statistics_model(self, method):
+        """
+        Get statistics model from model
+
+        :param method: method
+        :return: statistics model
+        """
         if method == 'year':
             return YearGroupStatistics
         elif method == 'month':
@@ -804,6 +810,15 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             return None
 
     def process_memoization(self, statistics_model, method, from_date, to_date):
+        """
+        Process memoization
+
+        :param statistics_model: statistics_model
+        :param method: method
+        :param from_date: from_date
+        :param to_date: to_date
+        :return: posts and comments
+        """
         # Is memoization?
         if not statistics_model.objects.filter(group=self.get_object()).exists():
             posts, comments = self.get_statistics(method, from_date, to_date)
@@ -852,11 +867,28 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return posts, comments
 
     def get_statistics(self, method, from_date, to_date):
+        """
+        Get statistics
+
+        :param method: method
+        :param from_date: from_date
+        :param to_date: to_date
+        :return: posts and comments
+        """
         posts = self.get_statistics_by_model(Post, method, from_date, to_date)
         comments = self.get_statistics_by_model(Comment, method, from_date, to_date)
         return posts, comments
 
     def get_statistics_by_model(self, model, method, from_date, to_date):
+        """
+        Get statistics by model
+
+        :param model: model
+        :param method: method
+        :param from_date: from_date
+        :param to_date: to_date
+        :return: models
+        """
         _models = self.get_objects_by_time(model, from_date, to_date)
 
         # Method Dictionary for group by time
@@ -873,6 +905,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             .annotate(count=Count('created_time'))
 
     def process_statistics(self, method, posts, comments):
+        """
+        Process statistics for chart
+
+        :param method: method
+        :param posts: post
+        :param comments: comment
+        :return: sorted processed posts and comments
+        """
         processed_posts = []
         processed_comments = []
 
@@ -895,6 +935,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return sorted(processed_posts, key=lambda k: k[0]), sorted(processed_comments, key=lambda k: k[0])
 
     def process_statistics_model(self, method, posts, comments):
+        """
+        Process statistics by model for chart
+
+        :param method: method
+        :param posts: post
+        :param comments: comment
+        :return: sorted processed posts and comments
+        """
         processed_posts = []
         processed_comments = []
 
@@ -917,10 +965,24 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return sorted(processed_posts, key=lambda k: k[0]), sorted(processed_comments, key=lambda k: k[0])
 
     def save_statistics_model(self, statistics_model, model, model_string):
+        """
+        Save statistics model
+
+        :param statistics_model: statistics_model
+        :param model: model
+        :param model_string: model_string
+        """
         statistics_model(group=self.get_object(), time=model.get("date"), model=model_string,
                          count=model.get("count")).save()
 
     def update_statistics_model(self, statistics_model, model, model_string):
+        """
+        Update statistics model
+
+        :param statistics_model: statistics_model
+        :param model: model
+        :param model_string: model_string
+        """
         old_model = statistics_model.objects.filter(group=self.get_object(), model=model_string, time=model.get("date"))
 
         if old_model:
