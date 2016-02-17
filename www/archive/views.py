@@ -783,28 +783,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
                     "Method can be used 'year', 'month', 'day' or 'hour_total'. Input method:" + method)
 
         statistics_model = self.get_statistics_model(method)
-
-        if not statistics_model.objects.filter(group=self.get_object()).exists():
-            posts, comments = self.get_statistics(method, from_date, to_date)
-            for post in posts:
-                temp_st = statistics_model(group=self.get_object(), time=post.get("date"), model='post', count=post.get("count"))
-                temp_st.save()
-
-            for comment in comments:
-                temp_st = statistics_model(group=self.get_object(), time=comment.get("date"), model='comment', count=comment.get("count"))
-                temp_st.save()
-            posts, comments = self.process_statistics(method, posts, comments)
-        else:
-            posts = statistics_model.objects.filter(group=self.get_object(), model='post').order_by('time')
-            comments = statistics_model.objects.filter(group=self.get_object(), model='comment').order_by('time')
-
-            # print(posts[len(posts)-1].time.year)
-
-            # from_date = posts[len(posts)-1].time
-            # for each in posts:
-            #     print(str(each.time) + " " + str(each.count))
-
-            posts, comments = self.process_statistics_model(method, posts, comments)
+        posts, comments = self.process_memoization(statistics_model, method, from_date, to_date)
 
         # Return json data after rearranging data
         return Response({
@@ -812,9 +791,73 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             'comments': comments
         })
 
+    def get_statistics_model(self, method):
+        if method == 'year':
+            return YearGroupStatistics
+        elif method == 'month':
+            return MonthGroupStatistics
+        elif method == 'day':
+            return DayGroupStatistics
+        elif method == 'hour_total':
+            return TimeOverviewGroupStatistics
+        else:
+            return None
+
+    def process_memoization(self, statistics_model, method, from_date, to_date):
+        # Is memoization?
+        if not statistics_model.objects.filter(group=self.get_object()).exists():
+            posts, comments = self.get_statistics(method, from_date, to_date)
+
+            for post in posts:
+                self.save_statistics_model(statistics_model, post, 'post')
+            for comment in comments:
+                self.save_statistics_model(statistics_model, comment, 'comment')
+
+            GroupStatisticsUpdateList.update(group=self.get_object(), method=method)
+
+            posts, comments = self.process_statistics(method, posts, comments)
+        else:
+            # Is ready to update?
+            update_list = GroupStatisticsUpdateList.objects.filter(group=self.get_object(), method=method)
+            if update_list:
+                is_update = update_list[0].is_update()
+            else:
+                GroupStatisticsUpdateList.update(group=self.get_object(), method=method)
+                is_update = False
+
+            # Get statistics from memoization
+            posts = statistics_model.objects.filter(group=self.get_object(), model='post').order_by('time')
+            comments = statistics_model.objects.filter(group=self.get_object(), model='comment').order_by('time')
+
+            if is_update:
+                if method == 'hour_total':
+                    update_posts, update_comments = self.get_statistics(method, from_date, to_date)
+
+                    for post in update_posts:
+                        self.update_statistics_model(statistics_model, post, 'post')
+                    for comment in update_comments:
+                        self.update_statistics_model(statistics_model, comment, 'comment')
+                else:
+                    update_posts = self.get_statistics_by_model(Post, method, posts[len(posts) - 1].time, to_date)
+                    update_comments = self.get_statistics_by_model(Comment, method, comments[len(comments) - 1].time,
+                                                                   to_date)
+
+                    for post in update_posts:
+                        self.update_statistics_model(statistics_model, post, 'post')
+                    for comment in update_comments:
+                        self.update_statistics_model(statistics_model, comment, 'comment')
+
+            posts, comments = self.process_statistics_model(method, posts, comments)
+
+        return posts, comments
+
     def get_statistics(self, method, from_date, to_date):
-        posts = self.get_objects_by_time(Post, from_date, to_date)
-        comments = self.get_objects_by_time(Comment, from_date, to_date)
+        posts = self.get_statistics_by_model(Post, method, from_date, to_date)
+        comments = self.get_statistics_by_model(Comment, method, from_date, to_date)
+        return posts, comments
+
+    def get_statistics_by_model(self, model, method, from_date, to_date):
+        _models = self.get_objects_by_time(model, from_date, to_date)
 
         # Method Dictionary for group by time
         dic = {
@@ -825,16 +868,11 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             'hour_total': "date_part('hour', created_time at time zone 'UTC' AT TIME ZONE '+9')",
         }
 
-        # Get posts and comment count in some date
-        posts = posts.extra(select={'date': dic[method]}).order_by().values('date') \
+        # Get models count in some date
+        return _models.extra(select={'date': dic[method]}).order_by().values('date') \
             .annotate(count=Count('created_time'))
-        comments = comments.extra(select={'date': dic[method]}).order_by().values('date') \
-            .annotate(count=Count('created_time'))
-
-        return posts, comments
 
     def process_statistics(self, method, posts, comments):
-
         processed_posts = []
         processed_comments = []
 
@@ -857,7 +895,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return sorted(processed_posts, key=lambda k: k[0]), sorted(processed_comments, key=lambda k: k[0])
 
     def process_statistics_model(self, method, posts, comments):
-
         processed_posts = []
         processed_comments = []
 
@@ -879,17 +916,18 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         return sorted(processed_posts, key=lambda k: k[0]), sorted(processed_comments, key=lambda k: k[0])
 
-    def get_statistics_model(self, method):
-        if method == 'year':
-            return YearGroupStatistics
-        elif method == 'month':
-            return MonthGroupStatistics
-        elif method == 'day':
-            return DayGroupStatistics
-        elif method == 'hour_total':
-            return TimeOverviewGroupStatistics
+    def save_statistics_model(self, statistics_model, model, model_string):
+        statistics_model(group=self.get_object(), time=model.get("date"), model=model_string,
+                         count=model.get("count")).save()
+
+    def update_statistics_model(self, statistics_model, model, model_string):
+        old_model = statistics_model.objects.filter(group=self.get_object(), model=model_string, time=model.get("date"))
+
+        if old_model:
+            old_model[0].count = model.get("count")
+            old_model[0].save()
         else:
-            return None
+            self.save_statistics_model(statistics_model, model, model_string)
 
     @detail_route()
     def post_issue(self, request, pk=None):

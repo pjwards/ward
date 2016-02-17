@@ -148,6 +148,10 @@ class TimeOverviewGroupStatisticsAdmin(admin.ModelAdmin):
     list_display = ('group', 'time', 'model', 'count')
 
 
+class GroupStatisticsUpdateListAdmin(admin.ModelAdmin):
+    list_display = ('group', 'method', 'updated_time')
+
+
 admin.site.register(FBUser, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
@@ -166,3 +170,4 @@ admin.site.register(YearGroupStatistics, YearGroupStatisticsAdmin)
 admin.site.register(MonthGroupStatistics, MonthGroupStatisticsAdmin)
 admin.site.register(DayGroupStatistics, DayGroupStatisticsAdmin)
 admin.site.register(TimeOverviewGroupStatistics, TimeOverviewGroupStatisticsAdmin)
+admin.site.register(GroupStatisticsUpdateList, GroupStatisticsUpdateListAdmin)

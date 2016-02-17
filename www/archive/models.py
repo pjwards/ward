@@ -454,6 +454,24 @@ class GroupStatisticsUpdateList(models.Model):
     method = models.CharField(max_length=30)
     updated_time = models.DateTimeField(auto_now_add=True)
 
+    @classmethod
+    def update(cls, group, method):
+        oj = GroupStatisticsUpdateList.objects.filter(group=group, method=method)
+        if oj:
+            oj[0].updated_time = timezone.now()
+            oj[0].save()
+        else:
+            oj = GroupStatisticsUpdateList(group=group, method=method)
+            oj.save()
+
+    def is_update(self):
+        now = timezone.now()
+        diff = now - self.updated_time
+
+        if diff.days >= 1:
+            return True
+        return False
+
 
 class YearGroupStatistics(models.Model):
     group = models.ForeignKey(Group)
