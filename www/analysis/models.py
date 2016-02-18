@@ -31,7 +31,7 @@ class SpamList(models.Model):
     group = models.ForeignKey(Group, related_name='spamlist')
     user = models.ForeignKey(FBUser, related_name='spamlist')
     message = models.TextField(null=True, blank=True)
-    last_updated_time = models.DateTimeField()
+    time = models.DateTimeField()
     status = models.CharField(max_length=10, default='temp')        # deleted, temp
 
     def __str__(self):
@@ -43,5 +43,3 @@ class SpamWordList(models.Model):
     word = models.CharField(max_length=255)
     count = models.IntegerField(default=1)
     status = models.CharField(max_length=10, default='temp')          # temp, filter, user, deleted
-
-

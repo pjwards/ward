@@ -23,4 +23,16 @@
 """ Sets admin site """
 
 from django.contrib import admin
+from .models import *
 
+
+class SpamListAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'group', 'message', 'time', 'status')
+
+
+class SpamWordAdmin(admin.ModelAdmin):
+    list_display = ('group', 'word', 'count', 'status')
+
+
+admin.site.register(SpamList, SpamListAdmin)
+admin.site.register(SpamWordList, SpamWordAdmin)

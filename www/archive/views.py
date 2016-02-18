@@ -272,7 +272,7 @@ def group_management(request, group_id):
                 'error': list(error)
             })
 
-
+'''
 @login_required
 def group_spam(request, group_id):
     """
@@ -359,7 +359,7 @@ def group_spam(request, group_id):
                 'result': {'total': total, 'success': success, 'fail': fail},
                 'error': list(error)
             })
-
+'''
 
 @user_passes_test(lambda u: u.is_superuser)
 def group_store(request, group_id):
