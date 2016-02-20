@@ -862,6 +862,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
                     for comment in update_comments:
                         self.update_statistics_model(statistics_model, comment, 'comment')
 
+                GroupStatisticsUpdateList.update(group=self.get_object(), method=method)
+
             posts, comments = self.process_statistics_model(method, posts, comments)
 
         return posts, comments
