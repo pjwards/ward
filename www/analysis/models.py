@@ -43,3 +43,30 @@ class SpamWordList(models.Model):
     word = models.CharField(max_length=255)
     count = models.IntegerField(default=1)
     status = models.CharField(max_length=10, default='temp')          # temp, filter, user, deleted
+
+
+class ArchiveAnalysisWord(models.Model):
+    word = models.CharField(max_length=255)
+    count = models.IntegerField(default=1)
+    status = models.CharField(max_length=10, default='temp')
+    group = models.ForeignKey(Group, related_name='archivewords')
+    # word weight with likes and comments
+
+
+class AnticipateArchive(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    group = models.ForeignKey(Group, related_name='antiArchives')
+    user = models.ForeignKey(FBUser, related_name='antiArchives')
+    message = models.TextField(null=True, blank=True)
+    time = models.DateTimeField()
+    status = models.CharField(max_length=10, default='temp')
+    # type
+
+
+class AnalysisDBSchema(models.Model):
+    group = models.ForeignKey(Group, related_name='analysisSchema')
+    avgpostlike = models.IntegerField(default=0)
+    avgpostcomment = models.IntegerField(default=0)
+    avgcomtlike = models.IntegerField(default=0)
+    avgcomtcomment = models.IntegerField(default=0)
+    lastupdatetime = models.DateTimeField()

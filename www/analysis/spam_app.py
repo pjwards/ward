@@ -293,7 +293,7 @@ def run_app():      # test-only method      lifecoding - 174499879257223, node -
     group = Group.objects.filter(id=168705546563077)[0]
     print("name is "+group.name)
 
-    #posts = Post.objects.filter(group=group)
+    # posts = Post.objects.filter(group=group)
 
     # SpamWordList.objects.all().delete()
 
