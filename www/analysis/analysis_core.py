@@ -163,7 +163,51 @@ def url_duplication_check(data_set, urls):
     return url_list
 
 
-#def merge_analyzed_list(list1, list2):
+def analyze_articles(analyzer, message):
+    """
+    analyze articles
+    :param analyzer: analyzer for analysis
+    :param message: string data
+    :return: refined words list
+    """
+    temp_twitter = []
+    temp_kkma = []
 
+    twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
+    kkma_pos = analyzer.analyzer_kkma(message, 'pos')
 
+    # print(kkma_pos)
+    # print(twitter_posmore)
 
+    twi_stemlist = ['Josa', 'Punctuation', 'Suffix', 'Determiner', 'KoreanParticle', 'Foreign', 'Number']
+    kkma_stemlist = ['NNG']
+
+    for i in twitter_posmore:
+        if i[1] in twi_stemlist:
+            continue
+
+        temp_twitter.append(i[0])
+
+    # print(tempTwitter)
+
+    for i in kkma_pos:
+        if i[1] in kkma_stemlist:
+            temp_kkma.append(i[0])
+
+    # print(tempKkma)
+
+    tempword = temp_twitter + temp_kkma
+    returnword = list(set(tempword))        # func = remove duplicates
+
+    refineword = []
+
+    # print(returnword)
+
+    for i in returnword:
+        if len(i) < 2:
+            continue
+        refineword.append(i)
+
+    # print(refineword)
+
+    return refineword       # need better refine words

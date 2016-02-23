@@ -28,63 +28,12 @@ from .models import ArchiveAnalysisWord, AnticipateArchive, AnalysisDBSchema
 from archive.models import Group, Post, Comment, Attachment
 
 
-def analyze_articles(analyzer, message):
-    """
-    analyze articles
-    :param analyzer: analyzer for analysis
-    :param message: message of spam list
-    :return: spam words list
-    """
-    tempTwitter = []
-    tempKkma = []
-
-    twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
-    kkma_pos = analyzer.analyzer_kkma(message, 'pos')
-
-    # print(kkma_pos)
-    # print(twitter_posmore)
-
-    twiStemList = ['Josa', 'Punctuation', 'Suffix', 'Determiner', 'KoreanParticle', 'Foreign', 'Number']
-    kkmaStemList = ['NNG']
-
-    for i in twitter_posmore:
-        if i[1] in twiStemList:
-            continue
-
-        tempTwitter.append(i[0])
-
-    # print(tempTwitter)
-
-    for i in kkma_pos:
-        if i[1] in kkmaStemList:
-            tempKkma.append(i[0])
-
-    # print(tempKkma)
-
-    tempword = tempTwitter + tempKkma
-    returnword = list(set(tempword))        # remove duplicates
-
-    refineword = []
-
-    # print(returnword)
-
-    for i in returnword:
-        if len(i) < 2:
-            continue
-        refineword.append(i)
-
-    # print(refineword)
-
-    return refineword       # need better refine words
-
-
-def add_anticipate_list(group, data_object):
+def add_anticipate_list(data_object):
     """
     add analyzed article to db
-    :param group: group object
     :param data_object: data object of target article
     """
-    newarticle = AnticipateArchive(group=group)
+    newarticle = AnticipateArchive(group=data_object.group)
     newarticle.id = data_object.id
     newarticle.user = data_object.user
     newarticle.message = data_object.message
@@ -92,19 +41,48 @@ def add_anticipate_list(group, data_object):
     newarticle.save()
 
 
-def analysis_prev_hit_posts(group):
+def add_words_db(group, word_set):
+    for word in word_set:
+        if not ArchiveAnalysisWord.objects.filter(group=group, word=word).exists():
+            ArchiveAnalysisWord(group=group, word=word).save()
+        else:
+            exword = ArchiveAnalysisWord.objects.filter(group=group, word=word)[0]
+            exword.count += 1
+            exword.save()
+
+
+def get_average_like_and_comment(group, is_post=False, is_comment=False):
     """
-    analysis previous posts that have high likes and comments
+    get or make average likes and comments count of posts or comments
     :param group: group object
+    :return: array of average likes and comments
     """
-    basicdata = AnalysisDBSchema.objects.filter(group=group)[0]         # consider update time
-    posts = Post.objects.filter(group=group)
+    basicdata = AnalysisDBSchema.objects.filter(group=group)[0]         # consider update time (standard = created)
 
-    avgLike = 0
-    avgComt = 0
+    if is_post is True:
+        posts = Post.objects.filter(group=group)
+        if basicdata is not None:                       # need update periodically
+            if basicdata.avgpostcomment is not 0 and basicdata.avgpostlike is not 0:
+                likes = 0
+                comments = 0
+                counts = posts.count()
 
-    if basicdata is not None:                       # need update periodically
-        if basicdata.avgpostcomment is not 0 and basicdata.avgpostlike is not 0:
+                for apost in posts:
+                    likes += apost.like_count
+                    comments += apost.comment_count
+
+                avglike = int(likes / counts)
+                avgcomt = int(comments / counts)
+
+                basicdata.avgpostlike = avglike
+                basicdata.avgpostcomment = avgcomt
+                basicdata.save()
+            else:
+                avglike = basicdata.avgpostlike
+                avgcomt = basicdata.avgpostcomment
+        else:
+            basicdata = AnalysisDBSchema(group=group)
+
             likes = 0
             comments = 0
             counts = posts.count()
@@ -113,61 +91,37 @@ def analysis_prev_hit_posts(group):
                 likes += apost.like_count
                 comments += apost.comment_count
 
-            avgLike = int(likes / counts)              # or Admin manage this directly
-            avgComt = int(comments / counts)
+            avglike = int(likes / counts)
+            avgcomt = int(comments / counts)
 
-            basicdata.avgpostcomment = avgComt
-            basicdata.avgpostlike = avgLike
+            basicdata.avgpostlike = avglike
+            basicdata.avgpostcomment = avgcomt
             basicdata.save()
+
+    elif is_comment is True:
+        commentlist = Comment.objects.filter(group=group)
+        if basicdata is not None:                       # need update periodically
+                if basicdata.avgcomtcomment is not 0 and basicdata.avgcomtlike is not 0:
+                    likes = 0
+                    comments = 0
+                    counts = commentlist.count()
+
+                    for apost in commentlist:
+                        likes += apost.like_count
+                        comments += apost.comment_count
+
+                    avglike = int(likes / counts)
+                    avgcomt = int(comments / counts)
+
+                    basicdata.avgcomtlike = avglike
+                    basicdata.avgcomtcomment = avgcomt
+                    basicdata.save()
+                else:
+                    avglike = basicdata.avgcomtlike
+                    avgcomt = basicdata.avgcomtcomment
         else:
-            avgComt = basicdata.avgpostcomment
-            avgLike = basicdata.avgpostlike
-    else:
-        basicdata = AnalysisDBSchema(group=group)
+            basicdata = AnalysisDBSchema(group=group)
 
-        likes = 0
-        comments = 0
-        counts = posts.count()
-
-        for apost in posts:
-            likes += apost.like_count
-            comments += apost.comment_count
-
-        avgLike = int(likes / counts)
-        avgComt = int(comments / counts)
-
-        basicdata.avgpostcomment = avgComt
-        basicdata.avgpostlike = avgLike
-        basicdata.save()
-
-    hits = Post.objects.filter(Q(group=group), Q(like_count__gte=avgLike) | Q(comment_count__gte=avgComt))
-
-    analyzer = core.AnalysisDiction(True, True)
-
-    for article in hits:                # Think about attachments
-        words = analyze_articles(analyzer, article.message)
-        for word in words:
-            if not ArchiveAnalysisWord.objects.filter(group=group, word=word).exists():
-                ArchiveAnalysisWord(group=group, word=word).save()
-            else:
-                exword = ArchiveAnalysisWord.objects.filter(group=group, word=word)[0]
-                exword.count += 1
-                exword.save()
-
-
-def analysis_prev_hit_comments(group):
-    """
-    analysis previous comments that have high likes and comments
-    :param group: group object
-    """
-    basicdata = AnalysisDBSchema.objects.filter(group=group)[0]
-    commentlist = Comment.objects.filter(group=group)
-
-    avgLike = 0
-    avgComt = 0
-
-    if basicdata is not None:                       # need update periodically
-        if basicdata.avgcomtcomment is not 0 and basicdata.avgcomtlike is not 0:
             likes = 0
             comments = 0
             counts = commentlist.count()
@@ -176,47 +130,166 @@ def analysis_prev_hit_comments(group):
                 likes += apost.like_count
                 comments += apost.comment_count
 
-            avgLike = int(likes / counts)              # or Admin manage this directly
-            avgComt = int(comments / counts)
+            avglike = int(likes / counts)
+            avgcomt = int(comments / counts)
 
-            basicdata.avgcomtcomment = avgComt
-            basicdata.avgcomtlike = avgLike
+            basicdata.avgcomtlike = avglike
+            basicdata.avgcomtcomment = avgcomt
             basicdata.save()
-        else:
-            avgComt = basicdata.avgcomtcomment
-            avgLike = basicdata.avgcomtlike
+
     else:
-        basicdata = AnalysisDBSchema(group=group)
+        return None
 
-        likes = 0
-        comments = 0
-        counts = commentlist.count()
+    returnarry = [avglike, avgcomt]
+    return returnarry
 
-        for apost in commentlist:
-            likes += apost.like_count
-            comments += apost.comment_count
 
-        avgLike = int(likes / counts)
-        avgComt = int(comments / counts)
+def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=False):
+    """
+    analyze article
+    :param analyzer: analyzer for analysis
+    :param group: group object
+    :param article_set: list of articles
+    :return string of status
+    """
+    for article in article_set:                # better algorithm
+        if is_post is True:
+            attach = Attachment.objects.filter(post=article)
+            if attach is None:
+                if article.message is None:
+                    return "no_message"
 
-        basicdata.avgcomtcomment = avgComt
-        basicdata.avgcomtlike = avgLike
-        basicdata.save()
+                words = core.analyze_articles(analyzer, article.message)
+                add_words_db(group, words)
+            else:
+                if attach.description is not None:
+                    message = attach.description
+                elif attach.title is not None:
+                    message = attach.title
+                else:
+                    return "no_message"
 
-    hits = Comment.objects.filter(Q(group=group), Q(like_count__gte=avgLike) | Q(comment_count__gte=avgComt))
+                words = core.analyze_articles(analyzer, message)
+                add_words_db(group, words)
+
+        elif is_comment is True:
+            attach = Attachment.objects.filter(comment=article)
+            if attach is None:
+                if article.message is None:
+                    return "no_message"
+
+                words = core.analyze_articles(analyzer, article.message)
+                add_words_db(group, words)
+            else:
+                if attach.description is not None:
+                    message = attach.description
+                elif attach.title is not None:
+                    message = attach.title
+                else:
+                    return "no_message"
+
+                words = core.analyze_articles(analyzer, message)
+                add_words_db(group, words)
+        else:
+            return "no_article"
+
+
+def analyze_feed(analyzer, data_object):
+    if data_object.message is not None:
+        message = data_object.message
+    else:
+        message = ''
+
+    if 'attachment' in data_object:
+        attach = data_object.get('attachment')
+        if 'description' in attach:
+            attach_message = attach.get('description')
+        elif 'title' in attach:
+            attach_message = attach.get('title')
+        else:
+            attach_message = ''
+    else:
+        attach_message = ''
+
+    message_word_set = core.analyze_articles(analyzer, message)
+    attach_word_set = core.analyze_articles(analyzer, attach_message)
+    temp_set = message_word_set + attach_word_set
+    word_set = list(set(temp_set))      # make better algorithm
+
+    word_db = ArchiveAnalysisWord.objects.filter(group=data_object.group)
+    data_set = [sp.word for sp in word_db]
+
+    for i in word_set:                   # make better algorithm
+        if i in data_set:
+            return word_set
+
+    return None
+
+
+def analysis_prev_hit_posts(group):
+    """
+    analysis previous posts that have high likes and comments
+    :param group: group object
+    """
+    avgarry = get_average_like_and_comment(group, is_post=True)           # or Admin manage this directly
+
+    if avgarry is None:
+        print("get_average function fail")
+        return
+
+    hits = Post.objects.filter(Q(group=group), Q(like_count__gte=avgarry[0]) | Q(comment_count__gte=avgarry[1]))
+    # better accuracy
 
     analyzer = core.AnalysisDiction(True, True)
 
-    for article in hits:                # Think about attachments
-        words = analyze_articles(analyzer, article.message)
-        for word in words:
-            if not ArchiveAnalysisWord.objects.filter(group=group, word=word).exists():
-                ArchiveAnalysisWord(group=group, word=word).save()
-            else:
-                exword = ArchiveAnalysisWord.objects.filter(group=group, word=word)[0]
-                exword.count += 1
-                exword.save()
+    analyze_hit_article(analyzer, group, hits, is_post=True)
+
+
+def analysis_prev_hit_comments(group):
+    """
+    analysis previous comments that have high likes and comments
+    :param group: group object
+    """
+    avgarry = get_average_like_and_comment(group, is_comment=True)           # or Admin manage this directly
+
+    if avgarry is None:
+        print("get_average function fail")
+        return
+
+    hits = Comment.objects.filter(Q(group=group), Q(like_count__gte=avgarry[0]) | Q(comment_count__gte=avgarry[1]))
+
+    analyzer = core.AnalysisDiction(True, True)
+
+    analyze_hit_article(analyzer, group, hits, is_comment=True)
+
+
+def analyze_feed_sequence(data_object):
+    analyzer = core.AnalysisDiction(True, True)
+
+    if data_object.message is None:
+        return "no_message"
+
+    if AnticipateArchive(group=data_object.group, id=data_object.id).exists():
+        return "exist"
+
+    words = analyze_feed(analyzer, data_object)
+    if words is None:
+        return "no_concern"
+
+    add_anticipate_list(data_object=data_object)
+
+    add_words_db(data_object.group, words)
+
+    return "ok"
 
 
 def run_app():
     print('hello')
+    # analyze old post and comment and spam (make analyzer) - init sequence
+    # get new feed
+    # check if spam (make analyzer) - feed analyze sequence
+    # go to spam app if it is spam
+    # go to analysis app if it is not spam
+    # analyze feed data and store anticipate db if it will be popular article
+    # delete or restore spam sequence (make analyzer)   - spam sequence
+    # add anticipate list sequence (make analyzer)  - analysis sequence
