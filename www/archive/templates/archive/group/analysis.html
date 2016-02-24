@@ -4,6 +4,7 @@
 {% block title %}{{ group.name }}{% endblock %}
 
 {% block css %}
+    <link href="{% static 'css/issuebar.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block sidebar %}
@@ -377,6 +378,76 @@
         </div>
         <!-- /.row -->
 
+        <!-- /.row -->
+        <div class="row">
+            <!-- Groups -->
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-users fa-fw"></i> Issue
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li class="divider"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <!-- Modal -->
+                        <div class="modal fade" id="issue" tabindex="-1" role="dialog"
+                             aria-labelledby="issue_label" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal"
+                                                aria-hidden="true">&times;</button>
+                                        <h4 class="modal-title" id="issue_label">Hot Issue</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <ul class="chat">
+                                            <li class="left clearfix">
+                                                <span class="chat-img pull-left">
+                                                    <img id="issue_img" src="http://placehold.it/50/55C1E7/fff" alt="User Avatar"
+                                                         class="img-circle"/>
+                                                </span>
+                                                <div class="chat-body clearfix">
+                                                    <div class="header">
+                                                        <strong id="issue_from" class="primary-font"></strong>
+                                                        <small id="issue_time" class="pull-right text-muted">
+                                                            <i class="fa fa-clock-o fa-fw"></i>
+                                                        </small>
+                                                    </div>
+                                                    <p id="issue_message">
+                                                    </p>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+                            <!-- /.modal-dialog -->
+                        </div>
+                        <!-- /.modal -->
+
+                        <div id="issue_bar_test"></div>
+
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+            <!-- /Groups -->
+        </div>
+        <!-- /.row -->
+        <br>
+
         <!-- table templates -->
         <script id="tpl_row" type="text/template">
             <tr>
@@ -442,6 +513,7 @@
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasTextRenderer.min.js' %}"></script>
     <script type="text/javascript"
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasAxisLabelRenderer.min.js' %}"></script>
+    <script src="{% static 'js/issuebar.js' %}" type="text/javascript"></script>
 
     <script>
         var is_authenticated = {% if user.is_authenticated %}true{% else %}false{% endif %}
@@ -767,6 +839,19 @@
                 comment_archive_limit = $("#comment_archive_limit").val();
                 changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
             });
+
+            var text1 = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
+            var text2 = '09876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321'
+            var event = function (id, str) {
+                $("#issue").modal();
+            }
+
+            issueBar.setup('issue_bar_test');
+            issueBar.generator(20, event.bind(null, "", '1'), text1);
+            issueBar.generator(40, event.bind(null, "", '1'), text1, text2);
+            issueBar.generator(60, event.bind(null, "", '1'), text1);
+            issueBar.generator(80, event.bind(null, "", '1'), text1, text2);
+            issueBar.generator(100, event.bind(null, "", '1'), text1);
         });
 
         /**
