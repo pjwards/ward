@@ -239,7 +239,7 @@ def analyze_restored_spamlist(analyzer, group_id, message):
             i.save()
 
 
-def delete_sequence(data_object):
+def delete_spam_sequence(data_object):
     """
     analyze deleted spam article from spam list and add spam words to spamwordlist
     :param data_object: deleted article object
@@ -252,8 +252,8 @@ def delete_sequence(data_object):
     update_words_level(data_object.group)
 
 
-def run_app():      # test-only method      lifecoding - 174499879257223, node - 168705546563077, import analysis.spam_app as spam
-    # group_id, message
+def run_app():
+    # test-only method      lifecoding - 174499879257223, node - 168705546563077, import analysis.spam_app as spam
     group = Group.objects.filter(id=168705546563077)[0]
     print("name is "+group.name)
 

@@ -34,5 +34,20 @@ class SpamWordAdmin(admin.ModelAdmin):
     list_display = ('group', 'word', 'count', 'status')
 
 
+class ArchiveAnalysisWordAdmin(admin.ModelAdmin):
+    list_display = ('group', 'word', 'count', 'status')
+
+
+class AnticipateArchiveAdmin(admin.ModelAdmin):
+    list_display = ('id', 'group', 'user', 'message', 'time', 'status')
+
+
+class AnalysisDBSchemaAdmin(admin.ModelAdmin):
+    list_display = ('group', 'avgpostlike', 'avgpostcomment', 'avgcomtlike', 'avgcomtcomment', 'lastupdatetime')
+
+
 admin.site.register(SpamList, SpamListAdmin)
 admin.site.register(SpamWordList, SpamWordAdmin)
+admin.site.register(ArchiveAnalysisWord, ArchiveAnalysisWordAdmin)
+admin.site.register(AnticipateArchive, AnticipateArchiveAdmin)
+admin.site.register(AnalysisDBSchema, AnalysisDBSchemaAdmin)
