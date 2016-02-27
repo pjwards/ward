@@ -214,6 +214,30 @@ def group_user(request, group_id):
     )
 
 
+def group_archive(request, group_id):
+    """
+    Display a group archive page
+
+    :param request: request
+    :param group_id: group id
+    :return: render
+    """
+    _groups = Group.objects.all().order_by('name')
+    _group = get_object_or_404(Group, pk=group_id)
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
+
+    return render(
+            request,
+            'archive/group/archive.html',
+            {
+                'groups': _groups,
+                'group': _group,
+                'posts': posts,
+                'interest_group': is_interest_group(request, group_id),
+            }
+    )
+
+
 def group_search(request, group_id):
     """
     Display a search page about group
@@ -1091,6 +1115,9 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if from_date:
             from_date = date_utils.get_date_from_str(from_date)
+            to_date = from_date
+        else:
+            from_date = date_utils.get_today()
             to_date = from_date
 
         if user_id:
