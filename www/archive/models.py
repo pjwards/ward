@@ -99,6 +99,7 @@ class FBUser(models.Model):
     name = models.CharField(max_length=50)
     picture = models.CharField(max_length=2083, null=True, blank=True)
     groups = models.ManyToManyField(Group)
+    updated_time = models.DateTimeField(auto_now_add=True)
 
     # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
@@ -106,6 +107,19 @@ class FBUser(models.Model):
 
     def __str__(self):
         return self.id
+
+    def is_update(self):
+        """
+        Check update is possible. (per 1 day)
+
+        :return:
+        """
+        now = timezone.now()
+        diff = now - self.updated_time
+
+        if diff.days >= 1:
+            return True
+        return False
 
 
 class Post(models.Model):

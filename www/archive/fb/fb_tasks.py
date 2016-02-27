@@ -46,25 +46,29 @@ def store_user(user_id, user_name, group):
     :return: user model
     """
     user = FBUser.objects.filter(id=user_id)
-    picture = fb_request.user_picture(user_id)
     if not user:
         # save user
         user = FBUser(id=user_id, name=user_name)
-        user.picture = picture
+        user.picture = fb_request.user_picture(user_id)
         user.save()
         logger.info('Saved user: %s', user.id)
     else:
         user = user[0]
-        is_change = False
-        if user.name != user_name:
-            is_change = True
-            user.name = user_name
-        elif user.picture != picture:
-            is_change = True
-            user.picture = picture
-        if is_change:
+        is_update = user.is_update()
+
+        if is_update:
+            is_change = False
+            picture = fb_request.user_picture(user_id)
+            if user.name != user_name:
+                is_change = True
+                user.name = user_name
+            elif user.picture != picture:
+                is_change = True
+                user.picture = picture
+            if is_change:
+                logger.info('Update user: %s', user.id)
+            user.updated_time = timezone.now()
             user.save()
-            logger.info('Update user: %s', user.id)
 
     user.groups.add(group)
 
