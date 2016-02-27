@@ -11,11 +11,11 @@
   line-height: 40px; !important;
 }
 
-.issue-swap:hover span{
+.issue-swap:hover .issue-bar-text span{
     display: none;
 }
 
-.issue-swap:hover:before {
+.issue-swap:hover .issue-bar-text:before {
     content: attr(rel);
     text-decoration:underline;
 }

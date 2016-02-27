@@ -25,10 +25,20 @@
  * Provides functions for issue bar
  */
 
-var issueBar = new function () {
-    this.id;
-    this.setup = function (id) {
+var $Class = function (oClassMember) {
+    function ClassOrigin() {
+        this.$init.apply(this, arguments);
+    }
+
+    ClassOrigin.prototype = oClassMember;
+    ClassOrigin.prototype.constructor = ClassOrigin;
+    return ClassOrigin
+}
+
+var IssueBar = $Class({
+    $init: function (id, option) {
         this.id = '#' + id;
+        this.option = option;
 
         if (!String.prototype.format) {
             String.prototype.format = function () {
@@ -41,8 +51,32 @@ var issueBar = new function () {
                 });
             };
         }
-    }
-    this.getType = function (percentage) {
+        this.setup();
+    },
+    setup: function () {
+        $(this.id).append($("<div />"));
+        this.issue_header = $(this.id).children().last();
+        $(this.id).append($("<div />"));
+        this.issue_content = $(this.id).children().last();
+        this.issue_content.attr("total_max_score", 0)
+        $(this.id).append($("<div />"));
+        this.issue_footer = $(this.id).children().last();
+
+        if (this.option) {
+            for (var prop in this.option) {
+                if (!this.option.hasOwnProperty(prop)) continue;
+
+                if (prop == 'read-more') {
+                    this.generateReadMore(this.option[prop].text, this.option[prop].events);
+                }
+            }
+        }
+    },
+    reset: function () {
+        $(this.id).empty();
+        this.setup();
+    },
+    getType: function (percentage) {
         if (percentage <= 20)
             return 'info';
         else if (percentage <= 40)
@@ -53,8 +87,16 @@ var issueBar = new function () {
             return 'warning';
         else if (percentage <= 100)
             return 'danger';
-    }
-    this.generator = function (percentage, event, text1, text2) {
+    },
+    changeEvents: function (object, events) {
+        if (events) {
+            for (var prop in events) {
+                if (!events.hasOwnProperty(prop)) continue;
+                object.on(prop, events[prop]);
+            }
+        }
+    },
+    generator: function (percentage, events, text1, text2) {
         var type = this.getType(percentage);
         var progress_bar_type = type ? 'progress-bar-' + type : '';
         var progress_bar_text_type = type ? 'issue-bar-text-' + type : '';
@@ -66,22 +108,35 @@ var issueBar = new function () {
             .attr("aria-valuenow", "60")
             .attr("aria-valuemin", "0")
             .attr("aria-valuemax", "100")
-            .attr("style", "width: {0}%;".format(percentage))
+            .attr("style", "width: {0}%;".format(percentage));
         var $process_bar_text = $("<div/>")
             .attr("class", "issue-bar-text {0}".format(progress_bar_text_type))
-            .append($("<span/>").text(text1))
+            .append($("<span/>").text(text1));
 
         if (text2) {
+            $process
+                .addClass("issue-swap");
             $process_bar_text
-                .addClass("issue-swap")
-                .attr("rel", text2)
+                .attr("rel", text2);
         }
 
         $process
             .append($process_bar)
-            .append($process_bar_text)
-            .on('click', event);
+            .append($process_bar_text);
 
-        $(this.id).append($process);
+        this.changeEvents($process, events);
+
+        this.issue_content.append($process);
+    },
+    generateReadMore: function (text, events) {
+        this.read_more_btn = $("<button />", {
+            class: "btn btn-outline btn-primary btn-lg btn-block",
+            style: "margin-top: 10px;"
+        })
+            .text(text)
+            .attr("rel", 1);
+
+        this.changeEvents(this.read_more_btn, events);
+        this.issue_footer.append(this.read_more_btn);
     }
-}
+});

@@ -39,6 +39,64 @@ $(function () {
         };
     }
 
+    if (!Date.prototype.format) {
+        Date.prototype.format = function (f) {
+            if (!this.valueOf()) return " ";
+
+            var weekName = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+            var d = this;
+
+            return f.replace(/(yyyy|yy|MM|dd|E|hh|mm|ss|a\/p)/gi, function ($1) {
+                switch ($1) {
+                    case "yyyy":
+                        return d.getFullYear();
+                    case "yy":
+                        return (d.getFullYear() % 1000).zf(2);
+                    case "MM":
+                        return (d.getMonth() + 1).zf(2);
+                    case "dd":
+                        return d.getDate().zf(2);
+                    case "E":
+                        return weekName[d.getDay()];
+                    case "HH":
+                        return d.getHours().zf(2);
+                    case "hh":
+                        return ((h = d.getHours() % 12) ? h : 12).zf(2);
+                    case "mm":
+                        return d.getMinutes().zf(2);
+                    case "ss":
+                        return d.getSeconds().zf(2);
+                    case "a/p":
+                        return d.getHours() < 12 ? "오전" : "오후";
+                    default:
+                        return $1;
+                }
+            });
+        };
+    }
+
+    if (!String.prototype.string) {
+        String.prototype.string = function (len) {
+            var s = '', i = 0;
+            while (i++ < len) {
+                s += this;
+            }
+            return s;
+        };
+    }
+
+    if (!String.prototype.zf) {
+        String.prototype.zf = function (len) {
+            return "0".string(len - this.length) + this;
+        };
+    }
+
+    if (!Number.prototype.zf) {
+        Number.prototype.zf = function (len) {
+            return this.toString().zf(len);
+        };
+    }
+
     $("#search_input").keypress(function (event) {
         var key_code = event.keyCode || window.event.keyCode;
         if (key_code == 13) document.getElementById('search_form').submit();
@@ -156,18 +214,9 @@ jui.ready(["ui.notify"], function (notify) {
  * @param date
  * @returns {string}
  */
-var timeSince = function (date, small_check) {
+var timeSince = function (date) {
     if (typeof date !== 'object') {
         date = new Date(date);
-    }
-
-    var is_small = false;
-    if (window.innerWidth <= 500) {
-        is_small = true;
-    }
-
-    if (small_check == false) {
-        is_small = false;
     }
 
     var seconds = Math.floor((new Date() - date) / 1000);
@@ -175,50 +224,26 @@ var timeSince = function (date, small_check) {
 
     var interval = Math.floor(seconds / 31536000);
     if (interval >= 1) {
-        if (is_small) {
-            intervalType = 'yr';
-        } else {
-            intervalType = 'year';
-        }
+        intervalType = 'year';
     } else {
         interval = Math.floor(seconds / 2592000);
         if (interval >= 1) {
-            if (is_small) {
-                intervalType = 'mon';
-            } else {
-                intervalType = 'month';
-            }
+            intervalType = 'month';
         } else {
             interval = Math.floor(seconds / 86400);
             if (interval >= 1) {
-                if (is_small) {
-                    intervalType = 'day';
-                } else {
-                    intervalType = 'day';
-                }
+                intervalType = 'day';
             } else {
                 interval = Math.floor(seconds / 3600);
                 if (interval >= 1) {
-                    if (is_small) {
-                        intervalType = 'hr';
-                    } else {
-                        intervalType = 'hour';
-                    }
+                    intervalType = "hour";
                 } else {
                     interval = Math.floor(seconds / 60);
                     if (interval >= 1) {
-                        if (is_small) {
-                            intervalType = 'min';
-                        } else {
-                            intervalType = 'minute';
-                        }
+                        intervalType = "minute";
                     } else {
-                        if (is_small) {
-                            intervalType = 'sec';
-                        } else {
-                            intervalType = 'second';
-                        }
                         interval = seconds;
+                        intervalType = "second";
                     }
                 }
             }
@@ -229,7 +254,7 @@ var timeSince = function (date, small_check) {
         intervalType += 's';
     }
 
-    return interval + (is_small ? '<br>' : '') + ' ' + intervalType + (is_small ? '<br>' : '') + ' ago';
+    return interval + ' ' + intervalType + ' ago';
 };
 
 
@@ -277,7 +302,7 @@ var getAlert = function (user_id) {
             var fb_url = "https://www.facebook.com/" + object.id;
             var message = object["message"] ? String(object["message"]).replace(/</gi, "&lt;") : "(photo)";
             message = message.length < 100 ? message : message.substring(0, 100) + "...";
-            $("#alert").append(ward_display(row["id"], fb_url, object["user"]["name"], timeSince(object["updated_time"], false), message));
+            $("#alert").append(ward_display(row["id"], fb_url, object["user"]["name"], timeSince(object["updated_time"]), message));
         }
 
         /**
@@ -330,3 +355,16 @@ var saveAsImage = function (id, filename) {
         }
     });
 }
+
+
+/**
+ * Get some day
+ *
+ * @param day
+ * @returns {*}
+ */
+var getSomeDate = function (day) {
+    if (typeof(day) != "number" && day % 1 != 0) return " ";
+
+    return new Date(Date.parse(new Date()) - day * 1000 * 60 * 60 * 24)
+};

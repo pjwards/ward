@@ -1003,7 +1003,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :return: response model
         """
         posts = self.get_issue(Post).exclude(is_show=False)
-        return self.response_models(posts, request, PostSerializer)
+        return self.response_models(posts, request, PostIssueSerializer)
 
     @detail_route()
     def comment_issue(self, request, pk=None):
@@ -1015,7 +1015,42 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :return: response model
         """
         comments = self.get_issue(Comment).exclude(is_show=False)
-        return self.response_models(comments, request, CommentSerializer)
+        return self.response_models(comments, request, CommentIssueSerializer)
+
+    def get_issue(self, model):
+        """
+        Get hot issue models from group.
+
+        from_date : start day from HTTP Request
+        to_date : to day from HTTP Request
+
+        :param model: model to get issue
+        :return: result models
+        """
+        from_date = self.request.query_params.get('from', None)
+        to_date = self.request.query_params.get('to', None)
+        ratio = self.request.query_params.get('ratio', None)
+
+        select_query = 'like_count + comment_count'
+        if ratio:
+            select_query = 'like_count * {} + comment_count * {}'.format(float(ratio), 1.0 - float(ratio))
+
+        # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
+        if from_date:
+            from_date = date_utils.get_date_from_str(from_date)
+        if to_date:
+            to_date = date_utils.get_date_from_str(to_date)
+
+        if not from_date and not to_date:
+            from_date, to_date = date_utils.week_delta()
+
+        _models = self.get_objects_by_time(model, from_date, to_date)
+
+        _models = _models.extra(
+            select={'score': select_query},
+            order_by=('-score',)
+        )
+        return _models
 
     @detail_route()
     def post_archive(self, request, pk=None):
@@ -1040,6 +1075,29 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         comments = self.get_archive(Comment).exclude(is_show=False)
         return self.response_models(comments, request, CommentSerializer)
+
+    def get_archive(self, model):
+        """
+        Get archive models from group.
+
+        from_date : day to find archives from HTTP Request
+
+        :param model: model to get archive
+        :return: result models
+        """
+        from_date = self.request.query_params.get('from', None)
+        to_date = None
+        user_id = self.request.query_params.get('user_id', None)
+
+        if from_date:
+            from_date = date_utils.get_date_from_str(from_date)
+            to_date = from_date
+
+        if user_id:
+            _user = get_object_or_404(FBUser, id=user_id)
+            return self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
+        else:
+            return self.get_objects_by_time(model, from_date, to_date).order_by('-created_time')
 
     @detail_route()
     def activity(self, request, pk=None):
@@ -1173,6 +1231,27 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         comments = self.group_search_by_check(Comment).exclude(is_show=False)
         return self.response_models(comments, request, CommentSerializer)
+
+    def group_search_by_check(self, model):
+        """
+        Get models by search
+
+        :param model: model
+        :return: models
+        """
+        _group = self.get_object()
+
+        search = self.request.query_params.get('q', '')
+        search_check = self.request.query_params.get('c', None)
+
+        if search_check == 'user':
+            _user = FBUser.objects.filter(id=search)
+            return model.objects.filter(group=_group, user=_user).order_by('-created_time')
+
+        if search:
+            return model.objects.filter(group=_group).order_by('-created_time').search(search)
+        else:
+            return model.objects.filter(group=_group).order_by('-created_time')
 
     @list_route()
     def group_search(self, request):
@@ -1374,81 +1453,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             return model.objects.filter(group=_group, created_time__lte=to_date)
         else:
             return model.objects.filter(group=_group)
-
-    def get_issue(self, model):
-        """
-        Get hot issue models from group.
-
-        from_date : start day from HTTP Request
-        to_date : to day from HTTP Request
-
-        :param model: model to get issue
-        :return: result models
-        """
-        from_date = self.request.query_params.get('from', None)
-        to_date = self.request.query_params.get('to', None)
-
-        # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
-        if from_date:
-            from_date = date_utils.get_date_from_str(from_date)
-        if to_date:
-            to_date = date_utils.get_date_from_str(to_date)
-
-        if not from_date and not to_date:
-            from_date, to_date = date_utils.week_delta()
-
-        models = self.get_objects_by_time(model, from_date, to_date)
-
-        models = models.extra(
-                select={'field_sum': 'like_count + comment_count'},
-                order_by=('-field_sum',)
-        )
-
-        return models
-
-    def get_archive(self, model):
-        """
-        Get archive models from group.
-
-        from_date : day to find archives from HTTP Request
-
-        :param model: model to get archive
-        :return: result models
-        """
-        from_date = self.request.query_params.get('from', None)
-        to_date = None
-        user_id = self.request.query_params.get('user_id', None)
-
-        if from_date:
-            from_date = date_utils.get_date_from_str(from_date)
-            to_date = from_date
-
-        if user_id:
-            _user = get_object_or_404(FBUser, id=user_id)
-            return self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
-        else:
-            return self.get_objects_by_time(model, from_date, to_date).order_by('-created_time')
-
-    def group_search_by_check(self, model):
-        """
-        Get models by search
-
-        :param model: model
-        :return: models
-        """
-        _group = self.get_object()
-
-        search = self.request.query_params.get('q', '')
-        search_check = self.request.query_params.get('c', None)
-
-        if search_check == 'user':
-            _user = FBUser.objects.filter(id=search)
-            return model.objects.filter(group=_group, user=_user).order_by('-created_time')
-
-        if search:
-            return model.objects.filter(group=_group).order_by('-created_time').search(search)
-        else:
-            return model.objects.filter(group=_group).order_by('-created_time')
 
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
