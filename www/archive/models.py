@@ -532,3 +532,78 @@ class TimeOverviewGroupStatistics(models.Model):
     time = models.IntegerField(default=0)
     model = models.CharField(max_length=10)
     count = models.IntegerField(default=0)
+
+
+class MonthPost(models.Model):
+    created_time = models.DateTimeField()
+    group = models.ForeignKey(Group)
+    post = models.OneToOneField(Post)
+
+    @classmethod
+    def create(cls, post):
+        check(post.group)
+        if MonthPost.objects.filter(post=post).exists():
+            return
+
+        cls(created_time=post.created_time, group=post.group, post=post).save()
+
+    def is_overtime(self):
+        """
+        Is this object overtime?
+
+        :return:
+        """
+        now = timezone.now()
+        diff = now - self.created_time
+
+        if diff.days > 30:
+            return True
+        return False
+
+
+class MonthComment(models.Model):
+    created_time = models.DateTimeField()
+    group = models.ForeignKey(Group)
+    comment = models.OneToOneField(Comment)
+
+    @classmethod
+    def create(cls, comment):
+        check(comment.group)
+        if MonthComment.objects.filter(comment=comment).exists():
+            return
+
+        cls(created_time=comment.created_time, group=comment.group, comment=comment).save()
+
+    def is_overtime(self):
+        """
+        Is this object overtime?
+
+        :return:
+        """
+        now = timezone.now()
+        diff = now - self.created_time
+
+        if diff.days > 30:
+            return True
+        return False
+
+
+def check(group):
+    # Is ready to update?
+    update_list = GroupStatisticsUpdateList.objects.filter(group=group, method='month_content')
+    if update_list:
+        update_list[0].updated_time = timezone.now() - timezone.timedelta(2)
+        is_update = update_list[0].is_update()
+    else:
+        GroupStatisticsUpdateList.update(group=group, method='month_content')
+        is_update = False
+
+    if is_update:
+        date = timezone.now() - timezone.timedelta(30)
+        for oj in MonthPost.objects.filter(group=group, created_time__lt=date):
+            print(oj)
+            oj.delete()
+
+        for oj in MonthComment.objects.filter(group=group, created_time__lt=date):
+            print(oj)
+            oj.delete()

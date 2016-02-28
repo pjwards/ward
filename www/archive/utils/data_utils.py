@@ -157,3 +157,13 @@ def check_user_from_contents(user, contents):
                 print('Name is same. (%s)' % user.name)
                 return True
     return False
+
+
+def month_content():
+    from_date = timezone.now() - timezone.timedelta(30)
+
+    for oj in Post.objects.filter(created_time__gte=from_date):
+        MonthPost.create(post=oj)
+
+    for oj in Comment.objects.filter(created_time__gte=from_date):
+        MonthComment.create(comment=oj)

@@ -151,8 +151,12 @@ def store_comment(comment_data, post, group, parent=None):
         # save attachment
         if 'attachment' in comment_data:
             store_attachment(attachment_data=comment_data.get('attachment'), comment=comment)
+
         # save user activity
         UserActivity.add_comment_count(user=comment.user, group=comment.group)
+
+        # save month comment
+        MonthComment.create(comment=comment)
     else:
         comment = Comment.objects.filter(id=comment_id)[0]
         comment.like_count = comment_data.get('like_count')
@@ -239,6 +243,9 @@ def store_feed(feed_data, group, is_store_comment=False, is_check=False):
 
         # save user activity
         UserActivity.add_post_count(user=post.user, group=post.group)
+
+        # save month post
+        MonthPost.create(post=post)
     else:
         post = Post.objects.filter(id=post_id)[0]
 

@@ -94,7 +94,10 @@ class CommentIssueSerializer(CommentSerializer):
     """
     Serializer for facebook issue comment
     """
-    score = serializers.ReadOnlyField()
+    score = serializers.SerializerMethodField()
+
+    def get_score(self, obj):
+        return obj.like_count + obj.comment_count
 
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
@@ -119,7 +122,10 @@ class PostIssueSerializer(PostSerializer):
     """
     Serializer for facebook issue post
     """
-    score = serializers.ReadOnlyField()
+    score = serializers.SerializerMethodField()
+
+    def get_score(self, obj):
+        return obj.like_count + obj.comment_count
 
 
 class BlacklistSerializer(serializers.HyperlinkedModelSerializer):

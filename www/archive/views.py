@@ -1026,7 +1026,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        posts = self.get_issue(Post).exclude(is_show=False)
+        posts = self.get_issue(Post)
         return self.response_models(posts, request, PostIssueSerializer)
 
     @detail_route()
@@ -1038,7 +1038,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        comments = self.get_issue(Comment).exclude(is_show=False)
+        comments = self.get_issue(Comment)
         return self.response_models(comments, request, CommentIssueSerializer)
 
     def get_issue(self, model):
@@ -1068,13 +1068,25 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if not from_date and not to_date:
             from_date, to_date = date_utils.week_delta()
 
+        if from_date and from_date > (timezone.now() - timezone.timedelta(30)).date():
+            if model == Post:
+                model = MonthPost
+            else:
+                model = MonthComment
+
         _models = self.get_objects_by_time(model, from_date, to_date)
 
-        _models = _models.extra(
-            select={'score': select_query},
-            order_by=('-score',)
-        )
-        return _models
+        if model == MonthPost:
+            _models = _models.exclude(post__is_show=False)
+            return Post.objects.filter(pk__in=_models.values_list('post', flat=True))\
+                .extra(select={'score': select_query}, order_by=('-score',))
+        elif model == MonthComment:
+            _models = _models.exclude(comment__is_show=False)
+            return Comment.objects.filter(pk__in=_models.values_list('comment', flat=True))\
+                .extra(select={'score': select_query}, order_by=('-score',))
+        else:
+            _models = _models.extra(select={'score': select_query}, order_by=('-score',))
+            return _models.exclude(is_show=False)
 
     @detail_route()
     def post_archive(self, request, pk=None):
@@ -1117,14 +1129,27 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             from_date = date_utils.get_date_from_str(from_date)
             to_date = from_date
         else:
-            from_date = date_utils.get_today()
+            from_date = date_utils.get_today().date()
             to_date = from_date
+
+        if from_date and from_date > (timezone.now() - timezone.timedelta(30)).date():
+            if model == Post:
+                model = MonthPost
+            else:
+                model = MonthComment
+
+        _models = self.get_objects_by_time(model, from_date, to_date)
+
+        if model == MonthPost:
+            _models = Post.objects.filter(pk__in=_models.values_list('post', flat=True))
+        elif model == MonthComment:
+            _models = Comment.objects.filter(pk__in=_models.values_list('comment', flat=True))
 
         if user_id:
             _user = get_object_or_404(FBUser, id=user_id)
-            return self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
+            return _models.filter(user=_user).order_by('-created_time')
         else:
-            return self.get_objects_by_time(model, from_date, to_date).order_by('-created_time')
+            return _models.order_by('-created_time')
 
     @detail_route()
     def activity(self, request, pk=None):
