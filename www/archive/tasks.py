@@ -72,7 +72,7 @@ def update_groups_feed_task(query):
     groups = Group.objects.values('id')
 
     for group in groups:
-        update_group_feed_task(group.get('id'), query)
+        update_group_feed_task.delay(group.get('id'), query)
 
     logger.info('=== End updating groups ===')
 

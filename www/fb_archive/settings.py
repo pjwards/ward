@@ -408,10 +408,10 @@ from archive.fb.fb_query import get_feed_with_comment_query
 
 if ARCHIVE_SERVER:
     CELERYBEAT_SCHEDULE = {
-        'add-every-120-seconds': {
+        'add-every-60-seconds': {
             'task': 'archive.tasks.update_groups_feed_task',
-            'schedule': timedelta(seconds=120),
-            'args': (get_feed_with_comment_query(),)
+            'schedule': timedelta(seconds=60),
+            'args': (get_feed_with_comment_query(50, 100),)
         },
     }
 

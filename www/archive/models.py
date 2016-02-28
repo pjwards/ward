@@ -546,3 +546,10 @@ class TimeOverviewGroupStatistics(models.Model):
     time = models.IntegerField(default=0)
     model = models.CharField(max_length=10)
     count = models.IntegerField(default=0)
+
+
+class GroupArchiveErrorList(models.Model):
+    group = models.OneToOneField(Group)
+    error_count = models.IntegerField(default=1)
+    query = models.CharField(max_length=2083, null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
