@@ -24,6 +24,7 @@
 
 import logging
 
+import time
 from facebook import GraphAPIError
 
 from archive.fb.fb_request import FBRequest
@@ -46,25 +47,29 @@ def store_user(user_id, user_name, group):
     :return: user model
     """
     user = FBUser.objects.filter(id=user_id)
-    picture = fb_request.user_picture(user_id)
     if not user:
         # save user
         user = FBUser(id=user_id, name=user_name)
-        user.picture = picture
+        user.picture = fb_request.user_picture(user_id)
         user.save()
         logger.info('Saved user: %s', user.id)
     else:
         user = user[0]
-        is_change = False
-        if user.name != user_name:
-            is_change = True
-            user.name = user_name
-        elif user.picture != picture:
-            is_change = True
-            user.picture = picture
-        if is_change:
+        is_update = user.is_update()
+
+        if is_update:
+            is_change = False
+            picture = fb_request.user_picture(user_id)
+            if user.name != user_name:
+                is_change = True
+                user.name = user_name
+            elif user.picture != picture:
+                is_change = True
+                user.picture = picture
+            if is_change:
+                logger.info('Update user: %s', user.id)
+            user.updated_time = timezone.now()
             user.save()
-            logger.info('Update user: %s', user.id)
 
     user.groups.add(group)
 
@@ -345,12 +350,25 @@ def store_group_feed(group, query):
         logger.info('=== Fail to save %s feed (Group is closed) ===', group.id)
         return False
 
+    error_cnt = 0
     while query is not None:
         feeds = []
         try:
             query = fb_request.feed(group.id, query, feeds)
         except Exception as e:
             logger.error('Fail to request by exception : %s', e)
+
+            error_cnt += 1
+            if error_cnt > 2:
+                error_list = GroupArchiveErrorList.objects.filter(group=group)
+                if error_list:
+                    error_list[0].error_count += 1
+                    error_list[0].message = '[store] : ' + str(e)
+                    error_list[0].query = group.id + query
+                    error_list[0].save()
+                else:
+                    GroupArchiveErrorList(group=group, query=group.id + query, message='[store] : ' + str(e)).save()
+                return
 
         for feed in feeds:
             try:
@@ -402,14 +420,30 @@ def update_group_feed(group, query):
         logger.info('=== Fail to update %s feed (Already updated) ===', group.id)
         return False
 
+    updated_time_backup = group.updated_time
     store_group(group_data)
 
+    error_cnt = 0
     while query is not None:
         feeds = []
         try:
             query = fb_request.feed(group.id, query, feeds)
         except Exception as e:
             logger.error('Fail to request by exception : %s', e)
+
+            group.updated_time = updated_time_backup
+            group.save()
+            error_cnt += 1
+            if error_cnt > 2:
+                error_list = GroupArchiveErrorList.objects.filter(group=group)
+                if error_list:
+                    error_list[0].error_count += 1
+                    error_list[0].message = '[update] : ' + str(e)
+                    error_list[0].query = group.id + query
+                    error_list[0].save()
+                else:
+                    GroupArchiveErrorList(group=group, query=group.id + query, message='[update] : ' + str(e)).save()
+                return False
 
         for feed in feeds:
             try:
@@ -419,8 +453,10 @@ def update_group_feed(group, query):
 
             # if post isn't updated, exit
             if not res:
+                check_cp_cnt_group(group)
                 return True
 
+    check_cp_cnt_group(group)
     logger.info('=== End updating %s feed ===', group.id)
     return True
 
@@ -435,13 +471,25 @@ def check_post_comment(post, query):
     """
     logger.info('=== Start checking %s comments ===', post.id)
 
+    error_cnt = 0
     while query is not None:
         comments = []
         try:
             query = fb_request.comments(post.id, query, comments)
         except Exception as e:
             logger.error('Fail to request by exception : %s', e)
-            return
+
+            error_cnt += 1
+            if error_cnt > 2:
+                error_list = GroupArchiveErrorList.objects.filter(group=post.group)
+                if error_list:
+                    error_list[0].error_count += 1
+                    error_list[0].message = '[check] : ' + str(e)
+                    error_list[0].query = post.id + query
+                    error_list[0].save()
+                else:
+                    GroupArchiveErrorList(group=post.group, query=post.id + query, message='[check] : ' + str(e)).save()
+                return
 
         for comment in comments:
             try:

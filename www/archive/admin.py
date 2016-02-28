@@ -152,6 +152,10 @@ class GroupStatisticsUpdateListAdmin(admin.ModelAdmin):
     list_display = ('group', 'method', 'updated_time')
 
 
+class GroupArchiveErrorListAdmin(admin.ModelAdmin):
+    list_display = ('group', 'error_count', 'message', 'query')
+
+
 admin.site.register(FBUser, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
@@ -171,3 +175,4 @@ admin.site.register(MonthGroupStatistics, MonthGroupStatisticsAdmin)
 admin.site.register(DayGroupStatistics, DayGroupStatisticsAdmin)
 admin.site.register(TimeOverviewGroupStatistics, TimeOverviewGroupStatisticsAdmin)
 admin.site.register(GroupStatisticsUpdateList, GroupStatisticsUpdateListAdmin)
+admin.site.register(GroupArchiveErrorList, GroupArchiveErrorListAdmin)
