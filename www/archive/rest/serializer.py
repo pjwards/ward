@@ -90,9 +90,19 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
         # depth = 1
 
 
+class CommentIssueSerializer(CommentSerializer):
+    """
+    Serializer for facebook issue comment
+    """
+    score = serializers.SerializerMethodField()
+
+    def get_score(self, obj):
+        return obj.like_count + obj.comment_count
+
+
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialiser for facebook post
+    Serializer for facebook post
     """
     id = serializers.ReadOnlyField()
     # attachments = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='attachment-detail')
@@ -106,6 +116,16 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
         read_only_fields = '__all__'
         # depth = 1
+
+
+class PostIssueSerializer(PostSerializer):
+    """
+    Serializer for facebook issue post
+    """
+    score = serializers.SerializerMethodField()
+
+    def get_score(self, obj):
+        return obj.like_count + obj.comment_count
 
 
 class BlacklistSerializer(serializers.HyperlinkedModelSerializer):

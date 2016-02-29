@@ -4,6 +4,7 @@
 {% block title %}{{ group.name }}{% endblock %}
 
 {% block css %}
+    <link href="{% static 'css/issuebar.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block sidebar %}
@@ -52,9 +53,6 @@
                                     </li>
                                     <li>
                                         <a onclick="changeStatistics('day', $('#statistics_from').val(), $('#statistics_to').val());">Day</a>
-                                    </li>
-                                    <li>
-                                        <a onclick="changeStatistics('hour', $('#statistics_from').val(), $('#statistics_to').val());">Hour</a>
                                     </li>
                                     <li class="divider"></li>
                                     <li style="text-align: center;">
@@ -134,12 +132,6 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="post_issue_limit">Limit</label>
-                                        <input type="text" class="input" id="post_issue_limit" placeholder="Limit"
-                                               value="10" style="width: 80%; text-align: center;"/>
-                                    </li>
-                                    <li class="divider"></li>
-                                    <li style="text-align: center;">
                                         <input type="text" class="input" id="post_issue_from" placeholder="From"
                                                style="width: 80%; text-align: center;"/>
                                     </li>
@@ -153,33 +145,8 @@
                         </div>
                     </div>
                     <!-- /.panel-heading -->
-                    <div class="panel-body jui">
-                        <table id="post_issue_table" class="table simple hover borderless">
-                            <colgroup>
-                                <col style="width: 60px;">
-                                <col style="width: 100px;">
-                                <col style="width: 60%;">
-                                <col style="width: 20%;">
-                                <col style="width: 20%;">
-                            </colgroup>
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-
-                        <div id="post_issue_paging" class="paging" style="margin-top: 3px;">
-                            <a href="#" class="prev">Previous</a>
-
-                            <div class="list"></div>
-                            <a href="#" class="next">Next</a>
-                        </div>
+                    <div class="panel-body">
+                        <div id="post_issue"></div>
                     </div>
                     <!-- /.panel-body -->
                 </div>
@@ -200,12 +167,6 @@
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
                                     <li style="text-align: center;">
-                                        <label for="comment_issue_limit">Limit</label>
-                                        <input type="text" class="input" id="comment_issue_limit" placeholder="Limit"
-                                               value="10" style="width: 80%; text-align: center;"/>
-                                    </li>
-                                    <li class="divider"></li>
-                                    <li style="text-align: center;">
                                         <input type="text" class="input" id="comment_issue_from" placeholder="From"
                                                style="width: 80%; text-align: center;"/>
                                     </li>
@@ -219,33 +180,8 @@
                         </div>
                     </div>
                     <!-- /.panel-heading -->
-                    <div class="panel-body jui">
-                        <table id="comment_issue_table" class="table simple hover borderless">
-                            <colgroup>
-                                <col style="width: 60px;">
-                                <col style="width: 100px;">
-                                <col style="width: 60%;">
-                                <col style="width: 20%;">
-                                <col style="width: 20%;">
-                            </colgroup>
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-
-                        <div id="comment_issue_paging" class="paging" style="margin-top: 3px;">
-                            <a href="#" class="prev">Previous</a>
-
-                            <div class="list"></div>
-                            <a href="#" class="next">Next</a>
-                        </div>
+                    <div class="panel-body">
+                        <div id="comment_issue"></div>
                     </div>
                     <!-- /.panel-body -->
                 </div>
@@ -254,131 +190,44 @@
         </div>
         <!-- /.row -->
 
-        <!-- /.row -->
-        <div class="row">
-            <!-- Post Archive -->
-            <div class="col-lg-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-list fa-fw"></i> Post Archive
-                        <div class="pull-right">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
-                                        data-toggle="dropdown">
-                                    Actions
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li style="text-align: center;">
-                                        <label for="post_archive_limit">Limit</label>
-                                        <input type="text" class="input" id="post_archive_limit" placeholder="Limit"
-                                               value="10" style="width: 80%; text-align: center;"/>
-                                    </li>
-                                    <li class="divider"></li>
-                                    <li style="text-align: center;">
-                                        <input type="text" class="input" id="post_archive_from" placeholder="From"
-                                               style="width: 80%; text-align: center;"/>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+        <!-- Hot Issue Modal -->
+        <div class="modal fade" id="issue" tabindex="-1" role="dialog"
+             aria-labelledby="issue_label" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                                aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="issue_label">Hot Issue</h4>
                     </div>
-                    <!-- /.panel-heading -->
-                    <div class="panel-body jui">
-                        <table id="post_archive_table" class="table simple hover borderless">
-                            <colgroup>
-                                <col style="width: 60px;">
-                                <col style="width: 100px;">
-                                <col style="width: 60%;">
-                                <col style="width: 20%;">
-                                <col style="width: 20%;">
-                            </colgroup>
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-
-                        <div id="post_archive_paging" class="paging" style="margin-top: 3px;">
-                            <a href="#" class="prev">Previous</a>
-
-                            <div class="list"></div>
-                            <a href="#" class="next">Next</a>
-                        </div>
+                    <div class="modal-body">
+                        <ul class="chat">
+                            <li class="left clearfix">
+                                                <span class="chat-img pull-left">
+                                                    <img id="issue_img" src=""
+                                                         alt="User Avatar"
+                                                         style="width:50px; border-radius: 10px;"/>
+                                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <strong id="issue_from" class="primary-font"></strong>
+                                        <small id="issue_time" class="pull-right text-muted">
+                                            <i class="fa fa-clock-o fa-fw"></i>
+                                        </small>
+                                    </div>
+                                    <p id="issue_message">
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                        <div id="issue_footer"></div>
                     </div>
-                    <!-- /.panel-body -->
                 </div>
+                <!-- /.modal-content -->
             </div>
-            <!-- /Post Archive -->
-
-            <!-- Comment Archive -->
-            <div class="col-lg-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-comments fa-fw"></i> Comment Archive
-                        <div class="pull-right">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
-                                        data-toggle="dropdown">
-                                    Actions
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li style="text-align: center;">
-                                        <label for="comment_archive_limit">Limit</label>
-                                        <input type="text" class="input" id="comment_archive_limit" placeholder="Limit"
-                                               value="10" style="width: 80%; text-align: center;"/>
-                                    </li>
-                                    <li class="divider"></li>
-                                    <li style="text-align: center;">
-                                        <input type="text" class="input" id="comment_archive_from" placeholder="From"
-                                               style="width: 80%; text-align: center;"/>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- /.panel-heading -->
-                    <div class="panel-body jui">
-                        <table id="comment_archive_table" class="table simple hover borderless">
-                            <colgroup>
-                                <col style="width: 60px;">
-                                <col style="width: 100px;">
-                                <col style="width: 60%;">
-                                <col style="width: 20%;">
-                                <col style="width: 20%;">
-                            </colgroup>
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th style="text-align: center;"><i class="icon-user"></i> From</th>
-                                <th style="text-align: center;"><i class="icon-report"></i> Message</th>
-                                <th style="text-align: center;"><i class="icon-like"></i> Like</th>
-                                <th style="text-align: center;"><i class="icon-message"></i> Comment</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-
-                        <div id="comment_archive_paging" class="paging" style="margin-top: 3px;">
-                            <a href="#" class="prev">Previous</a>
-
-                            <div class="list"></div>
-                            <a href="#" class="next">Next</a>
-                        </div>
-                    </div>
-                    <!-- /.panel-body -->
-                </div>
-            </div>
-            <!-- /Comment Archive -->
+            <!-- /.modal-dialog -->
         </div>
-        <!-- /.row -->
+        <!-- /.modal -->
 
         <!-- table templates -->
         <script id="tpl_row" type="text/template">
@@ -420,14 +269,6 @@
         <div id="loading_comment_issue_msg" style="display: none; font-size: 20px; color: red;">
             NOW LOADING...
         </div>
-
-        <div id="loading_post_archive_msg" style="display: none; font-size: 20px; color: red;">
-            NOW LOADING...
-        </div>
-
-        <div id="loading_comment_archive_msg" style="display: none; font-size: 20px; color: red;">
-            NOW LOADING...
-        </div>
         <!-- /loading messages -->
 
     </div><!-- /.page-wrapper -->
@@ -445,128 +286,22 @@
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasTextRenderer.min.js' %}"></script>
     <script type="text/javascript"
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasAxisLabelRenderer.min.js' %}"></script>
+    <script src="{% static 'js/issuebar.js' %}" type="text/javascript"></script>
 
     <script>
         var is_authenticated = {% if user.is_authenticated %}true{% else %}false{% endif %}
         var statistics_method = 'month';
 
-        var post_issue_limit = 10;
-        var comment_issue_limit = 10;
-        var post_archive_limit = 10;
-        var comment_archive_limit = 10;
-
+        var post_issue_bar;
+        var comment_issue_bar;
         var statistics_url = "/api/groups/{{ group.id }}/statistics/";
         var post_issue_url = "/api/groups/{{ group.id }}/post_issue/";
         var comment_issue_url = "/api/groups/{{ group.id }}/comment_issue/";
-        var post_archive_url = "/api/groups/{{ group.id }}/post_archive/";
-        var comment_archive_url = "/api/groups/{{ group.id }}/comment_archive/";
 
         /**
          * Generate JUI Init
          */
         jui.ready(["ui.paging", "grid.table", "ui.modal"], function (paging, table, modal) {
-            /**
-             * Generate Hot Issue
-             */
-            post_issue_paging = paging("#post_issue_paging", {
-                pageCount: 10,
-                screenCount: detectWidthToScreenCount(),
-                event: {
-                    page: function (pNo) {
-                        changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, pNo);
-                    }
-                },
-                tpl: {
-                    pages: $("#tpl_pages").html()
-                }
-            });
-
-            post_issue_table = table("#post_issue_table", {
-                fields: ["", "from", "message", "like_count", "comment_count"],
-                scroll: true,
-                scrollHeight: 2000,
-                resize: true,
-                tpl: {
-                    row: $("#tpl_row").html(),
-                    none: $("#tpl_none").html()
-                }
-            });
-
-            comment_issue_paging = paging("#comment_issue_paging", {
-                pageCount: 10,
-                screenCount: detectWidthToScreenCount(),
-                event: {
-                    page: function (pNo) {
-                        changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, pNo);
-                    }
-                },
-                tpl: {
-                    pages: $("#tpl_pages").html()
-                }
-            });
-
-            comment_issue_table = table("#comment_issue_table", {
-                fields: ["", "from", "message", "like_count", "comment_count"],
-                scroll: true,
-                scrollHeight: 2000,
-                resize: true,
-                tpl: {
-                    row: $("#tpl_row").html(),
-                    none: $("#tpl_none").html()
-                }
-            });
-
-            /**
-             * Generate Archive
-             */
-            post_archive_paging = paging("#post_archive_paging", {
-                pageCount: 10,
-                screenCount: detectWidthToScreenCount(),
-                event: {
-                    page: function (pNo) {
-                        changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, pNo);
-                    }
-                },
-                tpl: {
-                    pages: $("#tpl_pages").html()
-                }
-            });
-
-            post_archive_table = table("#post_archive_table", {
-                fields: ["", "from", "message", "like_count", "comment_count"],
-                scroll: true,
-                scrollHeight: 2000,
-                resize: true,
-                tpl: {
-                    row: $("#tpl_row").html(),
-                    none: $("#tpl_none").html()
-                }
-            });
-
-            comment_archive_paging = paging("#comment_archive_paging", {
-                pageCount: 10,
-                screenCount: detectWidthToScreenCount(),
-                event: {
-                    page: function (pNo) {
-                        changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, pNo);
-                    }
-                },
-                tpl: {
-                    pages: $("#tpl_pages").html()
-                }
-            });
-
-            comment_archive_table = table("#comment_archive_table", {
-                fields: ["", "from", "message", "like_count", "comment_count"],
-                scroll: true,
-                scrollHeight: 2000,
-                resize: true,
-                tpl: {
-                    row: $("#tpl_row").html(),
-                    none: $("#tpl_none").html()
-                }
-            });
-
             /**
              * Loading message
              */
@@ -585,28 +320,14 @@
             });
 
             loading_post_issue = modal("#loading_post_issue_msg", {
-                target: "#post_issue_table",
+                target: "#post_issue",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
             });
 
             loading_comment_issue = modal("#loading_comment_issue_msg", {
-                target: "#comment_issue_table",
-                opacity: 0.5,
-                color: 'white',
-                autoHide: false,
-            });
-
-            loading_post_archive = modal("#loading_post_archive_msg", {
-                target: "#post_archive_table",
-                opacity: 0.5,
-                color: 'white',
-                autoHide: false,
-            });
-
-            loading_comment_archive = modal("#loading_comment_archive_msg", {
-                target: "#comment_archive_table",
+                target: "#comment_issue",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
@@ -621,11 +342,8 @@
             loading_time_overview.show();
             getHourTotalStatistics(statistics_url, loading_time_overview);
 
-            changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
-            changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
-
-            changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, 1, post_archive_paging);
-            changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
+            changeIssue(post_issue_url, post_issue_bar, $("#post_issue_from"), $("#post_issue_to"), loading_post_issue);
+            changeIssue(comment_issue_url, comment_issue_bar, $("#comment_issue_from"), $("#comment_issue_to"), loading_comment_issue);
         });
 
         /**
@@ -663,16 +381,12 @@
                             changeStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
                             break;
                         case 'post_issue_from':
-                            changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
+                            post_issue_bar.reset();
+                            changeIssue(post_issue_url, post_issue_bar, $("#post_issue_from"), $("#post_issue_to"), loading_post_issue);
                             break;
                         case 'comment_issue_from':
-                            changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
-                            break;
-                        case 'post_archive_from':
-                            changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, 1, post_archive_paging);
-                            break;
-                        case 'comment_archive_from':
-                            changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
+                            comment_issue_bar.reset();
+                            changeIssue(comment_issue_url, comment_issue_bar, $("#comment_issue_from"), $("#comment_issue_to"), loading_comment_issue);
                             break;
                     }
                 }
@@ -709,10 +423,12 @@
                             changeStatistics(statistics_method, $("#statistics_from").val(), $("#statistics_to").val());
                             break;
                         case 'post_issue_to':
-                            changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
+                            post_issue_bar.reset();
+                            changeIssue(post_issue_url, post_issue_bar, $("#post_issue_from"), $("#post_issue_to"), loading_post_issue);
                             break;
                         case 'comment_issue_to':
-                            changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
+                            comment_issue_bar.reset();
+                            changeIssue(comment_issue_url, comment_issue_bar, $("#comment_issue_from"), $("#comment_issue_to"), loading_comment_issue);
                             break;
                     }
                 }
@@ -723,6 +439,37 @@
          * Init analysis.html
          */
         $(function () {
+            $("#post_issue_from").datepicker("setDate", -7);
+            $("#post_issue_to").datepicker("setDate", 0);
+            $("#comment_issue_from").datepicker("setDate", -7);
+            $("#comment_issue_to").datepicker("setDate", 0);
+
+            post_issue_bar = new IssueBar('post_issue', {
+                'read-more': {
+                    text: "Read more...",
+                    events: {
+                        'click': function () {
+                            var page = Number(post_issue_bar.read_more_btn.attr("rel"));
+                            post_issue_bar.read_more_btn.attr("rel", page + 1);
+                            changeIssue(post_issue_url, post_issue_bar, $("#post_issue_from"), $("#post_issue_to"), loading_post_issue);
+                        }
+                    }
+                }
+            });
+
+            comment_issue_bar = new IssueBar('comment_issue', {
+                'read-more': {
+                    text: "Read more...",
+                    events: {
+                        'click': function () {
+                            var page = Number(comment_issue_bar.read_more_btn.attr("rel"));
+                            comment_issue_bar.read_more_btn.attr("rel", page + 1);
+                            changeIssue(comment_issue_url, comment_issue_bar, $("#comment_issue_from"), $("#comment_issue_to"), loading_comment_issue);
+                        }
+                    }
+                }
+            });
+
             /**
              * Window Resize
              */
@@ -731,10 +478,6 @@
                 controllerStatisticsPlot.replot();
                 totalHourStatisticsPlot.replot();
                 controllerTotalHourStatisticsPlot.replot();
-                reLoadPaging(post_issue_paging);
-                reLoadPaging(comment_issue_paging);
-                reLoadPaging(post_archive_paging);
-                reLoadPaging(comment_archive_paging);
             }
 
             /**
@@ -745,30 +488,6 @@
                 controllerStatisticsPlot.replot();
                 totalHourStatisticsPlot.replot();
                 controllerTotalHourStatisticsPlot.replot();
-                changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
-                changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
-                changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, 1, post_archive_paging);
-                changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
-            });
-
-            $("#post_issue_limit").on("input", function () {
-                post_issue_limit = $("#post_issue_limit").val();
-                changeIssue(post_issue_url, post_issue_table, post_issue_limit, $("#post_issue_from").val(), $("#post_issue_to").val(), loading_post_issue, 1, post_issue_paging);
-            });
-
-            $("#comment_issue_limit").on("input", function () {
-                comment_issue_limit = $("#comment_issue_limit").val();
-                changeIssue(comment_issue_url, comment_issue_table, comment_issue_limit, $("#comment_issue_from").val(), $("#comment_issue_to").val(), loading_comment_issue, 1, comment_issue_paging);
-            })
-
-            $("#post_archive_limit").on("input", function () {
-                post_archive_limit = $("#post_archive_limit").val();
-                changeArchive(post_archive_url, post_archive_table, post_archive_limit, $("#post_archive_from").val(), loading_post_archive, 1, post_archive_paging);
-            });
-
-            $("#comment_archive_limit").on("input", function () {
-                comment_archive_limit = $("#comment_archive_limit").val();
-                changeArchive(comment_archive_url, comment_archive_table, comment_archive_limit, $("#comment_archive_from").val(), loading_comment_archive, 1, comment_archive_paging);
             });
         });
 

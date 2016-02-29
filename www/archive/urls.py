@@ -36,6 +36,7 @@ urlpatterns = [
         name='group'),
     url(r'^group/(?P<group_id>[0-9]+)/analysis/$', views.group_analysis, name='group_analysis'),
     url(r'^group/(?P<group_id>[0-9]+)/user/$', views.group_user, name='group_user'),
+    url(r'^group/(?P<group_id>[0-9]+)/archive/$', views.group_archive, name='group_archive'),
     url(r'^group/(?P<group_id>[0-9]+)/search/$', views.group_search, name='group_search'),
     url(r'^group/(?P<group_id>[0-9]+)/management/$', views.group_management, name='group_management'),
     url(r'^group/(?P<group_id>[0-9]+)/store/$', views.group_store, name='group_store'),

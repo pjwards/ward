@@ -214,6 +214,30 @@ def group_user(request, group_id):
     )
 
 
+def group_archive(request, group_id):
+    """
+    Display a group archive page
+
+    :param request: request
+    :param group_id: group id
+    :return: render
+    """
+    _groups = Group.objects.all().order_by('name')
+    _group = get_object_or_404(Group, pk=group_id)
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
+
+    return render(
+            request,
+            'archive/group/archive.html',
+            {
+                'groups': _groups,
+                'group': _group,
+                'posts': posts,
+                'interest_group': is_interest_group(request, group_id),
+            }
+    )
+
+
 def group_search(request, group_id):
     """
     Display a search page about group
@@ -778,12 +802,120 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if to_date:
             to_date = date_utils.get_date_from_str(to_date)
 
-        if method != 'year' and method != 'month' and method != 'day' and method != 'hour' and method != 'hour_total':
+        if method != 'year' and method != 'month' and method != 'day' and method != 'hour_total':
             raise ValueError(
-                    "Method can be used 'year', 'month', 'day', 'hour' or 'hour_total'. Input method:" + method)
+                    "Method can be used 'year', 'month', 'day' or 'hour_total'. Input method:" + method)
 
-        all_posts = self.get_objects_by_time(Post, from_date, to_date)
-        all_comments = self.get_objects_by_time(Comment, from_date, to_date)
+        statistics_model = self.get_statistics_model(method)
+        posts, comments = self.process_memoization(statistics_model, method, from_date, to_date)
+
+        # Return json data after rearranging data
+        return Response({
+            'posts': posts,
+            'comments': comments
+        })
+
+    def get_statistics_model(self, method):
+        """
+        Get statistics model from model
+
+        :param method: method
+        :return: statistics model
+        """
+        if method == 'year':
+            return YearGroupStatistics
+        elif method == 'month':
+            return MonthGroupStatistics
+        elif method == 'day':
+            return DayGroupStatistics
+        elif method == 'hour_total':
+            return TimeOverviewGroupStatistics
+        else:
+            return None
+
+    def process_memoization(self, statistics_model, method, from_date, to_date):
+        """
+        Process memoization
+
+        :param statistics_model: statistics_model
+        :param method: method
+        :param from_date: from_date
+        :param to_date: to_date
+        :return: posts and comments
+        """
+        # Is memoization?
+        if not statistics_model.objects.filter(group=self.get_object()).exists():
+            posts, comments = self.get_statistics(method, from_date, to_date)
+
+            for post in posts:
+                self.save_statistics_model(statistics_model, post, 'post')
+            for comment in comments:
+                self.save_statistics_model(statistics_model, comment, 'comment')
+
+            GroupStatisticsUpdateList.update(group=self.get_object(), method=method)
+
+            posts, comments = self.process_statistics(method, posts, comments)
+        else:
+            # Is ready to update?
+            update_list = GroupStatisticsUpdateList.objects.filter(group=self.get_object(), method=method)
+            if update_list:
+                is_update = update_list[0].is_update()
+            else:
+                GroupStatisticsUpdateList.update(group=self.get_object(), method=method)
+                is_update = False
+
+            # Get statistics from memoization
+            posts = statistics_model.objects.filter(group=self.get_object(), model='post').order_by('time')
+            comments = statistics_model.objects.filter(group=self.get_object(), model='comment').order_by('time')
+
+            if is_update:
+                if method == 'hour_total':
+                    update_posts, update_comments = self.get_statistics(method, from_date, to_date)
+
+                    for post in update_posts:
+                        self.update_statistics_model(statistics_model, post, 'post')
+                    for comment in update_comments:
+                        self.update_statistics_model(statistics_model, comment, 'comment')
+                else:
+                    update_posts = self.get_statistics_by_model(Post, method, posts[len(posts) - 1].time, to_date)
+                    update_comments = self.get_statistics_by_model(Comment, method, comments[len(comments) - 1].time,
+                                                                   to_date)
+
+                    for post in update_posts:
+                        self.update_statistics_model(statistics_model, post, 'post')
+                    for comment in update_comments:
+                        self.update_statistics_model(statistics_model, comment, 'comment')
+
+                GroupStatisticsUpdateList.update(group=self.get_object(), method=method)
+
+            posts, comments = self.process_statistics_model(method, posts, comments)
+
+        return posts, comments
+
+    def get_statistics(self, method, from_date, to_date):
+        """
+        Get statistics
+
+        :param method: method
+        :param from_date: from_date
+        :param to_date: to_date
+        :return: posts and comments
+        """
+        posts = self.get_statistics_by_model(Post, method, from_date, to_date)
+        comments = self.get_statistics_by_model(Comment, method, from_date, to_date)
+        return posts, comments
+
+    def get_statistics_by_model(self, model, method, from_date, to_date):
+        """
+        Get statistics by model
+
+        :param model: model
+        :param method: method
+        :param from_date: from_date
+        :param to_date: to_date
+        :return: models
+        """
+        _models = self.get_objects_by_time(model, from_date, to_date)
 
         # Method Dictionary for group by time
         dic = {
@@ -794,37 +926,96 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             'hour_total': "date_part('hour', created_time at time zone 'UTC' AT TIME ZONE '+9')",
         }
 
-        # Get posts and comment count in some date
-        all_posts = all_posts.extra(select={'date': dic[method]}).order_by().values('date') \
-            .annotate(count=Count('created_time'))
-        all_comments = all_comments.extra(select={'date': dic[method]}).order_by().values('date') \
+        # Get models count in some date
+        return _models.extra(select={'date': dic[method]}).order_by().values('date') \
             .annotate(count=Count('created_time'))
 
-        # Merge post and comment data
-        posts = []
-        comments = []
+    def process_statistics(self, method, posts, comments):
+        """
+        Process statistics for chart
 
-        for post in all_posts:
+        :param method: method
+        :param posts: post
+        :param comments: comment
+        :return: sorted processed posts and comments
+        """
+        processed_posts = []
+        processed_comments = []
+
+        for post in posts:
             if method == "hour_total":
                 date = '{0:0.0f}'.format(post.get('date')).zfill(2)
             else:
                 date = post.get("date").strftime("%Y-%m-%d %I:%M%p")
             count = post.get("count")
-            posts.append([date, count])
+            processed_posts.append([date, count])
 
-        for comment in all_comments:
+        for comment in comments:
             if method == "hour_total":
                 date = '{0:0.0f}'.format(comment.get('date')).zfill(2)
             else:
                 date = comment.get("date").strftime("%Y-%m-%d %I:%M%p")
             count = comment.get("count")
-            comments.append([date, count])
+            processed_comments.append([date, count])
 
-        # Return json data after rearranging data
-        return Response({
-            'posts': sorted(posts, key=lambda k: k[0]),
-            'comments': sorted(comments, key=lambda k: k[0])
-        })
+        return sorted(processed_posts, key=lambda k: k[0]), sorted(processed_comments, key=lambda k: k[0])
+
+    def process_statistics_model(self, method, posts, comments):
+        """
+        Process statistics by model for chart
+
+        :param method: method
+        :param posts: post
+        :param comments: comment
+        :return: sorted processed posts and comments
+        """
+        processed_posts = []
+        processed_comments = []
+
+        for post in posts:
+            if method == "hour_total":
+                date = '{0:0.0f}'.format(post.time).zfill(2)
+            else:
+                date = post.time.strftime("%Y-%m-%d %I:%M%p")
+            count = post.count
+            processed_posts.append([date, count])
+
+        for comment in comments:
+            if method == "hour_total":
+                date = '{0:0.0f}'.format(comment.time).zfill(2)
+            else:
+                date = comment.time.strftime("%Y-%m-%d %I:%M%p")
+            count = comment.count
+            processed_comments.append([date, count])
+
+        return sorted(processed_posts, key=lambda k: k[0]), sorted(processed_comments, key=lambda k: k[0])
+
+    def save_statistics_model(self, statistics_model, model, model_string):
+        """
+        Save statistics model
+
+        :param statistics_model: statistics_model
+        :param model: model
+        :param model_string: model_string
+        """
+        statistics_model(group=self.get_object(), time=model.get("date"), model=model_string,
+                         count=model.get("count")).save()
+
+    def update_statistics_model(self, statistics_model, model, model_string):
+        """
+        Update statistics model
+
+        :param statistics_model: statistics_model
+        :param model: model
+        :param model_string: model_string
+        """
+        old_model = statistics_model.objects.filter(group=self.get_object(), model=model_string, time=model.get("date"))
+
+        if old_model:
+            old_model[0].count = model.get("count")
+            old_model[0].save()
+        else:
+            self.save_statistics_model(statistics_model, model, model_string)
 
     @detail_route()
     def post_issue(self, request, pk=None):
@@ -835,8 +1026,8 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        posts = self.get_issue(Post).exclude(is_show=False)
-        return self.response_models(posts, request, PostSerializer)
+        posts = self.get_issue(Post)
+        return self.response_models(posts, request, PostIssueSerializer)
 
     @detail_route()
     def comment_issue(self, request, pk=None):
@@ -847,8 +1038,55 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: pk
         :return: response model
         """
-        comments = self.get_issue(Comment).exclude(is_show=False)
-        return self.response_models(comments, request, CommentSerializer)
+        comments = self.get_issue(Comment)
+        return self.response_models(comments, request, CommentIssueSerializer)
+
+    def get_issue(self, model):
+        """
+        Get hot issue models from group.
+
+        from_date : start day from HTTP Request
+        to_date : to day from HTTP Request
+
+        :param model: model to get issue
+        :return: result models
+        """
+        from_date = self.request.query_params.get('from', None)
+        to_date = self.request.query_params.get('to', None)
+        ratio = self.request.query_params.get('ratio', None)
+
+        select_query = 'like_count + comment_count'
+        if ratio:
+            select_query = 'like_count * {} + comment_count * {}'.format(float(ratio), 1.0 - float(ratio))
+
+        # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
+        if from_date:
+            from_date = date_utils.get_date_from_str(from_date)
+        if to_date:
+            to_date = date_utils.get_date_from_str(to_date)
+
+        if not from_date and not to_date:
+            from_date, to_date = date_utils.week_delta()
+
+        if from_date and from_date > (timezone.now() - timezone.timedelta(30)).date():
+            if model == Post:
+                model = MonthPost
+            else:
+                model = MonthComment
+
+        _models = self.get_objects_by_time(model, from_date, to_date)
+
+        if model == MonthPost:
+            _models = _models.exclude(post__is_show=False)
+            return Post.objects.filter(pk__in=_models.values_list('post', flat=True))\
+                .extra(select={'score': select_query}, order_by=('-score',))
+        elif model == MonthComment:
+            _models = _models.exclude(comment__is_show=False)
+            return Comment.objects.filter(pk__in=_models.values_list('comment', flat=True))\
+                .extra(select={'score': select_query}, order_by=('-score',))
+        else:
+            _models = _models.extra(select={'score': select_query}, order_by=('-score',))
+            return _models.exclude(is_show=False)
 
     @detail_route()
     def post_archive(self, request, pk=None):
@@ -873,6 +1111,45 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         comments = self.get_archive(Comment).exclude(is_show=False)
         return self.response_models(comments, request, CommentSerializer)
+
+    def get_archive(self, model):
+        """
+        Get archive models from group.
+
+        from_date : day to find archives from HTTP Request
+
+        :param model: model to get archive
+        :return: result models
+        """
+        from_date = self.request.query_params.get('from', None)
+        to_date = None
+        user_id = self.request.query_params.get('user_id', None)
+
+        if from_date:
+            from_date = date_utils.get_date_from_str(from_date)
+            to_date = from_date
+        else:
+            from_date = date_utils.get_today().date()
+            to_date = from_date
+
+        if from_date and from_date > (timezone.now() - timezone.timedelta(30)).date():
+            if model == Post:
+                model = MonthPost
+            else:
+                model = MonthComment
+
+        _models = self.get_objects_by_time(model, from_date, to_date)
+
+        if model == MonthPost:
+            _models = Post.objects.filter(pk__in=_models.values_list('post', flat=True))
+        elif model == MonthComment:
+            _models = Comment.objects.filter(pk__in=_models.values_list('comment', flat=True))
+
+        if user_id:
+            _user = get_object_or_404(FBUser, id=user_id)
+            return _models.filter(user=_user).order_by('-created_time')
+        else:
+            return _models.order_by('-created_time')
 
     @detail_route()
     def activity(self, request, pk=None):
@@ -1006,6 +1283,27 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         """
         comments = self.group_search_by_check(Comment).exclude(is_show=False)
         return self.response_models(comments, request, CommentSerializer)
+
+    def group_search_by_check(self, model):
+        """
+        Get models by search
+
+        :param model: model
+        :return: models
+        """
+        _group = self.get_object()
+
+        search = self.request.query_params.get('q', '')
+        search_check = self.request.query_params.get('c', None)
+
+        if search_check == 'user':
+            _user = FBUser.objects.filter(id=search)
+            return model.objects.filter(group=_group, user=_user).order_by('-created_time')
+
+        if search:
+            return model.objects.filter(group=_group).order_by('-created_time').search(search)
+        else:
+            return model.objects.filter(group=_group).order_by('-created_time')
 
     @list_route()
     def group_search(self, request):
@@ -1207,81 +1505,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             return model.objects.filter(group=_group, created_time__lte=to_date)
         else:
             return model.objects.filter(group=_group)
-
-    def get_issue(self, model):
-        """
-        Get hot issue models from group.
-
-        from_date : start day from HTTP Request
-        to_date : to day from HTTP Request
-
-        :param model: model to get issue
-        :return: result models
-        """
-        from_date = self.request.query_params.get('from', None)
-        to_date = self.request.query_params.get('to', None)
-
-        # If from_date and to_date aren't exist, it has seven days range from seven days ago to today.
-        if from_date:
-            from_date = date_utils.get_date_from_str(from_date)
-        if to_date:
-            to_date = date_utils.get_date_from_str(to_date)
-
-        if not from_date and not to_date:
-            from_date, to_date = date_utils.week_delta()
-
-        models = self.get_objects_by_time(model, from_date, to_date)
-
-        models = models.extra(
-                select={'field_sum': 'like_count + comment_count'},
-                order_by=('-field_sum',)
-        )
-
-        return models
-
-    def get_archive(self, model):
-        """
-        Get archive models from group.
-
-        from_date : day to find archives from HTTP Request
-
-        :param model: model to get archive
-        :return: result models
-        """
-        from_date = self.request.query_params.get('from', None)
-        to_date = None
-        user_id = self.request.query_params.get('user_id', None)
-
-        if from_date:
-            from_date = date_utils.get_date_from_str(from_date)
-            to_date = from_date
-
-        if user_id:
-            _user = get_object_or_404(FBUser, id=user_id)
-            return self.get_objects_by_time(model, from_date, to_date).filter(user=_user).order_by('-created_time')
-        else:
-            return self.get_objects_by_time(model, from_date, to_date).order_by('-created_time')
-
-    def group_search_by_check(self, model):
-        """
-        Get models by search
-
-        :param model: model
-        :return: models
-        """
-        _group = self.get_object()
-
-        search = self.request.query_params.get('q', '')
-        search_check = self.request.query_params.get('c', None)
-
-        if search_check == 'user':
-            _user = FBUser.objects.filter(id=search)
-            return model.objects.filter(group=_group, user=_user).order_by('-created_time')
-
-        if search:
-            return model.objects.filter(group=_group).order_by('-created_time').search(search)
-        else:
-            return model.objects.filter(group=_group).order_by('-created_time')
 
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
