@@ -90,6 +90,36 @@ class Group(models.Model):
         """
         return get_different_time(self.updated_time)
 
+    @staticmethod
+    def get_unit(number):
+        """
+        Get unit number
+
+        :param number: number
+        :return: unit number
+        """
+
+        if number > 1000:
+            return str(int(number / 1000)) + 'K'
+        else:
+            return number
+
+    def get_post_count_unit(self):
+        """
+        Get post count unit
+
+        :return: post count unit number
+        """
+        return Group.get_unit(self.post_count)
+
+    def get_comment_count_unit(self):
+        """
+        Get comment count unit
+
+        :return: comment count unit number
+        """
+        return Group.get_unit(self.comment_count)
+
 
 class FBUser(models.Model):
     """
