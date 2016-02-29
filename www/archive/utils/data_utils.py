@@ -160,6 +160,11 @@ def check_user_from_contents(user, contents):
 
 
 def month_content():
+    """
+    Get month post and comment
+
+    :return:
+    """
     from_date = timezone.now() - timezone.timedelta(30)
 
     for oj in Post.objects.filter(created_time__gte=from_date):

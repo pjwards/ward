@@ -549,20 +549,31 @@ class TimeOverviewGroupStatistics(models.Model):
 
 
 class GroupArchiveErrorList(models.Model):
+    """
+    Group archive error list
+    """
     group = models.OneToOneField(Group)
     error_count = models.IntegerField(default=1)
     query = models.CharField(max_length=2083, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
 
 
-
 class MonthPost(models.Model):
+    """
+    Memoization about month post
+    """
     created_time = models.DateTimeField()
     group = models.ForeignKey(Group)
     post = models.OneToOneField(Post)
 
     @classmethod
     def create(cls, post):
+        """
+        Create month post
+
+        :param post: post
+        :return:
+        """
         check(post.group)
         if MonthPost.objects.filter(post=post).exists():
             return
@@ -584,12 +595,21 @@ class MonthPost(models.Model):
 
 
 class MonthComment(models.Model):
+    """
+    Memoization about month comment
+    """
     created_time = models.DateTimeField()
     group = models.ForeignKey(Group)
     comment = models.OneToOneField(Comment)
 
     @classmethod
     def create(cls, comment):
+        """
+        Create month comment
+
+        :param comment: comment
+        :return:
+        """
         check(comment.group)
         if MonthComment.objects.filter(comment=comment).exists():
             return
@@ -611,10 +631,15 @@ class MonthComment(models.Model):
 
 
 def check(group):
+    """
+    Check month post and comment, and remove something over 1 month
+
+    :param group: group
+    :return:
+    """
     # Is ready to update?
     update_list = GroupStatisticsUpdateList.objects.filter(group=group, method='month_content')
     if update_list:
-        update_list[0].updated_time = timezone.now() - timezone.timedelta(2)
         is_update = update_list[0].is_update()
     else:
         GroupStatisticsUpdateList.update(group=group, method='month_content')
@@ -623,9 +648,7 @@ def check(group):
     if is_update:
         date = timezone.now() - timezone.timedelta(30)
         for oj in MonthPost.objects.filter(group=group, created_time__lt=date):
-            print(oj)
             oj.delete()
 
         for oj in MonthComment.objects.filter(group=group, created_time__lt=date):
-            print(oj)
             oj.delete()
