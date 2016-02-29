@@ -441,6 +441,10 @@ def update_group_feed(group, query):
                     error_list[0].message = '[update] : ' + str(e)
                     error_list[0].query = group.id + query
                     error_list[0].save()
+
+                    if error_list[0] >= 100:
+                        group.is_stored = False
+                        group.save()
                 else:
                     GroupArchiveErrorList(group=group, query=group.id + query, message='[update] : ' + str(e)).save()
                 return False
