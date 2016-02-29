@@ -431,8 +431,6 @@ def update_group_feed(group, query):
         except Exception as e:
             logger.error('Fail to request by exception : %s', e)
 
-            group.updated_time = updated_time_backup
-            group.save()
             error_cnt += 1
             if error_cnt > 2:
                 error_list = GroupArchiveErrorList.objects.filter(group=group)
@@ -442,11 +440,14 @@ def update_group_feed(group, query):
                     error_list[0].query = group.id + query
                     error_list[0].save()
 
-                    if error_list[0] >= 100:
+                    if error_list[0].error_count >= 100:
                         group.is_stored = False
                         group.save()
                 else:
                     GroupArchiveErrorList(group=group, query=group.id + query, message='[update] : ' + str(e)).save()
+
+                group.updated_time = updated_time_backup
+                group.save()
                 return False
 
         for feed in feeds:
