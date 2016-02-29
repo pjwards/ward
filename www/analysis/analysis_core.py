@@ -179,22 +179,18 @@ def analyze_articles(analyzer, message):
     # print(kkma_pos)
     # print(twitter_posmore)
 
-    twi_stemlist = ['Josa', 'Punctuation', 'Suffix', 'Determiner', 'KoreanParticle', 'Foreign', 'Number']
-    kkma_stemlist = ['NNG']
+    twi_stemlist = ['Alpha', 'URL']     # 'Adjective', 'Noun'
+    kkma_stemlist = ['NNG', 'NN', 'NNM', 'NNP']    # OL, NNB
 
     for i in twitter_posmore:
         if i[1] in twi_stemlist:
-            continue
-
-        temp_twitter.append(i[0])
-
-    # print(tempTwitter)
+            temp_twitter.append(i[0])
 
     for i in kkma_pos:
         if i[1] in kkma_stemlist:
             temp_kkma.append(i[0])
 
-    # print(tempKkma)
+    # print(temp_kkma)
 
     tempword = temp_twitter + temp_kkma
     returnword = list(set(tempword))        # func = remove duplicates
@@ -211,3 +207,7 @@ def analyze_articles(analyzer, message):
     # print(refineword)
 
     return refineword       # need better refine words
+
+
+def analysis_text_by_words(base_words, analyzed_words):
+    print("hello")

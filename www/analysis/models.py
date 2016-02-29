@@ -50,6 +50,9 @@ class ArchiveAnalysisWord(models.Model):
     count = models.IntegerField(default=1)
     status = models.CharField(max_length=10, default='temp')
     group = models.ForeignKey(Group, related_name='archivewords')
+    likenum = models.IntegerField(default=0)
+    commentnum = models.IntegerField(default=0)
+    weigh = models.IntegerField(default=0)
     # word weight with likes and comments
 
 

@@ -35,7 +35,7 @@ class SpamWordAdmin(admin.ModelAdmin):
 
 
 class ArchiveAnalysisWordAdmin(admin.ModelAdmin):
-    list_display = ('group', 'word', 'count', 'status')
+    list_display = ('group', 'word', 'count', 'status', 'likenum', 'commentnum', 'weigh')
 
 
 class AnticipateArchiveAdmin(admin.ModelAdmin):

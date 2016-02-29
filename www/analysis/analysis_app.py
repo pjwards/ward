@@ -23,7 +23,7 @@
 """ Provides analysis app class """
 
 import analysis.analysis_core as core
-from django.db.models import Q
+from django.db.models import Q, Avg
 from .models import ArchiveAnalysisWord, AnticipateArchive, AnalysisDBSchema
 from archive.models import Group, Post, Comment, Attachment
 from django.utils import timezone
@@ -42,7 +42,7 @@ def add_anticipate_list(data_object):
     newarticle.save()
 
 
-def add_words_db(group, word_set):
+def add_words_db(group, word_set, like_count, comment_count):
     """
     add words to word DB
     :param group: group object
@@ -50,10 +50,17 @@ def add_words_db(group, word_set):
     """
     for word in word_set:
         if not ArchiveAnalysisWord.objects.filter(group=group, word=word).exists():
-            ArchiveAnalysisWord(group=group, word=word).save()
+            temp = ArchiveAnalysisWord(group=group, word=word, likenum=like_count, commentnum=comment_count)
+            temp.weigh = 1 + int(like_count * 0.8) + int(comment_count * 0.5)
+            temp.save()
         else:
             exword = ArchiveAnalysisWord.objects.filter(group=group, word=word)[0]
             exword.count += 1
+            likes = exword.likenum + like_count
+            comments = exword.commentnum + comment_count
+            exword.likenum = likes
+            exword.commentnum = comments
+            exword.weigh = int(exword.count * 0.5) + int(likes * 0.8) + int(comments * 0.5)
             exword.save()
 
 
@@ -69,19 +76,12 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
         basicdata = None
 
     if is_post is True:
-        posts = Post.objects.filter(group=group)
         if basicdata is not None:                       # need update periodically
-            if basicdata.avgpostcomment is not 0 and basicdata.avgpostlike is not 0:
-                likes = 0
-                comments = 0
-                counts = posts.count()
-
-                for apost in posts:
-                    likes += apost.like_count
-                    comments += apost.comment_count
-
-                avglike = int(likes / counts)       # possibility of error
-                avgcomt = int(comments / counts)
+            if basicdata.avgpostcomment is 0 and basicdata.avgpostlike is 0:
+                args = Post.objects.filter(group=group).aggregate(avglike=Avg('like_count'),
+                                                                  avgcomt=Avg('comment_count'))
+                avglike = int(round(args['avglike']))
+                avgcomt = int(round(args['avgcomt']))
 
                 basicdata.avgpostlike = avglike
                 basicdata.avgpostcomment = avgcomt
@@ -92,17 +92,10 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
                 avgcomt = basicdata.avgpostcomment
         else:
             basicdata = AnalysisDBSchema(group=group)
-
-            likes = 0
-            comments = 0
-            counts = posts.count()
-
-            for apost in posts:
-                likes += apost.like_count
-                comments += apost.comment_count
-
-            avglike = int(likes / counts)
-            avgcomt = int(comments / counts)
+            args = Post.objects.filter(group=group).aggregate(avglike=Avg('like_count'),
+                                                              avgcomt=Avg('comment_count'))
+            avglike = int(round(args['avglike']))
+            avgcomt = int(round(args['avgcomt']))
 
             basicdata.avgpostlike = avglike
             basicdata.avgpostcomment = avgcomt
@@ -110,22 +103,16 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
             basicdata.save()
 
     elif is_comment is True:
-        commentlist = Comment.objects.filter(group=group)
         if basicdata is not None:                       # need update periodically
-                if basicdata.avgcomtcomment is not 0 and basicdata.avgcomtlike is not 0:
-                    likes = 0
-                    comments = 0
-                    counts = commentlist.count()
+                if basicdata.avgcomtcomment is 0 and basicdata.avgcomtlike is 0:
+                    args = Comment.objects.filter(group=group)\
+                        .aggregate(avglike=Avg('like_count'),
+                                   avgcomt=Avg('comment_count'))
+                    avglike = int(round(args['avglike']))
+                    avgcomt = int(round(args['avgcomt']))
 
-                    for apost in commentlist:
-                        likes += apost.like_count
-                        comments += apost.comment_count
-
-                    avglike = int(likes / counts)
-                    avgcomt = int(comments / counts)
-
-                    basicdata.avgcomtlike = avglike
-                    basicdata.avgcomtcomment = avgcomt
+                    basicdata.avgpostlike = avglike
+                    basicdata.avgpostcomment = avgcomt
                     basicdata.lastupdatetime = timezone.now()
                     basicdata.save()
                 else:
@@ -133,20 +120,14 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
                     avgcomt = basicdata.avgcomtcomment
         else:
             basicdata = AnalysisDBSchema(group=group)
+            args = Comment.objects.filter(group=group)\
+                .aggregate(avglike=Avg('like_count'),
+                           avgcomt=Avg('comment_count'))
+            avglike = int(round(args['avglike']))
+            avgcomt = int(round(args['avgcomt']))
 
-            likes = 0
-            comments = 0
-            counts = commentlist.count()
-
-            for apost in commentlist:
-                likes += apost.like_count
-                comments += apost.comment_count
-
-            avglike = int(likes / counts)
-            avgcomt = int(comments / counts)
-
-            basicdata.avgcomtlike = avglike
-            basicdata.avgcomtcomment = avgcomt
+            basicdata.avgpostlike = avglike
+            basicdata.avgpostcomment = avgcomt
             basicdata.lastupdatetime = timezone.now()
             basicdata.save()
 
@@ -162,21 +143,22 @@ def refresh_average(group):
     recalculating of AnalysisDBSchema
     :param group: group object
     """
-    posts = Post.objects.filter(group=group)
+    argpost = Post.objects.filter(group=group).aggregate(avglike=Avg('like_count'),
+                                                         avgcomt=Avg('comment_count'))
+    avglikep = int(round(argpost['avglike']))
+    avgcomtp = int(round(argpost['avgcomt']))
+
+    argcom = Comment.objects.filter(group=group).aggregate(avglike=Avg('like_count'),
+                                                           avgcomt=Avg('comment_count'))
+    avglikec = int(round(argcom['avglike']))
+    avgcomtc = int(round(argcom['avgcomt']))
+
     basicdata = AnalysisDBSchema.objects.filter(group=group)[0]
-    likes = 0
-    comments = 0
-    counts = posts.count()
 
-    for apost in posts:
-        likes += apost.like_count
-        comments += apost.comment_count
-
-    avglike = int(likes / counts)
-    avgcomt = int(comments / counts)
-
-    basicdata.avgpostlike = avglike
-    basicdata.avgpostcomment = avgcomt
+    basicdata.avgpostlike = avglikep
+    basicdata.avgpostcomment = avgcomtp
+    basicdata.avgcomtlike = avglikec
+    basicdata.avgcomtcomment = avgcomtc
     basicdata.lastupdatetime = timezone.now()   # change date
     basicdata.save()
 
@@ -198,7 +180,7 @@ def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=
                     return "no_message"
 
                 words = core.analyze_articles(analyzer, article.message)
-                add_words_db(group, words)
+                add_words_db(group, words, article.like_count, article.comment_count)
             else:
                 if attach[0].description is not None:
                     message = attach[0].description
@@ -208,7 +190,7 @@ def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=
                     return "no_message"
 
                 words = core.analyze_articles(analyzer, message)
-                add_words_db(group, words)
+                add_words_db(group, words, article.like_count, article.comment_count)
 
         elif is_comment is True:
             attach = Attachment.objects.filter(comment=article)
@@ -218,7 +200,7 @@ def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=
                     return "no_message"
 
                 words = core.analyze_articles(analyzer, article.message)
-                add_words_db(group, words)
+                add_words_db(group, words, article.like_count, article.comment_count)
             else:
                 if attach[0].description is not None:
                     message = attach[0].description
@@ -228,12 +210,18 @@ def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=
                     return "no_message"
 
                 words = core.analyze_articles(analyzer, message)
-                add_words_db(group, words)
+                add_words_db(group, words, article.like_count, article.comment_count)
         else:
             return "no_article"
 
 
 def analyze_feed(analyzer, data_object):
+    """
+    analyze a feed
+    :param analyzer: analyzer for analysis
+    :param data_object: data object
+    :return: words from analyzed feed
+    """
     if data_object.message is not None:
         message = data_object.message
     else:
@@ -324,15 +312,26 @@ def analyze_feed_sequence(data_object):
 
     add_anticipate_list(data_object=data_object)
 
-    add_words_db(data_object.group, words)
+    # add_words_db(data_object.group, words, data_object.like_count, data_object.comment_count)
 
     return "ok"
+
+
+def refresh_sequence(group):
+    """
+    refresh AnalysisDBScheman and comments & likes in words DB
+    :param group: group object
+    """
+    refresh_average(group)
+    analysis_prev_hit_posts(group)          # consider db init
+    analysis_prev_hit_comments(group)       # consider db init
 
 
 def run_app():
     print('hello')
     group = Group.objects.filter(id=168705546563077)[0]
-    # ArchiveAnalysisWord.objects.all().delete()
+    AnalysisDBSchema.objects.all().delete()
+    ArchiveAnalysisWord.objects.all().delete()
     analysis_prev_hit_posts(group)
 
     # analyze old post and comment and spam (make analyzer) - init sequence
@@ -343,4 +342,5 @@ def run_app():
     # analyze feed data and store anticipate db if it will be popular article
     # delete or restore spam sequence (make analyzer)   - spam sequence
     # add anticipate list sequence (make analyzer)  - analysis sequence
-    # everyday refresh AnalysisDBSchema onetime
+    # everyday refresh AnalysisDBSchema
+    # everyday refresh words comment & like calculating again
