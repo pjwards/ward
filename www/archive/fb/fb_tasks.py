@@ -459,9 +459,11 @@ def update_group_feed(group, query):
             # if post isn't updated, exit
             if not res:
                 check_cp_cnt_group(group)
+                store_group(group_data)
                 return True
 
     check_cp_cnt_group(group)
+    store_group(group_data)
     logger.info('=== End updating %s feed ===', group.id)
     return True
 
