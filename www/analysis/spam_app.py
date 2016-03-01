@@ -40,11 +40,7 @@ def analyze_feed_spam(analyzer, group, message):
     data_set = [sp.word for sp in spam_db]
     word_set = core.analyze_articles(analyzer, message)
 
-    for i in word_set:                   # change the method
-        if i in data_set:
-            return True
-
-    return False
+    return core.analysis_text_by_words(data_set, word_set)
 
 
 def add_spam_list(group, user, object_id, message, time):

@@ -246,11 +246,7 @@ def analyze_feed(analyzer, data_object):
     word_db = ArchiveAnalysisWord.objects.filter(group=data_object.group)
     data_set = [sp.word for sp in word_db]
 
-    for i in word_set:                   # make better algorithm
-        if i in data_set:
-            return word_set
-
-    return None
+    return core.analysis_text_by_words(data_set, word_set)
 
 
 def analysis_prev_hit_posts(group, wanted_time=None):
@@ -306,8 +302,9 @@ def analyze_feed_sequence(data_object):
     if AnticipateArchive(group=data_object.group, id=data_object.id).exists():
         return "exist"
 
-    words = analyze_feed(analyzer, data_object)
-    if words is None:
+    result = analyze_feed(analyzer, data_object)
+
+    if result is False:
         return "no_concern"
 
     add_anticipate_list(data_object=data_object)

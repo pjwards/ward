@@ -210,4 +210,28 @@ def analyze_articles(analyzer, message):
 
 
 def analysis_text_by_words(base_words, analyzed_words):
-    print("hello")
+    """
+    Compare words for analysis
+    :param base_words: standard words
+    :param analyzed_words: Be compared words
+    :return: Return true if analyzed words are in base words set and over critical number
+    """
+    wordhash = dict((k, 0) for k in base_words)
+    for k in analyzed_words:
+        if wordhash.get(k) is None:
+            print(k+' is None ')
+        else:
+            wordhash[k] += 1
+            # print(k+' is '+str(wordhash[k]))
+
+    total = 0
+
+    for k in wordhash:
+        total += wordhash[k]
+
+    # print(total)
+
+    if total > 5:
+        return True
+    else:
+        return False
