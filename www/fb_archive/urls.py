@@ -29,21 +29,23 @@ from django.views.generic import TemplateView
 from mezzanine.conf import settings
 from registration.backends.hmac.views import ActivationView, RegistrationView
 from rest_framework import routers
-from archive import views
+from archive import views as archive_views
+from analysis import views as analysis_views
 
 
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^$', views.groups, name="home"),
-    url(r'^about/$', views.about, name='about'),
-    url(r'^alert/$', views.alert, name='alert'),
+    url(r'^$', archive_views.groups, name="home"),
+    url(r'^about/$', archive_views.about, name='about'),
+    url(r'^alert/$', archive_views.alert, name='alert'),
     url(r"^admin/", include(admin.site.urls)),
 
     url(r'^', include('registration.auth_urls')),
     url(r'^accounts/', include('allauth.urls')),
 
     url(r'^archive/', include('archive.urls', namespace="archive")),
+    url(r'^analysis/', include('analysis.urls', namespace="analysis")),
 ]
 
 
@@ -83,16 +85,16 @@ urlpatterns += [
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
-router.register(r'posts', views.PostViewSet)
-router.register(r'comments', views.CommentViewSet)
-router.register(r'medium', views.MediaViewSet)
-router.register(r'attachments', views.AttachmentViewSet)
-router.register(r'blacklists', views.BlacklistViewSet)
-router.register(r'reports', views.ReportViewSet)
-router.register(r'wards', views.WardViewSet)
-router.register(r'user_activities', views.UserActivityViewSet)
+router.register(r'users', archive_views.UserViewSet)
+router.register(r'groups', archive_views.GroupViewSet)
+router.register(r'posts', archive_views.PostViewSet)
+router.register(r'comments', archive_views.CommentViewSet)
+router.register(r'medium', archive_views.MediaViewSet)
+router.register(r'attachments', archive_views.AttachmentViewSet)
+router.register(r'blacklists', archive_views.BlacklistViewSet)
+router.register(r'reports', archive_views.ReportViewSet)
+router.register(r'wards', archive_views.WardViewSet)
+router.register(r'user_activities', archive_views.UserActivityViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

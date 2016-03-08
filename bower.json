@@ -32,7 +32,8 @@
     "animate.css": ">= 3.4.0",
     "FitText.js": ">= 1.2.0",
     "jquery-backstretch": ">= 2.0.4",
-    "html2canvas": ">= 0.4.1"
+    "html2canvas": ">= 0.4.1",
+    "vis": ">= 4.15.0"
   },
   "devDependencies": {
   },

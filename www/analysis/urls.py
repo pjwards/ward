@@ -27,6 +27,7 @@ from django.conf.urls import url
 from . import views
 
 
-#urlpatterns = [
-#    url(r'^analysis/$', views.analysis, name='analysis'),
-#]
+urlpatterns = [
+   url(r'^network/$', views.analysis_network, name='analysis_network'),
+]
+

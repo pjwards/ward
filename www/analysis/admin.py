@@ -23,4 +23,11 @@
 """ Sets admin site """
 
 from django.contrib import admin
+from analysis.models import *
 
+
+class UpdateListAdmin(admin.ModelAdmin):
+    list_display = ('method', 'updated_time', 'data')
+
+
+admin.site.register(UpdateList, UpdateListAdmin)
