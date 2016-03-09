@@ -1,6 +1,3 @@
-slack
-팀
-배포
-api
-guldan
-http://festi.kr/zlack/
+오피걸
+Motel
+임대
