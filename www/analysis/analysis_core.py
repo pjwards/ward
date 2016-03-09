@@ -103,7 +103,7 @@ def compare_and_make_words(words, comparison_words):
     Compare standard words with input words. If two words are same, collects that word
     :param words: analyzed words
     :param comparison_words: standard words
-    :return: colleting words list. If input list has no str or tuple type, return false
+    :return: collecting words list. If input list has no str or tuple type, return false
     """
     meanning_words = []
     if type(words[0]).__name__ == 'str':    # morphs, nouns
@@ -163,7 +163,75 @@ def url_duplication_check(data_set, urls):
     return url_list
 
 
-#def merge_analyzed_list(list1, list2):
+def analyze_articles(analyzer, message):
+    """
+    analyze articles
+    :param analyzer: analyzer for analysis
+    :param message: string data
+    :return: refined words list
+    """
+    temp_twitter = []
+    temp_kkma = []
+
+    twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
+    kkma_pos = analyzer.analyzer_kkma(message, 'pos')
+
+    # print(kkma_pos)
+    # print(twitter_posmore)
+
+    twi_stemlist = ['Alpha', 'URL']     # 'Adjective', 'Noun'
+    kkma_stemlist = ['NNG', 'NN', 'NNM', 'NNP']    # OL, NNB
+
+    for i in twitter_posmore:
+        if i[1] in twi_stemlist:
+            temp_twitter.append(i[0])
+
+    for i in kkma_pos:
+        if i[1] in kkma_stemlist:
+            temp_kkma.append(i[0])
+
+    # print(temp_kkma)
+
+    tempword = temp_twitter + temp_kkma
+    returnword = list(set(tempword))        # func = remove duplicates
+
+    refineword = []
+
+    # print(returnword)
+
+    for i in returnword:
+        if len(i) < 2:
+            continue
+        refineword.append(i)
+
+    # print(refineword)
+
+    return refineword       # need better refine words
 
 
+def analysis_text_by_words(base_words, analyzed_words):
+    """
+    Compare words for analysis
+    :param base_words: standard words
+    :param analyzed_words: Be compared words
+    :return: Return true if analyzed words are in base words set and over critical number
+    """
+    wordhash = dict((k, 0) for k in base_words)
+    for k in analyzed_words:
+        if wordhash.get(k) is None:
+            print(k+' is None ')
+        else:
+            wordhash[k] += 1
+            # print(k+' is '+str(wordhash[k]))
 
+    total = 0
+
+    for k in wordhash:
+        total += wordhash[k]
+
+    # print(total)
+
+    if total > 5:
+        return True
+    else:
+        return False
