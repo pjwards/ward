@@ -26,8 +26,33 @@ from django.contrib import admin
 from analysis.models import *
 
 
+class SpamListAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'group', 'message', 'time', 'status')
+
+
+class SpamWordAdmin(admin.ModelAdmin):
+    list_display = ('group', 'word', 'count', 'status')
+
+
+class ArchiveAnalysisWordAdmin(admin.ModelAdmin):
+    list_display = ('group', 'word', 'count', 'status', 'likenum', 'commentnum', 'weigh')
+
+
+class AnticipateArchiveAdmin(admin.ModelAdmin):
+    list_display = ('id', 'group', 'user', 'message', 'time', 'status')
+
+
+class AnalysisDBSchemaAdmin(admin.ModelAdmin):
+    list_display = ('group', 'avgpostlike', 'avgpostcomment', 'avgcomtlike', 'avgcomtcomment', 'lastupdatetime')
+
+
 class UpdateListAdmin(admin.ModelAdmin):
     list_display = ('method', 'updated_time', 'data')
-
-
+    
+    
+admin.site.register(SpamList, SpamListAdmin)
+admin.site.register(SpamWordList, SpamWordAdmin)
+admin.site.register(ArchiveAnalysisWord, ArchiveAnalysisWordAdmin)
+admin.site.register(AnticipateArchive, AnticipateArchiveAdmin)
+admin.site.register(AnalysisDBSchema, AnalysisDBSchemaAdmin)
 admin.site.register(UpdateList, UpdateListAdmin)
