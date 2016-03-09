@@ -21,6 +21,23 @@
 # SOFTWARE.
 # ==================================================================================
 """ Sets views """
+from django.http import HttpResponse
+from analysis.tools import network
+from archive.models import *
 
-from django.shortcuts import render
 
+def analysis_network(request):
+    """
+    Return group network
+
+    :param request: request
+    :return: json
+    """
+    if request.method == 'GET':
+        group_id = request.GET.get("group", None)
+        if Group.objects.filter(id=group_id).exists():
+            network_json = network.network(group_id)
+        else:
+            network_json = network.network()
+
+        return HttpResponse(network_json, content_type="application/json")

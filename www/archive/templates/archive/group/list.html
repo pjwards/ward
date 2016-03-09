@@ -2,6 +2,7 @@
 {% load staticfiles %}
 
 {% block css %}
+    <link rel="stylesheet" href="{% static 'css/analysis/network.css' %}"/>
 {% endblock %}
 
 {% block content %}
@@ -84,6 +85,11 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-users fa-fw"></i> Groups
+
+                    <button class="btn btn-danger btn-xs" data-toggle="modal" data-target="#network"
+                            onclick="drawNetwork('/analysis/network/');">
+                        network
+                    </button>
                     <div class="pull-right">
                         <div class="btn-group">
                             <button type="button" class="btn btn-default btn-xs dropdown-toggle"
@@ -159,6 +165,43 @@
         </div>
         <!-- /.modal-dialog -->
     </div>
+
+    <div class="modal fade" id="network" tabindex="-1" role="dialog"
+         aria-labelledby="network_label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="network_label">Network</h4>
+                </div>
+                <div class="modal-body" style="text-align: center;">
+                    <!-- Network -->
+                    <div id="network_wrapper">
+                        <div id="network_content" class="col-lg-12"></div>
+                        <div id="network_loadingBar" class="col-lg-12">
+                            <div class="outerBorder">
+                                <div id="network_text">0%</div>
+                                <div id="network_border">
+                                    <div id="network_bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /Network -->
+                    <p><i class="fa fa-mouse-pointer"></i> You can use double click!
+                        <a data-toggle="modal" data-target="#save_img"
+                           onclick="saveAsImage('network_content', 'network')">
+                            Save as image
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
     <!-- /.modal -->
 
     <!-- table templates -->
@@ -198,7 +241,8 @@
 {% endblock content %}
 
 {% block script %}
-    <script src="{% static 'js/archive/js/group.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/group.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/analysis/network.js' %}" type="text/javascript"></script>
     <script>
         var groups_url = "/api/groups/group_search/";
         var groups_limit = detectWidthToPageCount();
@@ -351,6 +395,7 @@
          * Init user.html
          */
         $(function () {
+
             /**
              * Window Resize
              */
@@ -467,5 +512,10 @@
             $(id).children('i').next().remove();
             $(id).append("<i class='" + className[keyword] + "'></i>");
         }
+    </script>
+
+    <script type="text/javascript">
+
+
     </script>
 {% endblock %}
