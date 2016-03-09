@@ -312,46 +312,117 @@ var getHourTotalStatistics = function (url, loading) {
  * Get issue by using ajax
  *
  * @param url
- * @param table
- * @param limit
+ * @param issueBar
  * @param from
  * @param to
  * @param loading
- * @param page
- * @param paging
  */
-var getIssue = function (url, table, limit, from, to, loading, page, paging) {
+var getIssue = function (url, issueBar, from, to, loading) {
+
+    var event = function (source) {
+        var user_url = '/archive/user/' + source.user.id + '/';
+        var fb_url = "https://www.facebook.com/" + source.id;
+        var message = source.message ? source.message : source.picture ? $("<img />", {src: source.picture}) : '(photo)';
+        var time = ' ' + timeSince(source.created_time);
+        var like_count = $("<span />")
+            .text("like ")
+            .append($("<span />", {class: "badge badge-success"}).text(source.like_count));
+        var comment_count = $("<span />")
+            .text("comment ")
+            .append($("<span />", {class: "badge"}).text(source.comment_count));
+        var facebook = $("<a />", {class: "btn btn-xs btn-facebook pull-right", style: "margin-left: 2px;"})
+            .append($("<i />", {class: "fa fa-facebook"}))
+            .append(" Read")
+            .attr("href", fb_url)
+            .attr("target", "_blank");
+        var ward = $("<a />", {class: "btn btn-xs btn-warning pull-right", style: "margin-left: 2px;"})
+            .append($("<i />", {class: "fa fa-eye"}))
+            .append(" Ward")
+            .on("click", function () {
+                postWard(source.id)
+            });
+        var report = $("<a />", {class: "btn btn-xs btn-danger pull-right", style: "margin-left: 2px;"})
+            .append($("<i />", {class: "fa fa-warning"}))
+            .append(" Report")
+            .on("click", function () {
+                if (confirm('Is this spam?')) postReport(source.id);
+            });
+
+        $("#issue_img")
+            .empty()
+            .attr("src", source.user.picture)
+            .attr("onerror", window.no_image_error);
+        $("#issue_from")
+            .empty()
+            .append($("<a />")
+                .attr("href", user_url)
+                .text(source.user.name));
+        $("#issue_time")
+            .empty()
+            .text(time)
+            .prepend($("<i />", {class: "fa fa-clock-o fa-fw"}));
+        $("#issue_message")
+            .empty()
+            .append(message);
+        $("#issue_footer")
+            .empty()
+            .append($("<div />")
+                .append(like_count)
+                .append(" / ")
+                .append(comment_count)
+                .append(facebook)
+                .append(ward)
+                .append(report));
+        $("#issue").modal();
+    }
+
     var fun = function (source) {
         var results = source["results"];
-        var rows = []
+        if (results.length == 0) {
+            issueBar.read_more_btn.removeClass("btn-primary")
+            issueBar.read_more_btn.addClass("btn-default disabled");
+            issueBar.read_more_btn.text("Data does not exist.");
+            issueBar.read_more_btn.off('click');
+            loading.hide();
+            return;
+
+        }
+
+        var max_score = results[0].score;
+        var total_max_score = Number(issueBar.issue_content.attr("total_max_score"));
+
+        if (total_max_score < max_score) {
+            issueBar.issue_content.attr("total_max_score", max_score);
+            total_max_score = max_score;
+        }
+
         for (var i in results) {
-            pcDisplay(rows, results[i]);
+            var score = results[i].score / total_max_score * 100;
+            var text1 = results[i].message ? results[i].message : '(photo)';
+            var text2 = timeSince(results[i].created_time) + ' | ' + results[i].user.name;
+
+            issueBar.generator(score, {'click': event.bind(null, results[i])}, text1, text2);
         }
         ;
-
-        table.reset()
-        table.append(rows);
-        if (paging) {
-            paging.setOption("pageCount", limit);
-            paging.setOption("count", source["count"]);
-            paging.reload(source["count"]);
-            paging.first();
-        }
         loading.hide();
     }
 
-    if (!page) {
+    var page = issueBar.read_more_btn.attr("rel");
+    var limit = 10;
+
+    if (!page || page < 0) {
+        issueBar.read_more_btn.attr("rel", 1);
         page = 1;
     }
 
     data = {
         limit: limit,
         offset: (page - 1) * limit,
-        from: from,
-        to: to,
+        from: from.val(),
+        to: to.val()
     }
 
-    getAjaxResult(url, data, fun);
+    getAjaxResult(url, data, fun)
 }
 
 
@@ -359,17 +430,14 @@ var getIssue = function (url, table, limit, from, to, loading, page, paging) {
  * Change Issue
  *
  * @param url
- * @param table
- * @param limit
+ * @param issueBar
  * @param from
  * @param to
  * @param loading
- * @param page
- * @param paging
  */
-function changeIssue(url, table, limit, from, to, loading, page, paging) {
+var changeIssue = function (url, issueBar, from, to, loading) {
     loading.show();
-    getIssue(url, table, limit, from, to, loading, page, paging);
+    getIssue(url, issueBar, from, to, loading);
 }
 
 
@@ -434,7 +502,7 @@ var getArchive = function (url, table, limit, from, user_id, loading, page, pagi
  * @param page
  * @param paging
  */
-function changeArchive(url, table, limit, from, loading, page, paging) {
+var changeArchive = function (url, table, limit, from, loading, page, paging) {
     var user_id = undefined;
     loading.show();
     getArchive(url, table, limit, from, user_id, loading, page, paging);
@@ -453,7 +521,7 @@ function changeArchive(url, table, limit, from, loading, page, paging) {
  * @param page
  * @param paging
  */
-function changeArchiveByUser(url, table, limit, from, user_id, loading, page, paging) {
+var changeArchiveByUser = function (url, table, limit, from, user_id, loading, page, paging) {
     loading.show();
     getArchive(url, table, limit, from, user_id, loading, page, paging);
 }

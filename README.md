@@ -93,7 +93,6 @@ npm install bower
 cd [product_forder]
 bower install
 cd [product_forder]/www
-mkdir logs
 python manage.py migrate
 python manage.py createsuperuser
 
@@ -139,7 +138,6 @@ sudo chown www-data:www-data -R *
 cd [product_forder]
 bower install
 cd [product_forder]/www
-mkdir logs
 python manage.py migrate
 python manage.py createsuperuser
 
@@ -220,7 +218,7 @@ Ward는 [MIT 라이센스](./LICENSE)하에 배포 됩니다.
         │   ├── __init__.py
         │   ├── admin.py
         │   ├── analysis_core.py                    : 분석 관련 핵심 코드
-        │   ├── migrations                          : migrations
+        │   ├── migrations
         │   ├── models.py
         │   ├── spam_app.py                         : 스팸 관련 코드
         │   ├── tests.py
@@ -234,7 +232,8 @@ Ward는 [MIT 라이센스](./LICENSE)하에 배포 됩니다.
         │   │   ├── __init__.py
         │   │   ├── fb_lookup.py                    : Facebook의 그룹 아이디 찾기 코드
         │   │   ├── fb_query.py                     : Facebook Graph API 쿼리 코드
-        │   │   └── fb_request.py                   : Facebook Graph API 요청 클래스 코드
+        │   │   ├── fb_request.py                   : Facebook Graph API 요청 클래스 코드
+        │   │   └── fb_tasks.py                     : Facebook 그룹 데이터 수집 코드
         │   ├── migrations
         │   ├── models.py
         │   ├── rest                                : Djang Rest Framework를 위한 설정 파일
@@ -242,7 +241,7 @@ Ward는 [MIT 라이센스](./LICENSE)하에 배포 됩니다.
         │   │   ├── pagination.py                   : Pagination을 위한 설정 파일
         │   │   └── serializer.py                   : Serializer를 위한 설정 파일
         │   ├── sql                                 : Raw SQL를 생성하기 위해 테스트해본 SQL
-        │   ├── tasks.py                            : Facebook 그룹 데이터 수집 코드 (Celery 이용)
+        │   ├── tasks.py                            : Facebook 그룹 데이터 수집 코드를 이용하는 Celery 작업들
         │   ├── templates
         │   │   └── archive                         : Facebook 그룹 기록 앱 Templates
         │   │       ├── alert.html                  : 알림 Template
@@ -264,8 +263,9 @@ Ward는 [MIT 라이센스](./LICENSE)하에 배포 됩니다.
         │   ├── urls.py
         │   ├── utils                               : 도구 모음
         │   │   ├── __init__.py
-        │   │   ├── data_utils.py                   : 데이타 관련된 유틸들
-        │   │   └── date_utils.py                   : 날짜와 관련된 유틸들
+        │   │   ├── data_utils.py                   : 데이터 관련된 유틸들
+        │   │   ├── date_utils.py                   : 날짜와 관련된 유틸들
+        │   │   └── utils.py                        : 기타 유틸들
         │   └── views.py                            : views (Django Rest Framework의 View들도 포함
         ├── deploy
         ├── fabfile.py

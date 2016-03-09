@@ -386,8 +386,9 @@ FB_APP_VERSION = 2.4
 # ARCHIVE SETTINGS #
 ####################
 
-ARCHIVE_USE_CELERY = False
 ARCHIVE_GROUP_AUTO_SAVE = False
+ARCHIVE_SERVER = False
+ARCHIVE_SERVER_URL = 'http://localhost:8001'
 
 ###################
 # CELERY SETTINGS #
@@ -402,15 +403,17 @@ CELERY_TIMEZONE = 'Asia/Seoul'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 from datetime import timedelta
-from archive.fb.fb_query import get_feed_query
+from archive.fb.fb_query import get_feed_with_comment_query
 
-CELERYBEAT_SCHEDULE = {
-    'add-every-120-seconds': {
-        'task': 'archive.tasks.update_groups_feed',
-        'schedule': timedelta(seconds=120),
-        'args': (get_feed_query(), True, True)
-    },
-}
+
+if ARCHIVE_SERVER:
+    CELERYBEAT_SCHEDULE = {
+        'add-every-60-seconds': {
+            'task': 'archive.tasks.update_groups_feed_task',
+            'schedule': timedelta(seconds=60),
+            'args': (get_feed_with_comment_query(50, 100),)
+        },
+    }
 
 ####################
 # LOGGING SETTINGS #
@@ -429,22 +432,20 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
+        'default': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/mysite.log',
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
         'archive': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/archive.log',
+            'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['default'],
             'propagate': True,
             'level': 'DEBUG',
         },

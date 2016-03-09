@@ -475,8 +475,8 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/archive/js/user.js' %}" type="text/javascript"></script>
-    <script src="{% static 'js/archive/js/management.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/user.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/archive/management.js' %}" type="text/javascript"></script>
     <script>
         var group_id = "{{ group.id }}";
 
@@ -501,9 +501,12 @@
         var user_search_helper_check = 'post';
 
         /**
-         * Generate Archive
+         * Generate JUI Init
          */
-        jui.ready(["ui.paging", "uix.table"], function (paging, table) {
+        jui.ready(["ui.paging", "grid.table", "ui.modal", "ui.button"], function (paging, table, modal, button) {
+            /**
+             * Generate Archive
+             */
             post_paging = paging("#post_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
@@ -522,17 +525,6 @@
                 scroll: true,
                 scrollHeight: 2500,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row").html(),
                     none: $("#tpl_none").html()
@@ -557,17 +549,6 @@
                 scroll: true,
                 scrollHeight: 2500,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row").html(),
                     none: $("#tpl_none").html()
@@ -592,23 +573,15 @@
                 scroll: true,
                 scrollHeight: 2000,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row2").html(),
                     none: $("#tpl_none2").html()
                 }
             });
 
+            /**
+             * Generate Blacklist
+             */
             blacklist_paging = paging("#blacklist_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
@@ -627,23 +600,15 @@
                 scroll: true,
                 scrollHeight: 2000,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row3").html(),
                     none: $("#tpl_none3").html()
                 }
             });
 
+            /**
+             * Generate User Search Helper
+             */
             user_search_helper_paging = paging("#user_search_helper_paging", {
                 pageCount: 10,
                 screenCount: 5,
@@ -662,73 +627,15 @@
                 scroll: true,
                 scrollHeight: 2000,
                 resize: true,
-                event: {
-                    sort: function (column, e) {
-                        var className = {
-                            "desc": "icon-arrow1",
-                            "asc": "icon-arrow3"
-                        }[column.order];
-
-                        $(column.element).children("i").remove();
-                        $(column.element).append("<i class='" + className + "'></i>");
-                    }
-                },
                 tpl: {
                     row: $("#tpl_row4").html(),
                     none: $("#tpl_none4").html()
                 }
             });
-        });
 
-        /**
-         * Generate Helper
-         */
-        jui.ready(["ui.modal", "ui.tooltip"], function (modal, tooltip) {
-            $("#modal_1").appendTo("body");
-
-            modal_1 = modal("#modal_1", {
-                color: "black"
-            });
-        });
-
-        /**
-         * Generate Button
-         */
-        jui.ready(["ui.button"], function (button) {
-            function user_clicked(model) {
-                user_search_helper_check = model;
-
-                modal_1.show();
-                changeSearchUM(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), loading_user_search_helper, 1, user_search_helper_paging);
-            }
-
-            post_radio = button("#post_radio", {
-                type: "radio",
-                index: 0,
-                event: {
-                    change: function (data) {
-                        post_search_check = data.value;
-                        if (data.value == 'user') user_clicked('post');
-                    }
-                }
-            });
-
-            comment_radio = button("#comment_radio", {
-                type: "radio",
-                index: 0,
-                event: {
-                    change: function (data) {
-                        comment_search_check = data.value;
-                        if (data.value == 'user') user_clicked('comment');
-                    }
-                }
-            });
-        });
-
-        /**
-         * Loading message
-         */
-        jui.ready(["ui.modal"], function (modal) {
+            /**
+             * Loading message
+             */
             loading_post = modal("#loading_post_msg", {
                 target: "#post_table",
                 opacity: 0.5,
@@ -763,25 +670,65 @@
                 color: 'white',
                 autoHide: false,
             });
+
+            /**
+             * Generate Button
+             */
+            function user_clicked(model) {
+                user_search_helper_check = model;
+
+                modal_1.show();
+                changeSearchUM(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), loading_user_search_helper, 1, user_search_helper_paging);
+            }
+
+            post_radio = button("#post_radio", {
+                type: "radio",
+                index: 0,
+                event: {
+                    change: function (data) {
+                        post_search_check = data.value;
+                        if (data.value == 'user') user_clicked('post');
+                    }
+                }
+            });
+
+            comment_radio = button("#comment_radio", {
+                type: "radio",
+                index: 0,
+                event: {
+                    change: function (data) {
+                        comment_search_check = data.value;
+                        if (data.value == 'user') user_clicked('comment');
+                    }
+                }
+            });
+
+            /**
+             * Generate Helper
+             */
+            $("#modal_1").appendTo("body");
+
+            modal_1 = modal("#modal_1", {
+                color: "black"
+            });
+
+            /**
+             * Load list
+             */
+            changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
+            changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
+            changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
+            changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
         });
 
         /**
          * Init analysis.html
          */
         $(function () {
-            changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
-            changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
-            changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
-            changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
-
             /**
              * Window Resize
              */
             window.onresize = function (event) {
-                post_table.resize();
-                comment_table.resize();
-                user_table.resize();
-                blacklist_table.resize();
                 reLoadPaging(post_paging);
                 reLoadPaging(comment_paging);
                 reLoadPaging(user_paging);

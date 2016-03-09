@@ -1,0 +1,76 @@
+.progress.issue {
+    height: 40px; !important;
+    position: relative; !important;
+}
+
+.progress.issue a{
+    color: #e0ffff;
+}
+
+.progress-bar.issue-bar {
+  line-height: 40px; !important;
+}
+
+.issue-swap:hover .issue-bar-text span{
+    display: none;
+}
+
+.issue-swap:hover .issue-bar-text:before {
+    content: attr(rel);
+    text-decoration:underline;
+}
+
+.progress > .issue-bar-text {
+    position: absolute;
+    top: 0;
+    font-size:20px;
+    line-height: 40px;
+    padding-left: 10px;
+
+    color: #e0ffff;
+    text-shadow:
+    -1px -1px 0 #1e90ff,
+    1px -1px 0 #1e90ff,
+    -1px 1px 0 #1e90ff,
+    1px 1px 0 #1e90ff;
+}
+
+.progress > .issue-bar-text:hover {
+    text-decoration:underline;
+}
+
+.progress > .issue-bar-text-success {
+    color: #e0ffff;
+    text-shadow:
+    -1px -1px 0 #228b22,
+    1px -1px 0 #228b22,
+    -1px 1px 0 #228b22,
+    1px 1px 0 #228b22;
+}
+
+.progress > .issue-bar-text-info {
+    color: #e0ffff;
+    text-shadow:
+    -1px -1px 0 #87cefa,
+    1px -1px 0 #87cefa,
+    -1px 1px 0 #87cefa,
+    1px 1px 0 #87cefa;
+}
+
+.progress > .issue-bar-text-warning {
+    color: #e0ffff;
+    text-shadow:
+    -1px -1px 0 #ffa500,
+    1px -1px 0 #ffa500,
+    -1px 1px 0 #ffa500,
+    1px 1px 0 #ffa500;
+}
+
+.progress > .issue-bar-text-danger {
+    color: #e0ffff;
+    text-shadow:
+    -1px -1px 0 #ff69b4,
+    1px -1px 0 #ff69b4,
+    -1px 1px 0 #ff69b4,
+    1px 1px 0 #ff69b4;
+}

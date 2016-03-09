@@ -20,39 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # ==================================================================================
-""" Sets admin site """
+""" Provides utils """
 
-from django.contrib import admin
-from analysis.models import *
+import socket
 
-
-class SpamListAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'group', 'message', 'time', 'status')
+REMOTE_SERVER = "www.google.com"
 
 
-class SpamWordAdmin(admin.ModelAdmin):
-    list_display = ('group', 'word', 'count', 'status')
-
-
-class ArchiveAnalysisWordAdmin(admin.ModelAdmin):
-    list_display = ('group', 'word', 'count', 'status', 'likenum', 'commentnum', 'weigh')
-
-
-class AnticipateArchiveAdmin(admin.ModelAdmin):
-    list_display = ('id', 'group', 'user', 'message', 'time', 'status')
-
-
-class AnalysisDBSchemaAdmin(admin.ModelAdmin):
-    list_display = ('group', 'avgpostlike', 'avgpostcomment', 'avgcomtlike', 'avgcomtcomment', 'lastupdatetime')
-
-
-class UpdateListAdmin(admin.ModelAdmin):
-    list_display = ('method', 'updated_time', 'data')
-    
-    
-admin.site.register(SpamList, SpamListAdmin)
-admin.site.register(SpamWordList, SpamWordAdmin)
-admin.site.register(ArchiveAnalysisWord, ArchiveAnalysisWordAdmin)
-admin.site.register(AnticipateArchive, AnticipateArchiveAdmin)
-admin.site.register(AnalysisDBSchema, AnalysisDBSchemaAdmin)
-admin.site.register(UpdateList, UpdateListAdmin)
+def is_connected():
+    try:
+        # see if we can resolve the host name -- tells us if there is
+        # a DNS listening
+        host = socket.gethostbyname(REMOTE_SERVER)
+        # connect to the host -- tells us if the host is actually
+        # reachable
+        s = socket.create_connection((host, 80), 2)
+        return True
+    except Exception:
+        return False

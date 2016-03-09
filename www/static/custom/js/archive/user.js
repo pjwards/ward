@@ -178,7 +178,7 @@ var getProportion = function (url, post_loading, comment_loading) {
  * @param post_loading
  * @param comment_loading
  */
-function changeProportion(url, post_loading, comment_loading) {
+var changeProportion = function (url, post_loading, comment_loading) {
     post_loading.show();
     comment_loading.show();
     getProportion(url, post_loading, comment_loading)
@@ -254,7 +254,7 @@ var getUserArchive = function (url, group_id, table, limit, search, loading, pag
  * @param page
  * @param paging
  */
-function changeUserArchive(url, group_id, table, limit, search, loading, page, paging) {
+var changeUserArchive = function (url, group_id, table, limit, search, loading, page, paging) {
     loading.show();
     getUserArchive(url, group_id, table, limit, search, loading, page, paging);
 }

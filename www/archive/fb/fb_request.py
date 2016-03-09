@@ -51,16 +51,16 @@ class FBRequest:
                 version=app_version
             )
 
-    def feed(self, group, query, feeds):
+    def feed(self, group_id, query, feeds):
         """
         This method gets feeds.
 
-        :param group: group to find feeds
+        :param group_id: group id to find feeds
         :param query: details to find feeds
         :param feeds: list of feed data
         :return:
         """
-        re = self.graph.request(group.id + query)
+        re = self.graph.request(group_id + query)
 
         if re.get('feed') is not None:
             re = re.get('feed')
@@ -75,16 +75,16 @@ class FBRequest:
 
         return next_query
 
-    def comments(self, post, query, comments):
+    def comments(self, post_id, query, comments):
         """
         This method gets comments.
 
-        :param post: post to find comments
+        :param post_id: post to find comments
         :param query: details to find comments
         :param comments: list of comments data
         :return:
         """
-        re = self.graph.request(post.id + query)
+        re = self.graph.request(post_id + query)
 
         if re.get('comments') is not None:
             re = re.get('comments')
@@ -93,7 +93,7 @@ class FBRequest:
         if len_data == 0:
             return None
 
-        logger.info('Get Feeds: %d', len_data)
+        logger.info('Get Comments: %d', len_data)
         comments += re.get('data')
 
         next_query = None
@@ -115,7 +115,7 @@ class FBRequest:
         if len_data == 0:
             return None
 
-        logger.info('Get Comments: %d', len_data)
+        logger.info('Get Comment: %d', len_data)
         comments += re.get('data')
 
         if 'next' in re.get('paging'):

@@ -124,6 +124,38 @@ class UserActivityAdmin(admin.ModelAdmin):
     search_fields = ['user__id', 'group__id']
 
 
+class GroupStoreListAdmin(admin.ModelAdmin):
+    list_display = ('id', 'group', 'start_time', 'end_time', 'query', 'status')
+
+
+class InterestGroupListAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'group')
+
+
+class YearGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
+class MonthGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
+class DayGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
+class TimeOverviewGroupStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('group', 'time', 'model', 'count')
+
+
+class GroupStatisticsUpdateListAdmin(admin.ModelAdmin):
+    list_display = ('group', 'method', 'updated_time')
+
+
+class GroupArchiveErrorListAdmin(admin.ModelAdmin):
+    list_display = ('group', 'error_count', 'message', 'query')
+
+
 admin.site.register(FBUser, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Post, PostAdmin)
@@ -136,3 +168,11 @@ admin.site.register(DeletedPost, DeletedPostAdmin)
 admin.site.register(DeletedComment, DeletedCommentAdmin)
 admin.site.register(Ward, WardAdmin)
 admin.site.register(UserActivity, UserActivityAdmin)
+admin.site.register(GroupStoreList, GroupStoreListAdmin)
+admin.site.register(InterestGroupList, InterestGroupListAdmin)
+admin.site.register(YearGroupStatistics, YearGroupStatisticsAdmin)
+admin.site.register(MonthGroupStatistics, MonthGroupStatisticsAdmin)
+admin.site.register(DayGroupStatistics, DayGroupStatisticsAdmin)
+admin.site.register(TimeOverviewGroupStatistics, TimeOverviewGroupStatisticsAdmin)
+admin.site.register(GroupStatisticsUpdateList, GroupStatisticsUpdateListAdmin)
+admin.site.register(GroupArchiveErrorList, GroupArchiveErrorListAdmin)

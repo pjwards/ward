@@ -90,6 +90,36 @@ class Group(models.Model):
         """
         return get_different_time(self.updated_time)
 
+    @staticmethod
+    def get_unit(number):
+        """
+        Get unit number
+
+        :param number: number
+        :return: unit number
+        """
+
+        if number > 1000:
+            return str(int(number / 1000)) + 'K'
+        else:
+            return number
+
+    def get_post_count_unit(self):
+        """
+        Get post count unit
+
+        :return: post count unit number
+        """
+        return Group.get_unit(self.post_count)
+
+    def get_comment_count_unit(self):
+        """
+        Get comment count unit
+
+        :return: comment count unit number
+        """
+        return Group.get_unit(self.comment_count)
+
 
 class FBUser(models.Model):
     """
@@ -99,6 +129,7 @@ class FBUser(models.Model):
     name = models.CharField(max_length=50)
     picture = models.CharField(max_length=2083, null=True, blank=True)
     groups = models.ManyToManyField(Group)
+    updated_time = models.DateTimeField(auto_now_add=True)
 
     # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
@@ -106,6 +137,19 @@ class FBUser(models.Model):
 
     def __str__(self):
         return self.id
+
+    def is_update(self):
+        """
+        Check update is possible. (per 1 day)
+
+        :return:
+        """
+        now = timezone.now()
+        diff = now - self.updated_time
+
+        if diff.days >= 1:
+            return True
+        return False
 
 
 class Post(models.Model):
@@ -434,3 +478,207 @@ class UserActivity(models.Model):
             else:
                 user_activity.comment_count = 0
             user_activity.save()
+
+
+class GroupStoreList(models.Model):
+    """
+    Group store list to check group is store,
+    """
+    group = models.OneToOneField(Group)
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    query = models.CharField(max_length=2083, null=True, blank=True)
+    status = models.CharField(max_length=30, default='new')
+
+
+class InterestGroupList(models.Model):
+    """
+    Interest group list for easy to check interested group
+    """
+    user = models.ForeignKey(User, related_name='interest_group_list')
+    group = models.ForeignKey(Group, related_name='interest_group_list')
+
+
+class GroupStatisticsUpdateList(models.Model):
+    """
+    Group statistics update list for check statistics is update
+    """
+    group = models.ForeignKey(Group)
+    method = models.CharField(max_length=30)
+    updated_time = models.DateTimeField(auto_now_add=True)
+
+    @classmethod
+    def update(cls, group, method):
+        """
+        Update list
+
+        :param group: group
+        :param method: method
+        :return:
+        """
+        oj = GroupStatisticsUpdateList.objects.filter(group=group, method=method)
+        if oj:
+            oj[0].updated_time = timezone.now()
+            oj[0].save()
+        else:
+            oj = GroupStatisticsUpdateList(group=group, method=method)
+            oj.save()
+
+    def is_update(self):
+        """
+        Check update is possible. (per 1 day)
+
+        :return:
+        """
+        now = timezone.now()
+        diff = now - self.updated_time
+
+        if diff.days >= 1:
+            return True
+        return False
+
+
+class YearGroupStatistics(models.Model):
+    """
+    Memoization about year group statistics
+    """
+    group = models.ForeignKey(Group)
+    time = models.DateTimeField()
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)
+
+
+class MonthGroupStatistics(models.Model):
+    """
+    Memoization about month group statistics
+    """
+    group = models.ForeignKey(Group)
+    time = models.DateTimeField()
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)
+
+
+class DayGroupStatistics(models.Model):
+    """
+    Memoization about day group statistics
+    """
+    group = models.ForeignKey(Group)
+    time = models.DateTimeField()
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)
+
+
+class TimeOverviewGroupStatistics(models.Model):
+    """
+    Memoization about time overview group statistics
+    """
+    group = models.ForeignKey(Group)
+    time = models.IntegerField(default=0)
+    model = models.CharField(max_length=10)
+    count = models.IntegerField(default=0)
+
+
+class GroupArchiveErrorList(models.Model):
+    """
+    Group archive error list
+    """
+    group = models.OneToOneField(Group)
+    error_count = models.IntegerField(default=1)
+    query = models.CharField(max_length=2083, null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+
+
+class MonthPost(models.Model):
+    """
+    Memoization about month post
+    """
+    created_time = models.DateTimeField()
+    group = models.ForeignKey(Group)
+    post = models.OneToOneField(Post)
+
+    @classmethod
+    def create(cls, post):
+        """
+        Create month post
+
+        :param post: post
+        :return:
+        """
+        check(post.group)
+        if MonthPost.objects.filter(post=post).exists():
+            return
+
+        cls(created_time=post.created_time, group=post.group, post=post).save()
+
+    def is_overtime(self):
+        """
+        Is this object overtime?
+
+        :return:
+        """
+        now = timezone.now()
+        diff = now - self.created_time
+
+        if diff.days > 30:
+            return True
+        return False
+
+
+class MonthComment(models.Model):
+    """
+    Memoization about month comment
+    """
+    created_time = models.DateTimeField()
+    group = models.ForeignKey(Group)
+    comment = models.OneToOneField(Comment)
+
+    @classmethod
+    def create(cls, comment):
+        """
+        Create month comment
+
+        :param comment: comment
+        :return:
+        """
+        check(comment.group)
+        if MonthComment.objects.filter(comment=comment).exists():
+            return
+
+        cls(created_time=comment.created_time, group=comment.group, comment=comment).save()
+
+    def is_overtime(self):
+        """
+        Is this object overtime?
+
+        :return:
+        """
+        now = timezone.now()
+        diff = now - self.created_time
+
+        if diff.days > 30:
+            return True
+        return False
+
+
+def check(group):
+    """
+    Check month post and comment, and remove something over 1 month
+
+    :param group: group
+    :return:
+    """
+    # Is ready to update?
+    update_list = GroupStatisticsUpdateList.objects.filter(group=group, method='month_content')
+    if update_list:
+        is_update = update_list[0].is_update()
+    else:
+        GroupStatisticsUpdateList.update(group=group, method='month_content')
+        is_update = False
+
+    if is_update:
+        date = timezone.now() - timezone.timedelta(30)
+        for oj in MonthPost.objects.filter(group=group, created_time__lt=date):
+            oj.delete()
+
+        for oj in MonthComment.objects.filter(group=group, created_time__lt=date):
+            oj.delete()
