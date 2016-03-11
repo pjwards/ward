@@ -92,7 +92,7 @@ class UpdateList(models.Model):
 
         :param method: method
         :param data: data
-        :return:
+        :return: model
         """
         oj = UpdateList.objects.filter(method=method)
         if oj:
@@ -101,7 +101,9 @@ class UpdateList(models.Model):
             oj[0].save()
         else:
             oj = UpdateList(method=method)
+            oj.data = data
             oj.save()
+        return oj
 
     def is_update(self):
             """
