@@ -36,36 +36,12 @@ def network(group_id=None):
     # Is ready to update?
     update_list = UpdateList.objects.filter(method='network')
     if update_list:
-        is_update = update_list[0].is_update()
+        update_list = update_list[0]
+        is_update = update_list.is_update()
     else:
-        UpdateList.update(method='network')
-        is_update = False
+        is_update = True
 
-    if group_id and Group.objects.filter(id=group_id).exists() and update_list:
-        network_json = update_list[0].data
-        network_dic = json.loads(network_json)
-        _network_edge = network_dic['edges']
-        _network_node = network_dic['nodes']
-        _new_network_edge = []
-        _new_network_node = []
-        group_list = []
-
-        for edge in _network_edge:
-            if edge.get('from') == group_id or edge.get('to') == group_id:
-                _new_network_edge.append(edge)
-                if edge.get('from') == group_id:
-                    group_list.append(edge.get('to'))
-                else:
-                    group_list.append(edge.get('from'))
-
-        for node in _network_node:
-            if node.get('id') in group_list:
-                _new_network_node.append(node)
-            elif node.get('id') == group_id:
-                _new_network_node.append(node)
-
-        network_json = json.dumps({'edges': _new_network_edge, 'nodes': _new_network_node})
-    elif is_update or not update_list:
+    if is_update or not update_list:
         _network_edge = []
         _network_node = []
 
@@ -96,9 +72,34 @@ def network(group_id=None):
                                   'group': network_group(_network_node_dic.get(key, 1))})
 
         network_json = json.dumps({'edges': _network_edge, 'nodes': _network_node})
-        UpdateList.update(method='network', data=network_json)
+        update_list = UpdateList.update(method='network', data=network_json)
+
+    if group_id and Group.objects.filter(id=group_id).exists():
+        network_json = update_list.data
+        network_dic = json.loads(network_json)
+        _network_edge = network_dic['edges']
+        _network_node = network_dic['nodes']
+        _new_network_edge = []
+        _new_network_node = []
+        group_list = []
+
+        for edge in _network_edge:
+            if edge.get('from') == group_id or edge.get('to') == group_id:
+                _new_network_edge.append(edge)
+                if edge.get('from') == group_id:
+                    group_list.append(edge.get('to'))
+                else:
+                    group_list.append(edge.get('from'))
+
+        for node in _network_node:
+            if node.get('id') in group_list:
+                _new_network_node.append(node)
+            elif node.get('id') == group_id:
+                _new_network_node.append(node)
+
+        network_json = json.dumps({'edges': _new_network_edge, 'nodes': _new_network_node})
     else:
-        network_json = update_list[0].data
+        network_json = update_list.data
 
     return network_json
 
