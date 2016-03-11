@@ -6,8 +6,10 @@
                 <div class="form-group">
                     <select id="sidebar_select_group" class="form-control">
                         {% for grp in groups %}
-                            <option value="{% url 'archive:group' grp.id %}"
-                                    {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
+                            {% if grp.privacy == 'OPEN' %}
+                                <option value="{% url 'archive:group' grp.id %}"
+                                        {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 </div>
@@ -60,11 +62,11 @@
                     <a href="{% url 'archive:group_management' group.id %}"><i class="fa fa-sitemap fa-fw"></i>Management</a>
                 {% endif %}
             </li>
-{#            <li>#}
-{#                {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}#}
-{#                    <a href="{% url 'archive:group_spam' group.id %}"><i class="fa fa-sitemap fa-fw"></i>Spam</a>#}
-{#                {% endif %}#}
-{#            </li>#}
+            {#            <li>#}
+            {#                {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}#}
+            {#                    <a href="{% url 'archive:group_spam' group.id %}"><i class="fa fa-sitemap fa-fw"></i>Spam</a>#}
+            {#                {% endif %}#}
+            {#            </li>#}
 
             {#            <li>#}
             {#                <a href="#"><i class="fa fa-files-o fa-fw"></i> Sample Pages<span class="fa arrow"></span></a>#}
