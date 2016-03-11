@@ -1218,7 +1218,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if from_date:
             from_date = date_utils.get_date_from_str(from_date)
             to_date = from_date
-        else:
+        elif not user_id:
             from_date = date_utils.get_today().date()
             to_date = from_date
 
@@ -1237,6 +1237,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if user_id:
             _user = get_object_or_404(FBUser, id=user_id)
+            print(_models)
             return _models.filter(user=_user).order_by('-created_time')
         else:
             return _models.order_by('-created_time')
