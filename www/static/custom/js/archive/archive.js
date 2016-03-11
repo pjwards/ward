@@ -212,7 +212,7 @@ var pcDisplay = function (rows, row) {
         return '<div class="h5"><div class="more-link" style="margin-bottom:10px;"><a href="' + fb_url + row["id"] + '" target="_blank">' + message + '</a></div>' + ward_btn + report_btn + '</div>';
     }
     rows.push({
-        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
+        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px; width: 50px;" onerror="' + window.no_image_error + '">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>',
         "message": fb_link(message),
         "like_count": '<div class="h5">' + row["like_count"] + '</div>',

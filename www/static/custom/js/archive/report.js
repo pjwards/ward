@@ -49,7 +49,7 @@ var pcDisplayR = function (rows, row) {
     var show_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="reportAction(\'' + row["id"] + '\', \'show\'); reload()" style="color:#6495ed;">show</btn>';
     var delete_btn = '&nbsp; &nbsp;<btn class="btn mini" onclick="if(confirm(\'Are you sure delete?\')) reportAction(\'' + row["id"] + '\', \'delete\'); reload()" style="color:#ff1493;">deleted</btn>';
     rows.push({
-        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
+        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px; width: 50px;" onerror="' + window.no_image_error + '">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a>' + (object ? '<div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>' : ''),
         "message": object ? message : '<div class="h5">deleted</div>',
         "like_count": '<div class="h5">' + (object ? object["like_count"] : 'deleted') + '</div>',

@@ -44,7 +44,7 @@ var pcDisplayW = function (rows, row) {
         return '<div class="h5"><div class="more-link" style="margin-bottom:10px;">' + new_label + '<a onclick="updateWard(' + row["id"] + ',\'' + fb_url + object.id + '\')">' + message + '</a></div>' + report_btn + remove_ward_btn + '</div>';
     }
     rows.push({
-        "picture": '<img src="' + object["user"].picture + '" style="border-radius: 10px;">',
+        "picture": '<img src="' + object["user"].picture + '" style="border-radius: 10px; width: 50px;" onerror="' + window.no_image_error + '">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + object["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(object["created_time"]) + '</small></div></div>',
         "message": fb_link(message),
         "like_count": '<div class="h5">' + object["like_count"] + '</div>',
