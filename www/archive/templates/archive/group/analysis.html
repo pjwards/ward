@@ -5,6 +5,7 @@
 
 {% block css %}
     <link href="{% static 'css/issuebar.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/analysis/network.css' %}"/>
 {% endblock %}
 
 {% block sidebar %}
@@ -187,6 +188,52 @@
                 </div>
             </div>
             <!-- /Comment Hot Issue -->
+
+            <!-- Network -->
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Network
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li>
+                                        <a data-toggle="modal" data-target="#save_img"
+                                           onclick="saveAsImage('network_content', 'network')">
+                                            Save as image
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body" style="text-align: center;">
+                        <!-- Network -->
+                        <div id="network_wrapper">
+                            <div id="network_content" class="col-lg-12"></div>
+                            <div id="network_loadingBar" class="col-lg-12">
+                                <div class="outerBorder">
+                                    <div id="network_text">0%</div>
+                                    <div id="network_border">
+                                        <div id="network_bar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /Network -->
+                        <p><i class="fa fa-mouse-pointer"></i> You can use double click!
+                        </p>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+            <!-- /Network -->
         </div>
         <!-- /.row -->
 
@@ -287,6 +334,7 @@
     <script type="text/javascript"
             src="{% static 'jqplot-bower/dist/plugins/jqplot.canvasAxisLabelRenderer.min.js' %}"></script>
     <script src="{% static 'js/issuebar.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/analysis/network.js' %}" type="text/javascript"></script>
 
     <script>
         var is_authenticated = {% if user.is_authenticated %}true{% else %}false{% endif %}
@@ -344,6 +392,8 @@
 
             changeIssue(post_issue_url, post_issue_bar, $("#post_issue_from"), $("#post_issue_to"), loading_post_issue);
             changeIssue(comment_issue_url, comment_issue_bar, $("#comment_issue_from"), $("#comment_issue_to"), loading_comment_issue);
+
+            drawNetwork('/analysis/network/', '{{ group.id }}')
         });
 
         /**
