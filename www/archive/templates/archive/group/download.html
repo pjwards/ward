@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}{{ group.name }}{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block sidebar %}
+    {% include 'archive/group/sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+    <div id="page-wrapper">
+
+        {% block header %}
+            {% include 'archive/group/archive_header.html' %}
+        {% endblock %}
+
+        <!-- /.row -->
+        <div class="row">
+            <!-- Download -->
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-table fa-fw"></i> Download
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <form id="download" role="form" method="post">
+                            {% csrf_token %}
+                            <div class="form-group  col-md-6 col-lg-6">
+                                <label>Model</label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="model" id="model1" value="post" checked>
+                                        Post
+                                    </label>
+                                </div>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="model" id="model2" value="comment">
+                                        Comment
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6 col-lg-6">
+                                <label>Date</label>
+                                <input class="form-control" placeholder="From" name="from" id="from">
+                                <input class="form-control" placeholder="To" name="to" id="to">
+                            </div>
+                            <div class="row" style="text-align: center;">
+                                <button type="submit" class="btn btn-primary" style="width: 30%;">Download</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+            <!-- /Post Archive -->
+        </div>
+        <!-- /.row -->
+
+    </div><!-- /.page-wrapper -->
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        /**
+         * Generate Date Picker
+         */
+        $(function () {
+            $("#from").datepicker({
+                dateFormat: 'yy-mm-dd',
+                showMonthAfterYear: true,
+                autoSize: true,
+
+                showOtherMonths: true,
+                selectOtherMonths: true,
+
+                maxDate: 0,
+
+                changeMonth: true,
+                changeYear: true,
+                onClose: function (selectedDate) {
+                    $("#to").datepicker("option", "minDate", selectedDate);
+                }
+            });
+
+            $("#to").datepicker({
+                dateFormat: "yy-mm-dd",
+                showMonthAfterYear: true,
+                autoSize: true,
+
+                showOtherMonths: true,
+                selectOtherMonths: true,
+
+                maxDate: 0,
+
+                changeMonth: true,
+                changeYear: true,
+                onClose: function (selectedDate) {
+                    $("#from").datepicker("option", "maxDate", selectedDate);
+                }
+            });
+        });
+
+        /**
+         * Init analysis.html
+         */
+        $(function () {
+        });
+    </script>
+{% endblock %}

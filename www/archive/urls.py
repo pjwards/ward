@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^group/(?P<group_id>[0-9]+)/update/$', views.group_update, name='group_update'),
     url(r'^group/(?P<group_id>[0-9]+)/check/$', views.group_check, name='group_check'),
     url(r'^group/(?P<post_id>[0-9]+)/post_check/$', views.group_post_check, name='group_post_check'),
+    url(r'^group/(?P<group_id>[0-9]+)/download/$', views.group_download, name='group_download'),
     # url(r'^group/(?P<group_id>[0-9]+)/spam/$', views.group_spam, name='group_spam'),
 
     url(r'^user/(?P<user_id>[0-9]+)/$', views.user, name='user'),
