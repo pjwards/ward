@@ -170,16 +170,16 @@ def analyze_articles(analyzer, message):
     :param message: string data
     :return: refined words list
     """
+    if message is None:
+        return []
+
     temp_twitter = []
     temp_kkma = []
 
     twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
     kkma_pos = analyzer.analyzer_kkma(message, 'pos')
 
-    # print(kkma_pos)
-    # print(twitter_posmore)
-
-    twi_stemlist = ['Alpha', 'URL']     # 'Adjective', 'Noun'
+    twi_stemlist = ['Alpha']     # 'Adjective', 'Noun'
     kkma_stemlist = ['NNG', 'NN', 'NNM', 'NNP']    # OL, NNB
 
     for i in twitter_posmore:
@@ -190,30 +190,65 @@ def analyze_articles(analyzer, message):
         if i[1] in kkma_stemlist:
             temp_kkma.append(i[0])
 
-    # print(temp_kkma)
-
     tempword = temp_twitter + temp_kkma
     returnword = list(set(tempword))        # func = remove duplicates
 
     refineword = []
-
-    # print(returnword)
 
     for i in returnword:
         if len(i) < 2:
             continue
         refineword.append(i)
 
-    # print(refineword)
+    return refineword       # need better refine words
+
+
+def analyze_articles_up(analyzer, message):
+    """
+    analyze articles
+    :param analyzer: analyzer for analysis
+    :param message: string data
+    :return: refined words list
+    """
+    if message is None:
+        return []
+
+    temp_twitter = []
+    temp_kkma = []
+
+    twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
+    kkma_pos = analyzer.analyzer_kkma(message, 'pos')
+
+    twi_stemlist = ['Alpha', 'URL']     # 'Adjective', 'Noun'
+    kkma_stemlist = ['NNG', 'NN', 'NNM', 'NNP']    # OL, NNB
+
+    for i in twitter_posmore:
+        if i[1] in twi_stemlist:
+            temp_twitter.append(i)
+
+    for i in kkma_pos:
+        if i[1] in kkma_stemlist:
+            temp_kkma.append(i)
+
+    tempword = temp_twitter + temp_kkma
+    returnword = list(set(tempword))        # func = remove duplicates
+
+    refineword = []
+
+    for i in returnword:
+        if len(i[0]) < 2:
+            continue
+        refineword.append(i)
 
     return refineword       # need better refine words
 
 
-def analysis_text_by_words(base_words, analyzed_words):
+def analysis_text_by_words(base_words, analyzed_words, avg_weigh):
     """
     Compare words for analysis
     :param base_words: standard words
     :param analyzed_words: Be compared words
+    :param avg_weigh: average of weigh for standard
     :return: Return true if analyzed words are in base words set and over critical number
     """
     wordhash = dict((k, 0) for k in base_words)
@@ -231,7 +266,7 @@ def analysis_text_by_words(base_words, analyzed_words):
 
     # print(total)
 
-    if total > 5:
+    if total > avg_weigh:
         return True
     else:
         return False

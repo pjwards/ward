@@ -24,9 +24,12 @@
 
 import analysis.analysis_core as core
 from django.db.models import Q, Avg
-from .models import ArchiveAnalysisWord, AnticipateArchive, AnalysisDBSchema
+from .models import *
 from archive.models import Group, Post, Comment, Attachment
 from django.utils import timezone
+from dateutil import relativedelta as rdelta
+from datetime import datetime
+from pytz import timezone as tz
 
 
 def add_anticipate_list(data_object):
@@ -71,12 +74,15 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
     :return: array of average likes and comments
     """
     try:
-        basicdata = AnalysisDBSchema.objects.filter(group=group)[0]         # consider update time (standard = created)
+        basicdata = AnalysisDBSchema.objects.filter(group=group)[0]
     except IndexError:
         basicdata = None
 
     if is_post is True:
-        if basicdata is not None:                       # need update periodically
+        if basicdata is not None:
+            now = timezone.now()
+            diff = now - basicdata.lastupdatetime
+
             if basicdata.avgpostcomment is 0 and basicdata.avgpostlike is 0:
                 args = Post.objects.filter(group=group).aggregate(avglike=Avg('like_count'),
                                                                   avgcomt=Avg('comment_count'))
@@ -85,7 +91,17 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
 
                 basicdata.avgpostlike = avglike
                 basicdata.avgpostcomment = avgcomt
-                basicdata.lastupdatetime = timezone.now()   # change date
+                basicdata.lastupdatetime = timezone.now()
+                basicdata.save()
+            elif diff.days >= 1:
+                args = Post.objects.filter(group=group).aggregate(avglike=Avg('like_count'),
+                                                                  avgcomt=Avg('comment_count'))
+                avglike = int(round(args['avglike']))
+                avgcomt = int(round(args['avgcomt']))
+
+                basicdata.avgpostlike = avglike
+                basicdata.avgpostcomment = avgcomt
+                basicdata.lastupdatetime = timezone.now()
                 basicdata.save()
             else:
                 avglike = basicdata.avgpostlike
@@ -103,21 +119,35 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
             basicdata.save()
 
     elif is_comment is True:
-        if basicdata is not None:                       # need update periodically
-                if basicdata.avgcomtcomment is 0 and basicdata.avgcomtlike is 0:
-                    args = Comment.objects.filter(group=group)\
-                        .aggregate(avglike=Avg('like_count'),
-                                   avgcomt=Avg('comment_count'))
-                    avglike = int(round(args['avglike']))
-                    avgcomt = int(round(args['avgcomt']))
+        if basicdata is not None:
+            now = timezone.now()
+            diff = now - basicdata.lastupdatetime
 
-                    basicdata.avgpostlike = avglike
-                    basicdata.avgpostcomment = avgcomt
-                    basicdata.lastupdatetime = timezone.now()
-                    basicdata.save()
-                else:
-                    avglike = basicdata.avgcomtlike
-                    avgcomt = basicdata.avgcomtcomment
+            if basicdata.avgcomtcomment is 0 and basicdata.avgcomtlike is 0:
+                args = Comment.objects.filter(group=group)\
+                    .aggregate(avglike=Avg('like_count'),
+                               avgcomt=Avg('comment_count'))
+                avglike = int(round(args['avglike']))
+                avgcomt = int(round(args['avgcomt']))
+
+                basicdata.avgpostlike = avglike
+                basicdata.avgpostcomment = avgcomt
+                basicdata.lastupdatetime = timezone.now()
+                basicdata.save()
+            elif diff.days >= 1:
+                args = Comment.objects.filter(group=group)\
+                    .aggregate(avglike=Avg('like_count'),
+                               avgcomt=Avg('comment_count'))
+                avglike = int(round(args['avglike']))
+                avgcomt = int(round(args['avgcomt']))
+
+                basicdata.avgpostlike = avglike
+                basicdata.avgpostcomment = avgcomt
+                basicdata.lastupdatetime = timezone.now()
+                basicdata.save()
+            else:
+                avglike = basicdata.avgcomtlike
+                avgcomt = basicdata.avgcomtcomment
         else:
             basicdata = AnalysisDBSchema(group=group)
             args = Comment.objects.filter(group=group)\
@@ -136,31 +166,6 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
 
     returnarry = [avglike, avgcomt]
     return returnarry
-
-
-def refresh_average(group):
-    """
-    recalculating of AnalysisDBSchema
-    :param group: group object
-    """
-    argpost = Post.objects.filter(group=group).aggregate(avglike=Avg('like_count'),
-                                                         avgcomt=Avg('comment_count'))
-    avglikep = int(round(argpost['avglike']))
-    avgcomtp = int(round(argpost['avgcomt']))
-
-    argcom = Comment.objects.filter(group=group).aggregate(avglike=Avg('like_count'),
-                                                           avgcomt=Avg('comment_count'))
-    avglikec = int(round(argcom['avglike']))
-    avgcomtc = int(round(argcom['avgcomt']))
-
-    basicdata = AnalysisDBSchema.objects.filter(group=group)[0]
-
-    basicdata.avgpostlike = avglikep
-    basicdata.avgpostcomment = avgcomtp
-    basicdata.avgcomtlike = avglikec
-    basicdata.avgcomtcomment = avgcomtc
-    basicdata.lastupdatetime = timezone.now()   # change date
-    basicdata.save()
 
 
 def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=False):
@@ -215,6 +220,217 @@ def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=
             return "no_article"
 
 
+def analyze_monthly_post():     # analyzer, group
+    analyzer = core.AnalysisDiction(True, True)
+    group = Group.objects.filter(id=168705546563077)[0]
+    # MonthTrendWord.objects.all().delete()
+
+    try:
+        groupobjcet = GroupDurations.objects.filter(group=group)[0]
+        total_months = (groupobjcet.yeared * 12) + groupobjcet.monthed    # add last month update
+        old_time = groupobjcet.oldtimed
+    except IndexError:
+        old_time = group.get_date_from_oldest_post()
+        now_time = timezone.now()
+        rd = rdelta.relativedelta(now_time, old_time)
+        total_months = (rd.years * 12) + rd.months
+        GroupDurations(group=group, yeared=rd.years, monthed=rd.months, lastupdatetime=timezone.now(), oldtimed=old_time).save()
+
+    print(total_months)
+    total_months -= 1
+    while total_months != 0:
+        if old_time.month + 1 > 12:
+            old_year = old_time.year + 1
+            old_month = 1
+        else:
+            old_year = old_time.year
+            old_month = old_time.month + 1
+
+        temp_time = datetime(year=old_year, month=old_month, day=1)
+        target_time = temp_time.replace(tzinfo=tz('UTC'))
+
+        post = Post.objects.filter(group=group, created_time__range=(old_time, target_time))
+
+        if post.count() == 0:
+            post = None
+
+        comment = Comment.objects.filter(group=group, created_time__range=(old_time, target_time))
+
+        if comment.count() == 0:
+            comment = None
+
+        if post and comment is not None:
+            post_dict = {}
+            if post is not None:
+                for p in post:
+                    words = core.analyze_articles(analyzer, p.message)
+
+                    for w in words:
+                        if post_dict.get(w) is not None:
+                            post_dict[w] += (p.like_count + p.comment_count)
+                        else:
+                            post_dict[w] = 0
+
+            if comment is not None:
+                for c in comment:
+                    words = core.analyze_articles(analyzer, c.message)
+
+                    for w in words:
+                        if post_dict.get(w) is not None:
+                            post_dict[w] += (c.like_count + c.comment_count)
+                        else:
+                            post_dict[w] = 0
+
+            total_words = 1
+            count_value = 1
+
+            for i in post_dict.values():
+                if i != 0:
+                    total_words += 1
+                    count_value += i
+
+            avg = int(count_value/total_words*2)
+            print(total_words)
+            print(count_value)
+            print(avg)
+            refinewords = []
+
+            for i in post_dict.items():
+                if i[1] > avg:
+                    refinewords.append((i[0], i[1]))
+
+            for wd in refinewords:
+                if not MonthTrendWord.objects.filter(group=group, datedtime=old_time, word=wd[0]).exists():
+                    MonthTrendWord(group=group, datedtime=old_time, word=wd[0], weigh=wd[1]).save()
+
+        old_time = target_time
+        total_months -= 1           # target_time is one month before today
+
+
+def monthly_analyze_feed():      # analyzer, group
+    analyzer = core.AnalysisDiction(True, True)
+    group = Group.objects.filter(id=168705546563077)[0]
+    now = timezone.now()
+    time = now - timezone.timedelta(days=30)
+    try:
+        groupobjcet = MonthlyWords.objects.filter(group=group)[0]
+        rd = rdelta.relativedelta(now, groupobjcet.lastfeeddate)
+        if rd.days > 1:
+            MonthlyWords.objects.all().delete()
+
+            post = Post.objects.filter(group=group, created_time__range=(time, now))
+
+            if post.count() == 0:
+                post = None
+
+            comment = Comment.objects.filter(group=group, created_time__range=(time, now))
+
+            if comment.count() == 0:
+                comment = None
+
+            if post and comment is not None:
+                return False
+            else:
+                post_dict = {}
+                if post is not None:
+                    for p in post:
+                        words = core.analyze_articles(analyzer, p.message)
+
+                        for w in words:
+                            if post_dict.get(w) is not None:
+                                post_dict[w] += (p.like_count + p.comment_count)
+                            else:
+                                post_dict[w] = 0
+
+                if comment is not None:
+                    for c in comment:
+                        words = core.analyze_articles(analyzer, c.message)
+
+                        for w in words:
+                            if post_dict.get(w) is not None:
+                                post_dict[w] += (c.like_count + c.comment_count)
+                            else:
+                                post_dict[w] = 0
+
+                total_words = 1
+                count_value = 1
+
+                for i in post_dict.values():
+                    if i != 0:
+                        total_words += 1
+                        count_value += i
+
+                avg = int(count_value/total_words*2)
+
+                refinewords = []
+
+                for i in post_dict.items():
+                    if i[1] > avg:
+                        refinewords.append((i[0], i[1]))
+
+                for wd in refinewords:
+                    if not MonthlyWords.objects.filter(group=group, lastfeeddate=time, word=wd[0]).exists():
+                        MonthlyWords(group=group, lastfeeddate=time, word=wd[0], weigh=wd[1]).save()
+        else:
+            return False
+    except IndexError:
+        post = Post.objects.filter(group=group, created_time__range=(time, now))
+
+        if post.count() == 0:
+            post = None
+
+        comment = Comment.objects.filter(group=group, created_time__range=(time, now))
+
+        if comment.count() == 0:
+            comment = None
+
+        if post and comment is not None:
+            return False
+        else:
+            post_dict = {}
+            if post is not None:
+                for p in post:
+                    words = core.analyze_articles(analyzer, p.message)
+
+                    for w in words:
+                        if post_dict.get(w) is not None:
+                            post_dict[w] += (p.like_count + p.comment_count)
+                        else:
+                            post_dict[w] = 0
+
+            if comment is not None:
+                for c in comment:
+                    words = core.analyze_articles(analyzer, c.message)
+
+                    for w in words:
+                        if post_dict.get(w) is not None:
+                            post_dict[w] += (c.like_count + c.comment_count)
+                        else:
+                            post_dict[w] = 0
+
+            total_words = 1
+            count_value = 1
+
+            for i in post_dict.values():
+                if i != 0:
+                    total_words += 1
+                    count_value += i
+
+            avg = int(count_value/total_words*2)
+
+            refinewords = []
+
+            for i in post_dict.items():
+                if i[1] > avg:
+                    refinewords.append((i[0], i[1]))
+
+            for wd in refinewords:
+                if not MonthlyWords.objects.filter(group=group, lastfeeddate=time, word=wd[0]).exists():
+                    MonthlyWords(group=group, lastfeeddate=time, word=wd[0], weigh=wd[1]).save()
+
+            return True
+
+
 def analyze_feed(analyzer, data_object, group):
     """
     analyze a feed
@@ -257,14 +473,15 @@ def analyze_feed(analyzer, data_object, group):
     word_db = ArchiveAnalysisWord.objects.filter(group=group, weigh__gte=100)
     data_set = [sp.word for sp in word_db]
 
-    return core.analysis_text_by_words(data_set, word_set)
+    arg = ArchiveAnalysisWord.objects.filter(group=group).aggregate(avgweigh=Avg('weigh'))
+
+    return core.analysis_text_by_words(data_set, word_set, arg['avgweigh'])
 
 
-def analysis_prev_hit_posts(group, wanted_time=None):
+def analysis_prev_hit_posts(group):
     """
     analysis previous posts that have high likes and comments
     :param group: group object
-    :param wanted_time: get data from wanted time to now
     """
     avgarry = get_average_like_and_comment(group, is_post=True)           # or Admin manage this directly
 
@@ -280,11 +497,10 @@ def analysis_prev_hit_posts(group, wanted_time=None):
     analyze_hit_article(analyzer, group, hits, is_post=True)
 
 
-def analysis_prev_hit_comments(group, wanted_time=None):
+def analysis_prev_hit_comments(group):
     """
     analysis previous comments that have high likes and comments
     :param group: group object
-    :param wanted_time: get data from wanted time to now
     """
     avgarry = get_average_like_and_comment(group, is_comment=True)           # or Admin manage this directly
 
@@ -313,14 +529,15 @@ def analyze_feed_sequence(data_object):
     if AnticipateArchive(group=data_object.group, id=data_object.id).exists():
         return "exist"
 
-    result = analyze_feed(analyzer, data_object)
+    arg = ArchiveAnalysisWord.objects.filter(group=data_object.group).aggregate(avgweigh=Avg('weigh'))  # use month word
+
+    result = analyze_feed(analyzer, data_object, arg['avgweigh'])
 
     if result is False:
         return "no_concern"
 
     add_anticipate_list(data_object=data_object)
-
-    # add_words_db(data_object.group, words, data_object.like_count, data_object.comment_count)
+    # after 24hours, delete from list
 
     return "ok"
 
@@ -330,7 +547,7 @@ def refresh_sequence(group):
     refresh AnalysisDBScheman and comments & likes in words DB
     :param group: group object
     """
-    refresh_average(group)
+
     analysis_prev_hit_posts(group)          # consider db init
     analysis_prev_hit_comments(group)       # consider db init
 

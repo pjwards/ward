@@ -33,7 +33,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'updated_time', 'privacy', 'is_stored')
+    list_display = ('id', 'name', 'updated_time', 'privacy', 'is_stored', 'oldest_date')
     list_filter = ['updated_time']
     search_fields = ['name']
 

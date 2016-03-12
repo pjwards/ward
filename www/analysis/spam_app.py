@@ -23,8 +23,8 @@
 """ Provides spam app class """
 
 import analysis.analysis_core as core
-from django.db.models import Q
-from .models import SpamList, SpamWordList
+from django.db.models import Q, Avg
+from analysis.models import SpamList, SpamWordList
 from archive.models import Group, Post, Comment
 
 
@@ -40,7 +40,9 @@ def analyze_feed_spam(analyzer, group, message):
     data_set = [sp.word for sp in spam_db]
     word_set = core.analyze_articles(analyzer, message)
 
-    return core.analysis_text_by_words(data_set, word_set)
+    arg = SpamWordList.objects.filter(group=group).aggregate(avgcount=Avg('count'))
+
+    return core.analysis_text_by_words(data_set, word_set, arg['avgcount'])
 
 
 def add_spam_list(group, user, object_id, message, time):
