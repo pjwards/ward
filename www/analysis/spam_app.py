@@ -23,15 +23,16 @@
 """ Provides spam app class """
 
 import analysis.analysis_core as core
-from django.db.models import Q, Avg
+from django.db.models import Q
 from analysis.models import SpamList, SpamWordList
 from archive.models import Group, Post, Comment
 
+analyzer = core.AnalysisDiction(True, True)
 
-def analyze_feed_spam(analyzer, group, message):
+
+def analyze_feed_spam(group, message):
     """
     Return true if analyzed words and spam words are same
-    :param analyzer: analyzer for analysis
     :param group: group object
     :param message: message of post or comment
     :return: true or false
@@ -159,14 +160,12 @@ def analyze_old_posts(group):
     analyze all stored posts in db
     :param group: group object
     """
-    analyzer = core.AnalysisDiction(True, True)
-    # group = Group.objects.filter(id=group_id)[0]
     post_data = Post.objects.filter(group=group)
     for data in post_data:
         if data.message is None:
             continue
 
-        if analyze_feed_spam(analyzer, group, data.message) is False:
+        if analyze_feed_spam(group, data.message) is False:
             continue
 
         add_spam_list(group, data.user, data.id, data.message, data.created_time)
@@ -177,14 +176,12 @@ def analyze_old_comments(group):
     analyze all stored comments in db
     :param group: group object
     """
-    analyzer = core.AnalysisDiction(True, True)
-    # group = Group.objects.filter(id=group_id)[0]
     comment_data = Comment.objects.filter(group=group)
     for data in comment_data:
         if data.message is None:
             continue
 
-        if analyze_feed_spam(analyzer, group, data.message) is False:
+        if analyze_feed_spam(group, data.message) is False:
             continue
 
         add_spam_list(group, data.user, data.id, data.message, data.created_time)
@@ -196,25 +193,22 @@ def analyze_spam_sequence(data_object):
     :param data_object: article object
     :return string about result
     """
-    analyzer = core.AnalysisDiction(True, True)
-
     if data_object.message is None:
         return "no_message"
 
     if SpamList.objects.filter(group=data_object.group, id=data_object.id).exists():
         return "exist"
 
-    if analyze_feed_spam(analyzer, data_object.group, data_object.message) is False:
+    if analyze_feed_spam(data_object.group, data_object.message) is False:
         return "no_spam"
 
     add_spam_list(data_object.group, data_object.user, data_object.id, data_object.message, data_object.created_time)
     return "ok"
 
 
-def analyze_restored_spamlist(analyzer, group_id, message):
+def analyze_restored_spamlist(group_id, message):
     """
     analyze restored spam
-    :param analyzer: analyzer for analysis
     :param group_id: group id
     :param message: message of spam list
     """
@@ -242,7 +236,6 @@ def delete_spam_sequence(data_object):
     analyze deleted spam article from spam list and add spam words to spamwordlist
     :param data_object: deleted article object
     """
-    analyzer = core.AnalysisDiction(True, True)
 
     words = core.analyze_articles(analyzer, data_object.message)
 
@@ -254,17 +247,18 @@ def run_app():
     # test-only method      lifecoding - 174499879257223, node - 168705546563077, import analysis.spam_app as spam
     group = Group.objects.filter(id=168705546563077)[0]
     print("name is "+group.name)
-
+    a = core.analyze_articles(analyzer, '$아줌마$상대로섹알바하실분$1일수익80만홈피 $ w w w . y c c 6 6 . c o m !')
+    print(a)
     # posts = Post.objects.filter(group=group)
 
     # SpamWordList.objects.all().delete()
 
-    init_db(group)
+    # init_db(group)
 
     # words = SpamWordList.objects.filter()
 
-    analyze_old_posts(group)
-    analyze_old_comments(group)
+    # analyze_old_posts(group)
+    # analyze_old_comments(group)
 
     # spam = SpamList.objects.filter()
 

@@ -31,6 +31,8 @@ from dateutil import relativedelta as rdelta
 from datetime import datetime
 from pytz import timezone as tz
 
+analyzer = core.AnalysisDiction(True, True)
+
 
 def add_anticipate_list(data_object):
     """
@@ -168,10 +170,9 @@ def get_average_like_and_comment(group, is_post=False, is_comment=False):
     return returnarry
 
 
-def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=False):
+def analyze_hit_article(group, article_set, is_post=False, is_comment=False):
     """
     analyze article
-    :param analyzer: analyzer for analysis
     :param group: group object
     :param article_set: list of articles
     :return string of status
@@ -220,10 +221,9 @@ def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=
             return "no_article"
 
 
-def analyze_monthly_post(analyzer, group):
+def analyze_monthly_post(group):
     """
     Make trend words
-    :param analyzer: analyzer for analysis
     :param group: group object
     :return: if works well return true
     """
@@ -380,10 +380,9 @@ def analyze_monthly_post(analyzer, group):
         return True
 
 
-def monthly_analyze_feed(analyzer, group):
+def monthly_analyze_feed(group):
     """
     analyze monthly feed
-    :param analyzer: analyzer for analysis
     :param group: group object
     :return: if works well return true
     """
@@ -513,10 +512,9 @@ def monthly_analyze_feed(analyzer, group):
             return True
 
 
-def analyze_feed(analyzer, data_object):
+def analyze_feed(data_object):
     """
     analyze a feed
-    :param analyzer: analyzer for analysis
     :param data_object: data object
     :return: words from analyzed feed
     """
@@ -555,7 +553,7 @@ def analyze_feed(analyzer, data_object):
     word_db = MonthlyWords.objects.filter(group=data_object.group)
     data_set = [sp.word for sp in word_db]
 
-    return core.analysis_text_by_words(data_set, word_set, 2)
+    return core.analysis_text_by_words(data_set, word_set, 5)
 
 
 def analysis_prev_hit_posts(group):
@@ -572,9 +570,7 @@ def analysis_prev_hit_posts(group):
     hits = Post.objects.filter(Q(group=group), Q(like_count__gte=avgarry[0]) | Q(comment_count__gte=avgarry[1]))
     # better accuracy
 
-    analyzer = core.AnalysisDiction(True, True)
-
-    analyze_hit_article(analyzer, group, hits, is_post=True)
+    analyze_hit_article(group, hits, is_post=True)
 
 
 def analysis_prev_hit_comments(group):
@@ -590,9 +586,7 @@ def analysis_prev_hit_comments(group):
 
     hits = Comment.objects.filter(Q(group=group), Q(like_count__gte=avgarry[0]) | Q(comment_count__gte=avgarry[1]))
 
-    analyzer = core.AnalysisDiction(True, True)
-
-    analyze_hit_article(analyzer, group, hits, is_comment=True)
+    analyze_hit_article(group, hits, is_comment=True)
 
 
 def analyze_feed_sequence(data_object):
@@ -601,8 +595,6 @@ def analyze_feed_sequence(data_object):
     :param data_object: data object
     :return: status string
     """
-    analyzer = core.AnalysisDiction(True, True)
-
     if data_object.message is None:
         return "no_message"
 
@@ -611,7 +603,7 @@ def analyze_feed_sequence(data_object):
 
     # arg = ArchiveAnalysisWord.objects.filter(group=data_object.group).aggregate(avgweigh=Avg('weigh'))
 
-    result = analyze_feed(analyzer, data_object)
+    result = analyze_feed(data_object)
 
     if result is False:
         return "no_concern"
@@ -639,20 +631,17 @@ def refresh_sequence(group):
     refresh AnalysisDBScheman and comments & likes in words DB
     :param group: group object
     """
-    analyzer = core.AnalysisDiction(True, True)
-
-    analysis_prev_hit_posts(group)          # consider db init
-    analysis_prev_hit_comments(group)       # consider db init
-    analyze_monthly_post(analyzer, group)
-    monthly_analyze_feed(analyzer, group)
+    # analysis_prev_hit_posts(group)          # consider db init
+    # analysis_prev_hit_comments(group)       # consider db init
+    analyze_monthly_post(group)
+    monthly_analyze_feed(group)
     post_time_out(group)
 
 
 def run_app():
     print('hello')
     group = Group.objects.filter(id=168705546563077)[0]
-    analyzer = core.AnalysisDiction(True, True)
-    data_object = '1. 노드는 프로그래밍 언어가 아닙니다. 2. 단순히 노드 난이도라고 하면, JavaScript나 V8엔진, RESTful 등 서버 백그라운드를 갖추고 있다는 가정하에 진입장벽이 매우 낮은 편입니다'
+
     # print(analyze_feed(analyzer, data_object, group))
     # AnalysisDBSchema.objects.all().delete()
     # rchiveAnalysisWord.objects.all().delete()

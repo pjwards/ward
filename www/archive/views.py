@@ -1194,12 +1194,16 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializers.data)
 
     @detail_route()
-    def month_trend_word(self, request):
+    def month_trend_word(self, request, pk=None):
         date = self.request.query_params.get('date', None)
+        now = timezone.now()
         fromdate = date_utils.get_date_from_str(date)
-        todate = fromdate.replace(year=fromdate.year, month=fromdate.month, day=25)
         _group = self.get_object()
-        _monthlywords = MonthTrendWord.objects.filter(group=_group, datedtime__range=(fromdate, todate))
+        if fromdate.month == now.month:
+            _monthlywords = MonthlyWords.objects.filter(group=_group)
+        else:
+            todate = fromdate.replace(year=fromdate.year, month=fromdate.month, day=25)
+            _monthlywords = MonthTrendWord.objects.filter(group=_group, datedtime__range=(fromdate, todate))
 
         serializers = MonthlyWordsSerializer(_monthlywords, many=True, context={'request': request})
         return Response(serializers.data)
