@@ -253,10 +253,10 @@ def analysis_text_by_words(base_words, analyzed_words, avg_weigh):
     """
     wordhash = dict((k, 0) for k in base_words)
     for k in analyzed_words:
-        if wordhash.get(k) is None:
-            print(k+' is None ')
-        else:
+        if wordhash.get(k):
             wordhash[k] += 1
+        # else:
+            # print(k+' is None ')
             # print(k+' is '+str(wordhash[k]))
 
     total = 0

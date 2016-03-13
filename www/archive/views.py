@@ -50,7 +50,7 @@ from .rest.serializer import *
 from .utils import date_utils
 from archive.models import *
 from analysis.models import *
-from analysis.views import AnticipateArchiveSerializer, MonthlyWordsSerializer, MonthTrendWordSerializer
+from analysis.views import SpamListSerializer, SpamWordListSerializer, AnticipateArchiveSerializer, MonthlyWordsSerializer, MonthTrendWordSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -1576,6 +1576,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         _user = get_object_or_404(DjangoUser, id=user_id)
         _wards = Ward.objects.filter(group=_group, user=_user).exclude(comment=None).order_by('-created_time')
         return self.response_models(_wards, request, WardSerializer)
+
+    @detail_route()
+    def spam(self, request, pk=None):
+        _group = self.get_object()
+        _spam = SpamList.objects.filter(group=_group).exclude(status='deleted')
+        return self.response_models(_spam, request, SpamListSerializer)
 
     def response_models(self, models, request, model_serializer):
         """

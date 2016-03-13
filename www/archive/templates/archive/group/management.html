@@ -239,6 +239,79 @@
 
         <!-- /.row -->
         <div class="row">
+            <!-- Spam -->
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-list fa-fw"></i> Spam
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Actions
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li style="text-align: center;">
+                                        <label for="spam_limit">Limit</label>
+                                        <input type="text" class="input" id="spam_limit" placeholder="Limit"
+                                               value="10" style="width: 80%; text-align: center;"/>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a id="spam_del_btn">Delete</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body jui">
+                        <form id="spam_del_form" action="" method="post">
+                            {% csrf_token %}
+                            <table id="spam_table" class="table simple hover borderless">
+                                <colgroup>
+                                    <col style="width: 20px;">
+                                    <col style="width: 60px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 60%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 20%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th style="text-align: center;">
+                                        <input type="checkbox" id="check_all_spam"
+                                               style="display: inline-block;">
+                                    </th>
+                                    <th></th>
+                                    <th><i class="icon-user"></i> From</th>
+                                    <th style="text-align: center;"><i class="icon-report"></i> Message</th>
+                                    <th style="text-align: center;"><i class="icon-like"></i> Like</th>
+                                    <th style="text-align: center;"><i class="icon-message"></i> Comment
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </form>
+
+                        <div id="spam_paging" class="paging" style="margin-top: 3px;">
+                            <a href="#" class="prev">Previous</a>
+
+                            <div class="list"></div>
+                            <a href="#" class="next">Next</a>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+            <!-- / Spam -->
+        </div>
+        <!-- /.row -->
+
+        <!-- /.row -->
+        <div class="row">
             <!-- User -->
             <div class="col-lg-12">
                 <div class="panel panel-default">
@@ -430,6 +503,11 @@
         <div id="loading_user_search_helper_msg" style="display: none; font-size: 20px; color: red;">
             NOW LOADING...
         </div>
+
+        <div id="loading_spam_msg" style="display: none; font-size: 20px; color: red;">
+            NOW LOADING...
+        </div>
+
         <!-- /loading messages -->
 
         <!-- User Search -->
@@ -484,6 +562,7 @@
         var comment_limit = 20;
         var user_limit = 10;
         var search_limit = 10;
+        var spam_limit = 10;
 
         var post_search = $('#post_search');
         var comment_search = $('#comment_search');
@@ -495,6 +574,7 @@
         var comment_search_url = "/api/groups/{{ group.id }}/comment_search/";
         var user_search_url = "/api/groups/{{ group.id }}/user_archive/";
         var blacklist_search_url = "/api/groups/{{ group.id }}/blacklist_search/";
+        var spam_url = "/api/groups/{{ group.id }}/post_search/";
 
         var post_search_check = 'text';
         var comment_search_check = 'text';
@@ -634,6 +714,33 @@
             });
 
             /**
+             * Spam
+             */
+            spam_paging = paging("#spam_paging", {
+                pageCount: 10,
+                screenCount: detectWidthToScreenCount(),
+                event: {
+                    page: function (pNo) {
+                        //changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, pNo);
+                    }
+                },
+                tpl: {
+                    pages: $("#tpl_pages").html(),
+                }
+            });
+
+            spam_table = table("#spam_table", {
+                fields: ["", "", "from", "message", "like_count", "comment_count"],
+                scroll: true,
+                scrollHeight: 800,
+                resize: true,
+                tpl: {
+                    row: $("#tpl_row").html(),
+                    none: $("#tpl_none").html()
+                }
+            });
+
+            /**
              * Loading message
              */
             loading_post = modal("#loading_post_msg", {
@@ -669,6 +776,15 @@
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
+            });
+
+            loading_spam = modal("#loading_spam_msg", {
+                target: "#spam_table",
+                opacity: 0.5,
+                color: 'white',
+                autoHide: false,
+            });
+
             });
 
             /**
@@ -733,6 +849,8 @@
                 reLoadPaging(comment_paging);
                 reLoadPaging(user_paging);
                 reLoadPaging(blacklist_paging);
+                reLoadPaging(spam_post_paging);
+                reLoadPaging(spam_comment_paging);
             }
 
             /**
@@ -764,6 +882,12 @@
             $("#blacklist_limit").on("input", function () {
                 user_limit = $("#blacklist_limit").val();
                 changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
+            });
+
+            $("#spam_limit").on("input", function () {
+                spam_limit = $("#spam_limit").val();
+                // changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
+
             });
 
             $("#post_search").keypress(function (event) {
@@ -817,6 +941,14 @@
                     $("input[name=del_comment]").prop("checked", true);
                 } else {
                     $("input[name=del_comment]").prop("checked", false);
+                }
+            });
+
+            $("#check_all_spam").click(function () {
+                if ($("#check_all_spam").prop("checked")) {
+                    $("input[name=del_post]").prop("checked", true);
+                } else {
+                    $("input[name=del_post]").prop("checked", false);
                 }
             });
 

@@ -40,9 +40,9 @@ def analyze_feed_spam(analyzer, group, message):
     data_set = [sp.word for sp in spam_db]
     word_set = core.analyze_articles(analyzer, message)
 
-    arg = SpamWordList.objects.filter(group=group).aggregate(avgcount=Avg('count'))
+    # arg = SpamWordList.objects.filter(group=group).aggregate(avgcount=Avg('count'))
 
-    return core.analysis_text_by_words(data_set, word_set, arg['avgcount'])
+    return core.analysis_text_by_words(data_set, word_set, 1)
 
 
 def add_spam_list(group, user, object_id, message, time):
@@ -255,19 +255,19 @@ def run_app():
     group = Group.objects.filter(id=168705546563077)[0]
     print("name is "+group.name)
 
-    posts = Post.objects.filter(group=group)
+    # posts = Post.objects.filter(group=group)
 
     # SpamWordList.objects.all().delete()
 
-    # init_db(group)
+    init_db(group)
 
     # words = SpamWordList.objects.filter()
 
-    # analyze_old_posts(group)
-    # analyze_old_comments(group)
+    analyze_old_posts(group)
+    analyze_old_comments(group)
 
     # spam = SpamList.objects.filter()
 
-    analyze_spam_sequence(posts[0])
+    # analyze_spam_sequence(posts[0])
 
     # delete_sequence(spam[0])
