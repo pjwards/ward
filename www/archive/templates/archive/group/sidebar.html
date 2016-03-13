@@ -6,10 +6,8 @@
                 <div class="form-group">
                     <select id="sidebar_select_group" class="form-control">
                         {% for grp in groups %}
-                            {% if grp.privacy == 'OPEN' %}
-                                <option value="{% url 'archive:group' grp.id %}"
-                                        {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
-                            {% endif %}
+                            <option value="{% url 'archive:group' grp.id %}"
+                                    {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
                         {% endfor %}
                     </select>
                 </div>

@@ -146,7 +146,7 @@ def groups_admin(request):
     :return: render
     """
     if request.method == "GET":
-        _groups = Group.objects.all().order_by('name')
+        _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
         return render(request, 'archive/group/list_admin.html', {'groups': _groups})
 
 
@@ -178,7 +178,7 @@ def group_analysis(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -202,7 +202,7 @@ def group_user(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -226,7 +226,7 @@ def group_archive(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -250,7 +250,7 @@ def group_search(request, group_id):
     :param group_id: group_id
     :return: searched data
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
 
     search = request.GET['q']
@@ -285,7 +285,7 @@ def group_management(request, group_id):
             return HttpResponseForbidden()
 
     if request.method == "GET":
-        _groups = Group.objects.all()
+        _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
         posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
         return render(
                 request,
@@ -604,7 +604,7 @@ def group_download(request, group_id):
     :param group_id: group id
     :return: render or csv
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 

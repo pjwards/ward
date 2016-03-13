@@ -87,10 +87,8 @@
                                 <label>Groups</label>
                                 <select id="store_date_select" multiple="" class="form-control">
                                     {% for grp in groups %}
-                                        {% if grp.privacy == 'OPEN' %}
-                                            <option value="{% url 'archive:group_store_date' grp.id %}"
-                                                    {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
-                                        {% endif %}
+                                        <option value="{% url 'archive:group_store_date' grp.id %}"
+                                                {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
