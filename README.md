@@ -179,10 +179,7 @@ Ward는 [GPL v3+](./LICENSE)하에 배포됩니다.
 
 ## 컨트리뷰션 가이드
 [Contribution Guide 문서](./CONTRIBUTING.md)를 읽어주세요.
-<<<<<<< HEAD
 
 
 ## Wiki
 더 많은 정보의 제공을 위해 [Wiki](https://github.com/egaoneko/ward/wiki)를 사용하고 있습니다.
-=======
->>>>>>> origin/master

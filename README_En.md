@@ -44,8 +44,8 @@ Ward collects data of Facebook groups using Facebook Graph API and shows various
 * Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/), [MIT License](./NOTICE/LICENSE.azmind))
 * html2canvas ([html2canvas](https://html2canvas.hertzen.com), [MIT License](./NOTICE/LICENSE.html2canvas))
 * jqPlot ([jqPlot](http://www.jqplot.com), [GPL v2, MIT License](./NOTICE/LICENSE.jqplot))
-* vis.js ([vis](http://visjs.org/#), [Apache 2.0, MIT](./NOTICE/LICENSE.vis))
-* jqcloud ([jqcloud](http://mistic100.github.io/jQCloud/index.html), [MIT](./NOTICE/LICENSE.jqcloud))
+* vis.js ([vis](http://visjs.org/#), [Apache License 2.0, MIT License](./NOTICE/LICENSE.vis))
+* jqcloud ([jqcloud](http://mistic100.github.io/jQCloud/index.html), [MIT License](./NOTICE/LICENSE.jqcloud))
 
 #### Etc
 
@@ -167,9 +167,6 @@ Ward uses the [GPL v3+](./LICENSE).
 
 ## Contribution Guide 
 Please read [the Contribution Guide Document](./CONTRIBUTING.md).
-<<<<<<< HEAD
 
 ## Wiki
 Sharing more information, ward uses [Wiki](https://github.com/egaoneko/ward/wiki).
-=======
->>>>>>> origin/master
