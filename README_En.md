@@ -22,7 +22,7 @@ Ward collects data of Facebook groups using Facebook Graph API and shows various
 * lxml (tested with version 3.5.0) ([lxml](http://lxml.de), [BSD License](./NOTICE/LICENSE.lxml))
 * django-registration (tested with version 2.0.2) ([django-registration](https://github.com/macropin/django-registration), [BSD License](./NOTICE/LICENSE.django-registration))
 * JPype1-py3 (tested with version 0.5.5.2) ([JPype1-py3](https://pypi.python.org/pypi/JPype1-py3), [Apache License 2.0](./NOTICE/LICENSE.jpype1-py3))
-* konlpy (tested with version 0.4.4) ([konlpy](http://konlpy.org/ko/v0.4.3/), [GPL v3](./NOTICE/LICENSE.konlpy))
+* konlpy (tested with version 0.4.4) ([konlpy](http://konlpy.org/ko/v0.4.3/), [GPL v3+](./NOTICE/LICENSE.konlpy))
 * django-allauth (tested with version 0.24.1) ([django-allauth](https://github.com/pennersr/django-allauth), [MIT License](./NOTICE/LICENSE.django-allauth))
 * redis (tested with version 2.10.3) ([redis](http://redis.io), [BSD License](./NOTICE/LICENSE.redis))
 * uwsgi (tested with version 2.0.11.2) ([uwsgi](https://github.com/unbit/uwsgi), [GPL v2](./NOTICE/LICENSE.uwsgi))
@@ -43,9 +43,9 @@ Ward collects data of Facebook groups using Facebook Graph API and shows various
 * Start Bootstrap SB Admin 2 ([Start Bootstrap](http://www.startbootstrap.com), [Apache License 2.0](./NOTICE/LICENSE.startbootstrap))
 * Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/), [MIT License](./NOTICE/LICENSE.azmind))
 * html2canvas ([html2canvas](https://html2canvas.hertzen.com), [MIT License](./NOTICE/LICENSE.html2canvas))
-* jqPlot ([jqPlot](http://www.jqplot.com), [GPL v2, MIT License](./NOTICE/LICENSE.jqplot))
-* vis.js ([vis](http://visjs.org/#), [Apache 2.0, MIT](./NOTICE/LICENSE.vis))
-* jqcloud ([jqcloud](http://mistic100.github.io/jQCloud/index.html), [MIT](./NOTICE/LICENSE.jqcloud))
+* jqPlot ([jqPlot](http://www.jqplot.com), [GPL v2 or MIT License](./NOTICE/LICENSE.jqplot))
+* vis.js ([vis](http://visjs.org/#), [Apache License 2.0, MIT License](./NOTICE/LICENSE.vis))
+* jqcloud ([jqcloud](http://mistic100.github.io/jQCloud/index.html), [MIT License](./NOTICE/LICENSE.jqcloud))
 
 #### Etc
 
@@ -162,4 +162,8 @@ If you face unresolved reference issue in pycharm, check below.
 
 
 ## License
-Ward uses the [MIT License](./LICENSE).
+Ward uses the [GPL v3+](./LICENSE).
+
+
+## Contribution Guide 
+Please read [the Contribution Guide Document](./CONTRIBUTING.md).
