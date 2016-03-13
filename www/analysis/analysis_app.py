@@ -381,6 +381,12 @@ def analyze_monthly_post(analyzer, group):
 
 
 def monthly_analyze_feed(analyzer, group):
+    """
+    analyze monthly feed
+    :param analyzer: analyzer for analysis
+    :param group: group object
+    :return: if works well return true
+    """
     now = timezone.now()
     time = now - timezone.timedelta(days=30)
     # print(time)
@@ -549,7 +555,7 @@ def analyze_feed(analyzer, data_object):
     word_db = MonthlyWords.objects.filter(group=data_object.group)
     data_set = [sp.word for sp in word_db]
 
-    return core.analysis_text_by_words(data_set, word_set, 0)
+    return core.analysis_text_by_words(data_set, word_set, 2)
 
 
 def analysis_prev_hit_posts(group):
@@ -617,6 +623,10 @@ def analyze_feed_sequence(data_object):
 
 
 def post_time_out(group):
+    """
+    Delete feed data from AnticipateArchive list
+    :param group: group object
+    """
     now = timezone.now()
     dayago = now - timezone.timedelta(1)
     postlist = AnticipateArchive.objects.filter(group=group, time__lte=dayago)

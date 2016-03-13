@@ -50,6 +50,7 @@ from .rest.serializer import *
 from .utils import date_utils
 from archive.models import *
 from analysis.models import *
+from analysis.views import AnticipateArchiveSerializer, MonthlyWordsSerializer, MonthTrendWordSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -1177,6 +1178,31 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             _models = _models.extra(select={'score': select_query}, order_by=('-score',))
             return _models.exclude(is_show=False)
+
+    @detail_route()
+    def anticipate_archive(self, request, pk=None):
+        _group = self.get_object()
+        _anticips = AnticipateArchive.objects.filter(group=_group)
+        return self.response_models(_anticips, request, AnticipateArchiveSerializer)
+
+    @detail_route()
+    def monthly_words(self, request, pk=None):
+        _group = self.get_object()
+        _monthwords = MonthlyWords.objects.filter(group=_group)
+
+        serializers = MonthlyWordsSerializer(_monthwords, many=True, context={'request': request})
+        return Response(serializers.data)
+
+    @detail_route()
+    def month_trend_word(self, request):
+        date = self.request.query_params.get('date', None)
+        fromdate = date_utils.get_date_from_str(date)
+        todate = fromdate.replace(year=fromdate.year, month=fromdate.month, day=25)
+        _group = self.get_object()
+        _monthlywords = MonthTrendWord.objects.filter(group=_group, datedtime__range=(fromdate, todate))
+
+        serializers = MonthlyWordsSerializer(_monthlywords, many=True, context={'request': request})
+        return Response(serializers.data)
 
     @detail_route()
     def post_archive(self, request, pk=None):

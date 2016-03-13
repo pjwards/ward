@@ -49,3 +49,36 @@ class SpamWordListSerializer(serializers.HyperlinkedModelSerializer):
         exclude = ('status', 'group',)
         read_only_fields = '__all__'
 
+
+class AnticipateArchiveSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for future hot issue
+    """
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = AnticipateArchive
+        read_only_fields = '__all__'
+
+
+class MonthTrendWordSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for trend words every month
+    """
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = MonthTrendWord
+        read_only_fields = '__all__'
+
+
+class MonthlyWordsSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for future hot issue
+    """
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = MonthlyWords
+        read_only_fields = '__all__'
+

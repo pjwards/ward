@@ -24,8 +24,6 @@
 from django.http import HttpResponse
 from rest_framework import viewsets
 from analysis.tools import network
-from analysis.models import *
-from archive.models import *
 from analysis.rest.serializer import *
 
 
@@ -60,3 +58,27 @@ class SpamWordListViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = SpamWordList.objects.all()
     serializer_class = SpamWordListSerializer
+
+
+class AnticipateArchiveViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Spam word list View Set for django restful framework
+    """
+    queryset = AnticipateArchive.objects.all()
+    serializer_class = AnticipateArchiveSerializer
+
+
+class MonthTrendWordViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Month trend word list View Set for django restful framework
+    """
+    queryset = MonthTrendWord.objects.all()
+    serializer_class = MonthTrendWordSerializer
+
+
+class MonthlyWordsViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Monthly words list View Set for django restful framework
+    """
+    queryset = MonthlyWords.objects.all()
+    serializer_class = MonthlyWordsSerializer
