@@ -89,7 +89,7 @@
                                     <li style="text-align: center;">
                                         <label for="post_limit">Limit</label>
                                         <input type="text" class="input" id="post_limit" placeholder="Limit"
-                                               value="20" style="width: 80%; text-align: center;"/>
+                                               value="10" style="width: 80%; text-align: center;"/>
                                     </li>
                                     <li class="divider"></li>
                                     <li style="text-align: center;">
@@ -170,7 +170,7 @@
                                     <li style="text-align: center;">
                                         <label for="comment_limit">Limit</label>
                                         <input type="text" class="input" id="comment_limit" placeholder="Limit"
-                                               value="20" style="width: 80%; text-align: center;"/>
+                                               value="10" style="width: 80%; text-align: center;"/>
                                     </li>
                                     <li class="divider"></li>
                                     <li style="text-align: center;">
@@ -480,8 +480,8 @@
     <script>
         var group_id = "{{ group.id }}";
 
-        var post_limit = 20;
-        var comment_limit = 20;
+        var post_limit = 10;
+        var comment_limit = 10;
         var user_limit = 10;
         var search_limit = 10;
 
@@ -523,7 +523,7 @@
             post_table = table("#post_table", {
                 fields: ["", "", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 2500,
+                scrollHeight: 800,
                 resize: true,
                 tpl: {
                     row: $("#tpl_row").html(),
@@ -547,7 +547,7 @@
             comment_table = table("#comment_table", {
                 fields: ["", "", "from", "message", "like_count", "comment_count"],
                 scroll: true,
-                scrollHeight: 2500,
+                scrollHeight: 800,
                 resize: true,
                 tpl: {
                     row: $("#tpl_row").html(),

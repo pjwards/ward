@@ -6,10 +6,8 @@
                 <div class="form-group">
                     <select id="sidebar_select_group" class="form-control">
                         {% for grp in groups %}
-                            {% if grp.privacy == 'OPEN' %}
-                                <option value="{% url 'archive:group' grp.id %}"
-                                        {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
-                            {% endif %}
+                            <option value="{% url 'archive:group' grp.id %}"
+                                    {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -56,6 +54,9 @@
             </li>
             <li>
                 <a href="{% url 'archive:group_archive' group.id %}"><i class="fa fa-hdd-o fa-fw"></i>Archive</a>
+            </li>
+            <li>
+                <a href="{% url 'archive:group_download' group.id %}"><i class="fa fa-table fa-fw"></i>Download</a>
             </li>
             <li>
                 {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}
