@@ -43,7 +43,7 @@ def analyze_feed_spam(group, message):
 
     # arg = SpamWordList.objects.filter(group=group).aggregate(avgcount=Avg('count'))
 
-    return core.analysis_text_by_words(data_set, word_set, 1)
+    return core.analysis_text_by_words(data_set, word_set, 0)
 
 
 def add_spam_list(group, user, object_id, message, time):
