@@ -72,6 +72,7 @@ class AnticipateArchive(models.Model):
     user = models.ForeignKey(FBUser, related_name='antiArchives')
     message = models.TextField(null=True, blank=True)
     time = models.DateTimeField()
+    status = models.CharField(max_length=10, default='temp')
 
 
 class AnalysisDBSchema(models.Model):
@@ -155,3 +156,12 @@ class MonthlyWords(models.Model):
     word = models.CharField(max_length=255)
     weigh = models.IntegerField(default=0)
     lastfeeddate = models.DateTimeField()
+
+
+class WordsDiction(models.Model):
+    """
+    Temporary words for calculating
+    """
+    group = models.ForeignKey(Group)
+    word = models.CharField(max_length=255)
+    count = models.IntegerField(default=0)

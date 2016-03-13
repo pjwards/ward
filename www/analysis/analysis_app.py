@@ -31,19 +31,19 @@ from dateutil import relativedelta as rdelta
 from datetime import datetime
 from pytz import timezone as tz
 
-analyzer = core.AnalysisDiction(True, True)
 
-
-def add_anticipate_list(data_object):
+def add_anticipate_list(data_object, typed):
     """
     add analyzed article to db
     :param data_object: data object of target article
+    :param typed: post or comment
     """
     newarticle = AnticipateArchive(group=data_object.group)
     newarticle.id = data_object.id
     newarticle.user = data_object.user
     newarticle.message = data_object.message
     newarticle.time = data_object.created_time
+    newarticle.status = typed
     newarticle.save()
 
 
@@ -185,7 +185,7 @@ def analyze_hit_article(group, article_set, is_post=False, is_comment=False):
                 if article.message is None:
                     return "no_message"
 
-                words = core.analyze_articles(analyzer, article.message)
+                words = core.analyze_articles(article.message)
                 add_words_db(group, words, article.like_count, article.comment_count)
             else:
                 if attach[0].description is not None:
@@ -195,7 +195,7 @@ def analyze_hit_article(group, article_set, is_post=False, is_comment=False):
                 else:
                     return "no_message"
 
-                words = core.analyze_articles(analyzer, message)
+                words = core.analyze_articles(message)
                 add_words_db(group, words, article.like_count, article.comment_count)
 
         elif is_comment is True:
@@ -205,7 +205,7 @@ def analyze_hit_article(group, article_set, is_post=False, is_comment=False):
                 if article.message is None:
                     return "no_message"
 
-                words = core.analyze_articles(analyzer, article.message)
+                words = core.analyze_articles(article.message)
                 add_words_db(group, words, article.like_count, article.comment_count)
             else:
                 if attach[0].description is not None:
@@ -215,7 +215,7 @@ def analyze_hit_article(group, article_set, is_post=False, is_comment=False):
                 else:
                     return "no_message"
 
-                words = core.analyze_articles(analyzer, message)
+                words = core.analyze_articles(message)
                 add_words_db(group, words, article.like_count, article.comment_count)
         else:
             return "no_article"
@@ -250,7 +250,7 @@ def analyze_monthly_post(group):
                 post_dict = {}
                 if post is not None:
                     for p in post:
-                        words = core.analyze_articles(analyzer, p.message)
+                        words = core.analyze_articles(p.message)
 
                         for w in words:
                             if post_dict.get(w) is not None:
@@ -260,7 +260,7 @@ def analyze_monthly_post(group):
 
                 if comment is not None:
                     for c in comment:
-                        words = core.analyze_articles(analyzer, c.message)
+                        words = core.analyze_articles(c.message)
 
                         for w in words:
                             if post_dict.get(w) is not None:
@@ -336,7 +336,7 @@ def analyze_monthly_post(group):
                 post_dict = {}
                 if post is not None:
                     for p in post:
-                        words = core.analyze_articles(analyzer, p.message)
+                        words = core.analyze_articles(p.message)
 
                         for w in words:
                             if post_dict.get(w) is not None:
@@ -346,7 +346,7 @@ def analyze_monthly_post(group):
 
                 if comment is not None:
                     for c in comment:
-                        words = core.analyze_articles(analyzer, c.message)
+                        words = core.analyze_articles(c.message)
 
                         for w in words:
                             if post_dict.get(w) is not None:
@@ -413,7 +413,7 @@ def monthly_analyze_feed(group):
                 post_dict = {}
                 if post is not None:
                     for p in post:
-                        words = core.analyze_articles(analyzer, p.message)
+                        words = core.analyze_articles(p.message)
 
                         for w in words:
                             if post_dict.get(w) is not None:
@@ -423,7 +423,7 @@ def monthly_analyze_feed(group):
 
                 if comment is not None:
                     for c in comment:
-                        words = core.analyze_articles(analyzer, c.message)
+                        words = core.analyze_articles(c.message)
 
                         for w in words:
                             if post_dict.get(w) is not None:
@@ -471,7 +471,7 @@ def monthly_analyze_feed(group):
             post_dict = {}
             if post is not None:
                 for p in post:
-                    words = core.analyze_articles(analyzer, p.message)
+                    words = core.analyze_articles(p.message)
 
                     for w in words:
                         if post_dict.get(w) is not None:
@@ -481,7 +481,7 @@ def monthly_analyze_feed(group):
 
             if comment is not None:
                 for c in comment:
-                    words = core.analyze_articles(analyzer, c.message)
+                    words = core.analyze_articles(c.message)
 
                     for w in words:
                         if post_dict.get(w) is not None:
@@ -538,12 +538,12 @@ def analyze_feed(data_object):
     # attach_message = ''
 
     if message is not '':
-        message_word_set = core.analyze_articles(analyzer, message)
+        message_word_set = core.analyze_articles(message)
     else:
         message_word_set = []
 
     if attach_message is not '':
-        attach_word_set = core.analyze_articles(analyzer, attach_message)
+        attach_word_set = core.analyze_articles(attach_message)
     else:
         attach_word_set = []
 
@@ -589,10 +589,11 @@ def analysis_prev_hit_comments(group):
     analyze_hit_article(group, hits, is_comment=True)
 
 
-def analyze_feed_sequence(data_object):
+def analyze_feed_sequence(data_object, typed):
     """
     analyze article sequence
     :param data_object: data object
+    :param typed: post or comment
     :return: status string
     """
     if data_object.message is None:
@@ -608,7 +609,7 @@ def analyze_feed_sequence(data_object):
     if result is False:
         return "no_concern"
 
-    add_anticipate_list(data_object=data_object)
+    add_anticipate_list(data_object=data_object, typed=typed)
     # after 24hours, delete from list
 
     return "ok"
@@ -636,6 +637,57 @@ def refresh_sequence(group):
     analyze_monthly_post(group)
     monthly_analyze_feed(group)
     post_time_out(group)
+
+
+def future_analysis_post(group, data_object, typed):
+    """
+    analysis feed and enroll future hot issue
+    :param group: group object
+    :param data_object: data object
+    :param typed: post or comment
+    :return: if works well return True
+    """
+    if AnticipateArchive.objects.filter(group=group):
+        analyze_feed_sequence(data_object, typed)
+    else:
+        if typed is 'post':
+            now = timezone.now()
+            dayago = now - timezone.timedelta(1)
+            posts = Post.objects.filter(group=group, created_time__range=(dayago, now))
+
+            if posts is None:
+                return False
+
+            for p in posts:
+                if p.message is None:
+                    continue
+
+                result = analyze_feed(p)
+
+                if result is False:
+                    continue
+
+                add_anticipate_list(data_object=p, typed=typed)
+        else:
+            now = timezone.now()
+            dayago = now - timezone.timedelta(1)
+            comments = Comment.objects.filter(group=group, created_time__range=(dayago, now))
+
+            if comments is None:
+                return False
+
+            for c in comments:
+                if c.message is None:
+                    continue
+
+                result = analyze_feed(c)
+
+                if result is False:
+                    continue
+
+                add_anticipate_list(data_object=c, typed=typed)
+
+        return True
 
 
 def run_app():

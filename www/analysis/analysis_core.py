@@ -163,13 +163,15 @@ def url_duplication_check(data_set, urls):
     return url_list
 
 
-def analyze_articles(analyzer, message):
+def analyze_articles(message): # analyzer
     """
     analyze articles
-    :param analyzer: analyzer for analysis
     :param message: string data
     :return: refined words list
     """
+
+    analyzer = AnalysisDiction(True, True)
+
     if message is None:
         return []
 
@@ -203,13 +205,15 @@ def analyze_articles(analyzer, message):
     return refineword       # need better refine words
 
 
-def analyze_articles_up(analyzer, message):
+def analyze_articles_up(message): # analyzer
     """
     analyze articles
-    :param analyzer: analyzer for analysis
     :param message: string data
     :return: refined words list
     """
+
+    analyzer = AnalysisDiction(True, True)
+
     if message is None:
         return []
 
