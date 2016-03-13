@@ -28,7 +28,7 @@ Ward collects data of Facebook groups using Facebook Graph API and shows various
 * uwsgi (tested with version 2.0.11.2) ([uwsgi](https://github.com/unbit/uwsgi), [GPL v2](./NOTICE/LICENSE.uwsgi))
 * pylibmc (tested with version 1.5.0) ([pylibmc](https://pypi.python.org/pypi/pylibmc), [BSD License](./NOTICE/LICENSE.pylibmc))
 * psycopg2 (tested with version 2.6.1) ([psycopg2](http://initd.org/psycopg/), [LGPL with exceptions or ZPL](./NOTICE/LICENSE.psycopg2))
-
+* python-dateutil (tested with version 2.5.0) ([dateutil](https://dateutil.readthedocs.org/en/latest/), [Simplified BSD](./NOTICE/LICENSE.dateutil))
 
 #### Front-End
 
@@ -44,7 +44,8 @@ Ward collects data of Facebook groups using Facebook Graph API and shows various
 * Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/), [MIT License](./NOTICE/LICENSE.azmind))
 * html2canvas ([html2canvas](https://html2canvas.hertzen.com), [MIT License](./NOTICE/LICENSE.html2canvas))
 * jqPlot ([jqPlot](http://www.jqplot.com), [GPL v2, MIT License](./NOTICE/LICENSE.jqplot))
-
+* vis.js ([vis](http://visjs.org/#), [Apache 2.0, MIT](./NOTICE/LICENSE.vis))
+* jqcloud ([jqcloud](http://mistic100.github.io/jQCloud/index.html), [MIT](./NOTICE/LICENSE.jqcloud))
 
 #### Etc
 
