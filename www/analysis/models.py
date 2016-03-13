@@ -136,16 +136,6 @@ class MonthTrendWord(models.Model):
     weigh = models.IntegerField(default=1)
 
 
-class MonthlyWords(models.Model):
-    """
-    Memoization about month words
-    """
-    group = models.ForeignKey(Group)
-    word = models.CharField(max_length=255)
-    weigh = models.IntegerField(default=0)
-    lastfeeddate = models.DateTimeField()
-
-
 class GroupDurations(models.Model):
     """
     Total years and months from creation of group to now
@@ -155,3 +145,13 @@ class GroupDurations(models.Model):
     monthed = models.IntegerField(default=0)
     lastupdatetime = models.DateTimeField()
     oldtimed = models.DateTimeField()
+
+
+class MonthlyWords(models.Model):
+    """
+    Memoization about month words
+    """
+    group = models.ForeignKey(Group)
+    word = models.CharField(max_length=255)
+    weigh = models.IntegerField(default=0)
+    lastfeeddate = models.DateTimeField()

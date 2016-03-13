@@ -20,43 +20,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # ==================================================================================
-""" Sets views """
-from django.http import HttpResponse
-from rest_framework import viewsets
-from analysis.tools import network
+""" Provides serializers for django rest frameworks """
+
 from analysis.models import *
-from archive.models import *
-from analysis.rest.serializer import *
+from rest_framework import serializers
 
 
-def analysis_network(request):
+class SpamListSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Return group network
-
-    :param request: request
-    :return: json
+    Serializer for spam list
     """
-    if request.method == 'GET':
-        group_id = request.GET.get("group", None)
-        if Group.objects.filter(id=group_id).exists():
-            network_json = network.network(group_id)
-        else:
-            network_json = network.network()
+    id = serializers.ReadOnlyField()
 
-        return HttpResponse(network_json, content_type="application/json")
+    class Meta:
+        model = SpamList
+        exclude = ('status', 'group',)
+        read_only_fields = '__all__'
 
 
-class SpamListViewSet(viewsets.ReadOnlyModelViewSet):
+class SpamWordListSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Spam list View Set for django restful framework
+    Serializer for spam word list
     """
-    queryset = SpamList.objects.all()
-    serializer_class = SpamListSerializer
+    id = serializers.ReadOnlyField()
 
+    class Meta:
+        model = SpamWordList
+        exclude = ('status', 'group',)
+        read_only_fields = '__all__'
 
-class SpamWordListViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Spam word list View Set for django restful framework
-    """
-    queryset = SpamWordList.objects.all()
-    serializer_class = SpamWordListSerializer

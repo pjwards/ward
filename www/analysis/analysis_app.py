@@ -220,101 +220,175 @@ def analyze_hit_article(analyzer, group, article_set, is_post=False, is_comment=
             return "no_article"
 
 
-def analyze_monthly_post():     # analyzer, group
-    analyzer = core.AnalysisDiction(True, True)
-    group = Group.objects.filter(id=168705546563077)[0]
+def analyze_monthly_post(analyzer, group):
+    """
+    Make trend words
+    :param analyzer: analyzer for analysis
+    :param group: group object
+    :return: if works well return true
+    """
     # MonthTrendWord.objects.all().delete()
-
     try:
         groupobjcet = GroupDurations.objects.filter(group=group)[0]
-        total_months = (groupobjcet.yeared * 12) + groupobjcet.monthed    # add last month update
-        old_time = groupobjcet.oldtimed
+        now_time = timezone.now()
+        temp_time = datetime(year=now_time.year, month=now_time.month, day=1)
+        update_month = temp_time.replace(tzinfo=tz('UTC'))
+        rd = rdelta.relativedelta(update_month, groupobjcet.lastupdatetime)
+
+        if rd.days >= 30:
+            post = Post.objects.filter(group=group, created_time__range=(groupobjcet.lastupdatetime, update_month))
+
+            if post.count() == 0:
+                post = None
+
+            comment = Comment.objects.filter(group=group, created_time__range=(groupobjcet.lastupdatetime, update_month))
+
+            if comment.count() == 0:
+                comment = None
+
+            if post and comment is not None:
+                post_dict = {}
+                if post is not None:
+                    for p in post:
+                        words = core.analyze_articles(analyzer, p.message)
+
+                        for w in words:
+                            if post_dict.get(w) is not None:
+                                post_dict[w] += (p.like_count + p.comment_count)
+                            else:
+                                post_dict[w] = 0
+
+                if comment is not None:
+                    for c in comment:
+                        words = core.analyze_articles(analyzer, c.message)
+
+                        for w in words:
+                            if post_dict.get(w) is not None:
+                                post_dict[w] += (c.like_count + c.comment_count)
+                            else:
+                                post_dict[w] = 0
+
+                total_words = 1
+                count_value = 1
+
+                for i in post_dict.values():
+                    if i != 0:
+                        total_words += 1
+                        count_value += i
+
+                avg = int(count_value/total_words*2)
+
+                refinewords = []
+
+                for i in post_dict.items():
+                    if i[1] > avg:
+                        refinewords.append((i[0], i[1]))
+
+                for wd in refinewords:
+                    if not MonthTrendWord.objects.filter(group=group, datedtime=groupobjcet.lastupdatetime, word=wd[0]).exists():
+                        MonthTrendWord(group=group, datedtime=groupobjcet.lastupdatetime, word=wd[0], weigh=wd[1]).save()
+
+                groupobjcet.lastupdatetime = update_month
+                temp = groupobjcet.monthed + 1
+                if temp > 12:
+                    groupobjcet.yeared += 1
+                    groupobjcet.monthed = 1
+                else:
+                    groupobjcet.monthed += 1
+                groupobjcet.save()
+
+                return True
+        else:
+            return False
+
     except IndexError:
         old_time = group.get_date_from_oldest_post()
         now_time = timezone.now()
         rd = rdelta.relativedelta(now_time, old_time)
         total_months = (rd.years * 12) + rd.months
-        GroupDurations(group=group, yeared=rd.years, monthed=rd.months, lastupdatetime=timezone.now(), oldtimed=old_time).save()
+        temp_time = datetime(year=now_time.year, month=now_time.month, day=1)
+        update_month = temp_time.replace(tzinfo=tz('UTC'))
+        GroupDurations(group=group, yeared=rd.years, monthed=rd.months, lastupdatetime=update_month, oldtimed=old_time).save()
 
-    print(total_months)
-    total_months -= 1
-    while total_months != 0:
-        if old_time.month + 1 > 12:
-            old_year = old_time.year + 1
-            old_month = 1
-        else:
-            old_year = old_time.year
-            old_month = old_time.month + 1
+        total_months -= 1
+        while total_months != 0:
+            if old_time.month + 1 > 12:
+                old_year = old_time.year + 1
+                old_month = 1
+            else:
+                old_year = old_time.year
+                old_month = old_time.month + 1
 
-        temp_time = datetime(year=old_year, month=old_month, day=1)
-        target_time = temp_time.replace(tzinfo=tz('UTC'))
+            temp_time = datetime(year=old_year, month=old_month, day=1)
+            target_time = temp_time.replace(tzinfo=tz('UTC'))
 
-        post = Post.objects.filter(group=group, created_time__range=(old_time, target_time))
+            post = Post.objects.filter(group=group, created_time__range=(old_time, target_time))
 
-        if post.count() == 0:
-            post = None
+            if post.count() == 0:
+                post = None
 
-        comment = Comment.objects.filter(group=group, created_time__range=(old_time, target_time))
+            comment = Comment.objects.filter(group=group, created_time__range=(old_time, target_time))
 
-        if comment.count() == 0:
-            comment = None
+            if comment.count() == 0:
+                comment = None
 
-        if post and comment is not None:
-            post_dict = {}
-            if post is not None:
-                for p in post:
-                    words = core.analyze_articles(analyzer, p.message)
+            if post and comment is not None:
+                post_dict = {}
+                if post is not None:
+                    for p in post:
+                        words = core.analyze_articles(analyzer, p.message)
 
-                    for w in words:
-                        if post_dict.get(w) is not None:
-                            post_dict[w] += (p.like_count + p.comment_count)
-                        else:
-                            post_dict[w] = 0
+                        for w in words:
+                            if post_dict.get(w) is not None:
+                                post_dict[w] += (p.like_count + p.comment_count)
+                            else:
+                                post_dict[w] = 0
 
-            if comment is not None:
-                for c in comment:
-                    words = core.analyze_articles(analyzer, c.message)
+                if comment is not None:
+                    for c in comment:
+                        words = core.analyze_articles(analyzer, c.message)
 
-                    for w in words:
-                        if post_dict.get(w) is not None:
-                            post_dict[w] += (c.like_count + c.comment_count)
-                        else:
-                            post_dict[w] = 0
+                        for w in words:
+                            if post_dict.get(w) is not None:
+                                post_dict[w] += (c.like_count + c.comment_count)
+                            else:
+                                post_dict[w] = 0
 
-            total_words = 1
-            count_value = 1
+                total_words = 1
+                count_value = 1
 
-            for i in post_dict.values():
-                if i != 0:
-                    total_words += 1
-                    count_value += i
+                for i in post_dict.values():
+                    if i != 0:
+                        total_words += 1
+                        count_value += i
 
-            avg = int(count_value/total_words*2)
-            print(total_words)
-            print(count_value)
-            print(avg)
-            refinewords = []
+                avg = int(count_value/total_words*2)
 
-            for i in post_dict.items():
-                if i[1] > avg:
-                    refinewords.append((i[0], i[1]))
+                refinewords = []
 
-            for wd in refinewords:
-                if not MonthTrendWord.objects.filter(group=group, datedtime=old_time, word=wd[0]).exists():
-                    MonthTrendWord(group=group, datedtime=old_time, word=wd[0], weigh=wd[1]).save()
+                for i in post_dict.items():
+                    if i[1] > avg:
+                        refinewords.append((i[0], i[1]))
 
-        old_time = target_time
-        total_months -= 1           # target_time is one month before today
+                for wd in refinewords:
+                    if not MonthTrendWord.objects.filter(group=group, datedtime=old_time, word=wd[0]).exists():
+                        MonthTrendWord(group=group, datedtime=old_time, word=wd[0], weigh=wd[1]).save()
+
+            old_time = target_time
+            total_months -= 1
+
+        return True
 
 
-def monthly_analyze_feed():      # analyzer, group
-    analyzer = core.AnalysisDiction(True, True)
-    group = Group.objects.filter(id=168705546563077)[0]
+def monthly_analyze_feed(analyzer, group):
     now = timezone.now()
     time = now - timezone.timedelta(days=30)
+    # print(time)
     try:
+        # print('part1')
         groupobjcet = MonthlyWords.objects.filter(group=group)[0]
         rd = rdelta.relativedelta(now, groupobjcet.lastfeeddate)
+        # print(rd.days)
         if rd.days > 1:
             MonthlyWords.objects.all().delete()
 
@@ -328,7 +402,7 @@ def monthly_analyze_feed():      # analyzer, group
             if comment.count() == 0:
                 comment = None
 
-            if post and comment is not None:
+            if post and comment is None:
                 return False
             else:
                 post_dict = {}
@@ -369,22 +443,24 @@ def monthly_analyze_feed():      # analyzer, group
                         refinewords.append((i[0], i[1]))
 
                 for wd in refinewords:
-                    if not MonthlyWords.objects.filter(group=group, lastfeeddate=time, word=wd[0]).exists():
-                        MonthlyWords(group=group, lastfeeddate=time, word=wd[0], weigh=wd[1]).save()
+                    MonthlyWords(group=group, lastfeeddate=now, word=wd[0], weigh=wd[1]).save()
+
+                return True
         else:
             return False
     except IndexError:
+        # print('part2')
         post = Post.objects.filter(group=group, created_time__range=(time, now))
-
+        # print(post.count())
         if post.count() == 0:
             post = None
 
         comment = Comment.objects.filter(group=group, created_time__range=(time, now))
-
+        # print(comment.count())
         if comment.count() == 0:
             comment = None
 
-        if post and comment is not None:
+        if post and comment is None:
             return False
         else:
             post_dict = {}
@@ -424,38 +500,38 @@ def monthly_analyze_feed():      # analyzer, group
                 if i[1] > avg:
                     refinewords.append((i[0], i[1]))
 
+            # print(refinewords)
             for wd in refinewords:
-                if not MonthlyWords.objects.filter(group=group, lastfeeddate=time, word=wd[0]).exists():
-                    MonthlyWords(group=group, lastfeeddate=time, word=wd[0], weigh=wd[1]).save()
+                MonthlyWords(group=group, lastfeeddate=now, word=wd[0], weigh=wd[1]).save()
 
             return True
 
 
-def analyze_feed(analyzer, data_object, group):
+def analyze_feed(analyzer, data_object):
     """
     analyze a feed
     :param analyzer: analyzer for analysis
     :param data_object: data object
     :return: words from analyzed feed
     """
-    #if data_object.message is not None:
-    #    message = data_object.message
-    #else:
-    #    message = ''
+    if data_object.message is not None:
+        message = data_object.message
+    else:
+        message = ''
 
-    #if 'attachment' in data_object:
-    #    attach = data_object.get('attachment')
-    #    if 'description' in attach:
-    #        attach_message = attach.get('description')
-    #    elif 'title' in attach:
-    #        attach_message = attach.get('title')
-    #    else:
-    #        attach_message = ''
-    #else:
-    #    attach_message = ''
+    if 'attachment' in data_object:
+        attach = data_object.get('attachment')
+        if 'description' in attach:
+            attach_message = attach.get('description')
+        elif 'title' in attach:
+            attach_message = attach.get('title')
+        else:
+            attach_message = ''
+    else:
+        attach_message = ''
 
-    message = data_object
-    attach_message = ''
+    # message = data_object
+    # attach_message = ''
 
     if message is not '':
         message_word_set = core.analyze_articles(analyzer, message)
@@ -470,12 +546,10 @@ def analyze_feed(analyzer, data_object, group):
     temp_set = message_word_set + attach_word_set
     word_set = list(set(temp_set))      # make better algorithm
 
-    word_db = ArchiveAnalysisWord.objects.filter(group=group, weigh__gte=100)
+    word_db = MonthlyWords.objects.filter(group=data_object.group)
     data_set = [sp.word for sp in word_db]
 
-    arg = ArchiveAnalysisWord.objects.filter(group=group).aggregate(avgweigh=Avg('weigh'))
-
-    return core.analysis_text_by_words(data_set, word_set, arg['avgweigh'])
+    return core.analysis_text_by_words(data_set, word_set, 0)
 
 
 def analysis_prev_hit_posts(group):
@@ -529,9 +603,9 @@ def analyze_feed_sequence(data_object):
     if AnticipateArchive(group=data_object.group, id=data_object.id).exists():
         return "exist"
 
-    arg = ArchiveAnalysisWord.objects.filter(group=data_object.group).aggregate(avgweigh=Avg('weigh'))  # use month word
+    # arg = ArchiveAnalysisWord.objects.filter(group=data_object.group).aggregate(avgweigh=Avg('weigh'))
 
-    result = analyze_feed(analyzer, data_object, arg['avgweigh'])
+    result = analyze_feed(analyzer, data_object)
 
     if result is False:
         return "no_concern"
@@ -542,14 +616,26 @@ def analyze_feed_sequence(data_object):
     return "ok"
 
 
+def post_time_out(group):
+    now = timezone.now()
+    dayago = now - timezone.timedelta(1)
+    postlist = AnticipateArchive.objects.filter(group=group, time__lte=dayago)
+    for i in postlist:
+        i.delete()
+
+
 def refresh_sequence(group):
     """
     refresh AnalysisDBScheman and comments & likes in words DB
     :param group: group object
     """
+    analyzer = core.AnalysisDiction(True, True)
 
     analysis_prev_hit_posts(group)          # consider db init
     analysis_prev_hit_comments(group)       # consider db init
+    analyze_monthly_post(analyzer, group)
+    monthly_analyze_feed(analyzer, group)
+    post_time_out(group)
 
 
 def run_app():
@@ -557,7 +643,7 @@ def run_app():
     group = Group.objects.filter(id=168705546563077)[0]
     analyzer = core.AnalysisDiction(True, True)
     data_object = '1. 노드는 프로그래밍 언어가 아닙니다. 2. 단순히 노드 난이도라고 하면, JavaScript나 V8엔진, RESTful 등 서버 백그라운드를 갖추고 있다는 가정하에 진입장벽이 매우 낮은 편입니다'
-    print(analyze_feed(analyzer, data_object, group))
+    # print(analyze_feed(analyzer, data_object, group))
     # AnalysisDBSchema.objects.all().delete()
     # rchiveAnalysisWord.objects.all().delete()
     # analysis_prev_hit_posts(group)
