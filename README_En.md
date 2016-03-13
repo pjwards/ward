@@ -43,9 +43,9 @@ Ward collects data of Facebook groups using Facebook Graph API and shows various
 * Start Bootstrap SB Admin 2 ([Start Bootstrap](http://www.startbootstrap.com), [Apache License 2.0](./NOTICE/LICENSE.startbootstrap))
 * Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/), [MIT License](./NOTICE/LICENSE.azmind))
 * html2canvas ([html2canvas](https://html2canvas.hertzen.com), [MIT License](./NOTICE/LICENSE.html2canvas))
-* jqPlot ([jqPlot](http://www.jqplot.com), [GPL v2 or MIT License](./NOTICE/LICENSE.jqplot))
-* vis.js ([vis](http://visjs.org/#), [Apache License 2.0, MIT License](./NOTICE/LICENSE.vis))
-* jqcloud ([jqcloud](http://mistic100.github.io/jQCloud/index.html), [MIT License](./NOTICE/LICENSE.jqcloud))
+* jqPlot ([jqPlot](http://www.jqplot.com), [GPL v2, MIT License](./NOTICE/LICENSE.jqplot))
+* vis.js ([vis](http://visjs.org/#), [Apache 2.0, MIT](./NOTICE/LICENSE.vis))
+* jqcloud ([jqcloud](http://mistic100.github.io/jQCloud/index.html), [MIT](./NOTICE/LICENSE.jqcloud))
 
 #### Etc
 
