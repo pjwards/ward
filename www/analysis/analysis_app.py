@@ -228,7 +228,7 @@ def analyze_monthly_post(group):
     :return: if works well return true
     """
     # MonthTrendWord.objects.all().delete()
-    try:
+    if GroupDurations.objects.filter(group=group).exists():
         groupobjcet = GroupDurations.objects.filter(group=group)[0]
         now_time = timezone.now()
         temp_time = datetime(year=now_time.year, month=now_time.month, day=1)
@@ -301,7 +301,7 @@ def analyze_monthly_post(group):
         else:
             return False
 
-    except IndexError:
+    else:
         old_time = group.get_date_from_oldest_post()
         now_time = timezone.now()
         rd = rdelta.relativedelta(now_time, old_time)
@@ -389,7 +389,7 @@ def monthly_analyze_feed(group):
     now = timezone.now()
     time = now - timezone.timedelta(days=30)
     # print(time)
-    try:
+    if MonthlyWords.objects.filter(group=group).exists():
         # print('part1')
         groupobjcet = MonthlyWords.objects.filter(group=group)[0]
         rd = rdelta.relativedelta(now, groupobjcet.lastfeeddate)
@@ -453,7 +453,7 @@ def monthly_analyze_feed(group):
                 return True
         else:
             return False
-    except IndexError:
+    else:
         # print('part2')
         post = Post.objects.filter(group=group, created_time__range=(time, now))
         # print(post.count())
