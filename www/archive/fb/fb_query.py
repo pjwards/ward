@@ -23,14 +23,20 @@
 """ Provides query for facebook graph api """
 
 
-def get_feed_query(feed_limit=100):
+def get_feed_query(feed_limit=100, since='', until=''):
     """
     This method return query for feed.
 
     :param feed_limit: how many feeds?
+    :param since: since
+    :param until: until
     :return: feed query
     """
-    query = '?fields=feed.limit(%d){' \
+    if since:
+        since = '.since({})'.format(since)
+    if until:
+        until = '.until({})'.format(until)
+    query = '?fields=feed%s%s.limit(%d){' \
                 'message,' \
                 'from,' \
                 'created_time,' \
@@ -41,7 +47,7 @@ def get_feed_query(feed_limit=100):
                 'likes.summary(true),' \
                 'shares}'
 
-    return query % feed_limit
+    return query % (since, until, feed_limit)
 
 
 def get_comment_query(comments_limit=100, child_comments_limit=100):
@@ -64,15 +70,21 @@ def get_comment_query(comments_limit=100, child_comments_limit=100):
     return query % (comments_limit, child_comments_limit)
 
 
-def get_feed_with_comment_query(feed_limit=100, comments_limit=100):
+def get_feed_with_comment_query(feed_limit=100, comments_limit=100, since='', until=''):
     """
     This method return query for feed with comment.
 
     :param feed_limit: how many feeds?
     :param comments_limit: how many comment?
+    :param since: since
+    :param until: until
     :return: feed query
     """
-    query = '?fields=feed.limit(%d){' \
+    if since:
+        since = '.since({})'.format(since)
+    if until:
+        until = '.until({})'.format(until)
+    query = '?fields=feed%s%s.limit(%d){' \
                 'message,' \
                 'from,' \
                 'created_time,' \
@@ -90,4 +102,4 @@ def get_feed_with_comment_query(feed_limit=100, comments_limit=100):
                 'likes.summary(true),' \
                 'shares}'
 
-    return query % (feed_limit, comments_limit, comments_limit)
+    return query % (since, until, feed_limit, comments_limit, comments_limit)

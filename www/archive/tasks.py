@@ -48,6 +48,21 @@ def store_group_feed_task(group_id, post_query, comment_query):
 
 
 @shared_task
+def store_group_feed_by_date_task(group_id, post_query, comment_query):
+    """
+    This method is storing group's feeds for specific date by using facebook group api.
+
+    :param group_id: param group_id: group id for getting feeds
+    :param post_query: post query for facebook graph api
+    :param comment_query: comment query for facebook graph api
+    :return:
+    """
+    group = Group.objects.filter(id=group_id)[0]
+    store_group_feed(group, post_query, True)
+    check_group_task(group, comment_query)
+
+
+@shared_task
 def update_group_feed_task(group_id, query):
     """
     This method is updating group's feeds by using facebook group api.

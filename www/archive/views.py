@@ -146,7 +146,8 @@ def groups_admin(request):
     :return: render
     """
     if request.method == "GET":
-        return render(request, 'archive/group/list_admin.html', {})
+        _groups = Group.objects.all().order_by('name')
+        return render(request, 'archive/group/list_admin.html', {'groups': _groups})
 
 
 def is_interest_group(request, group_id):
@@ -476,6 +477,39 @@ def group_store(request, group_id):
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
+@user_passes_test(lambda u: u.is_superuser)
+def group_store_date(request, group_id):
+    """
+    Store group method for super user by specific date
+
+    :param request: request
+    :param group_id: group id
+    :return: if you succeed, redirect groups page
+    """
+    p_limit = int(request.GET.get("post_limit", '100'))
+    c_limit = int(request.GET.get("comment_limit", '100'))
+    c_c_limit = int(request.GET.get("child_comment_limit", '100'))
+    since = request.GET.get('since', '')
+    until = request.GET.get('until', '')
+
+    # Check this server is archive server
+    if not settings.ARCHIVE_SERVER:
+        latest_group_list = Group.objects.order_by('name')
+        error = 'This is wrong connection.'
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
+
+    if not Group.objects.filter(id=group_id).exists():
+        latest_group_list = Group.objects.order_by('name')
+        error = 'Does not exist group.'
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
+
+    tasks.store_group_feed_by_date_task.delay(group_id, get_feed_query(p_limit, since, until),
+                                              get_comment_query(c_limit, c_c_limit))
+    return HttpResponseRedirect(reverse('archive:groups_admin'))
+
+
 @csrf_exempt
 def group_update(request, group_id):
     """
@@ -655,6 +689,7 @@ class Echo(object):
     """
     An object that implements just the write method of the file-like interface.
     """
+
     def write(self, value):
         """
         Write the value by returning it, instead of storing in a buffer.
@@ -1054,6 +1089,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             # Is ready to update?
             update_list = GroupStatisticsUpdateList.objects.filter(group=self.get_object(), method=method)
             if update_list:
+                update_list[0].updated_time = timezone.now() - timezone.timedelta(2)
                 is_update = update_list[0].is_update()
             else:
                 GroupStatisticsUpdateList.update(group=self.get_object(), method=method)
