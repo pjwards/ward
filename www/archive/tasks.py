@@ -25,6 +25,9 @@
 from __future__ import absolute_import
 from celery import shared_task
 from archive.fb.fb_tasks import *
+from archive.models import *
+from analysis.tools import network
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -122,3 +125,13 @@ def check_group_post_task(post_id, query):
     """
     post = Post.objects.filter(id=post_id)[0]
     check_post_comment(post, query)
+
+
+@shared_task
+def memoization_task():
+    """
+    This method for memoization per day
+
+    :return:
+    """
+    network.network()

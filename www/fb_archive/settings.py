@@ -413,6 +413,10 @@ if ARCHIVE_SERVER:
             'schedule': timedelta(seconds=60),
             'args': (get_feed_with_comment_query(50, 100),)
         },
+        'add-every-1-days': {
+            'task': 'archive.tasks.memoization_task',
+            'schedule': timedelta(days=1),
+        },
     }
 
 ####################

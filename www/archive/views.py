@@ -1089,7 +1089,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             # Is ready to update?
             update_list = GroupStatisticsUpdateList.objects.filter(group=self.get_object(), method=method)
             if update_list:
-                update_list[0].updated_time = timezone.now() - timezone.timedelta(2)
                 is_update = update_list[0].is_update()
             else:
                 GroupStatisticsUpdateList.update(group=self.get_object(), method=method)
