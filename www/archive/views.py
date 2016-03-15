@@ -1411,7 +1411,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         :param request: request
         :param pk: pk
-        :return: json respomse
+        :return: json response
         """
         cursor = connection.cursor()
         _group = self.get_object()
