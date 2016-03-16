@@ -127,16 +127,6 @@ class UpdateList(models.Model):
             return False
 
 
-class MonthTrendWord(models.Model):
-    """
-    Trend words on every month
-    """
-    datedtime = models.DateTimeField()
-    group = models.ForeignKey(Group)
-    word = models.CharField(max_length=255)
-    weigh = models.IntegerField(default=1)
-
-
 class GroupDurations(models.Model):
     """
     Total years and months from creation of group to now
@@ -158,6 +148,16 @@ class MonthlyWords(models.Model):
     lastfeeddate = models.DateTimeField()
 
 
+class WeeklyWords(models.Model):
+    """
+    Memoization about week words
+    """
+    group = models.ForeignKey(Group)
+    word = models.CharField(max_length=255)
+    weigh = models.IntegerField(default=0)
+    lastfeeddate = models.DateTimeField()
+
+
 class WordsDiction(models.Model):
     """
     Temporary words for calculating
@@ -165,3 +165,14 @@ class WordsDiction(models.Model):
     group = models.ForeignKey(Group)
     word = models.CharField(max_length=255)
     count = models.IntegerField(default=0)
+
+
+class MonthTrendWord(models.Model):
+    """
+    Trend words on every month
+    """
+    datedtime = models.DateTimeField()
+    group = models.ForeignKey(Group)
+    word = models.CharField(max_length=255)
+    weigh = models.IntegerField(default=1)
+    lastfeeddate = models.DateTimeField()

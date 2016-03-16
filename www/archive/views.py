@@ -54,6 +54,11 @@ from analysis.views import SpamListSerializer, SpamWordListSerializer, Anticipat
     MonthlyWordsSerializer, MonthTrendWordSerializer
 from analysis import analysis_app
 from pytz import timezone as tz
+import jpype
+from konlpy import jvm
+from django.utils import timezone
+from dateutil import relativedelta as rdelta
+
 
 logger = logging.getLogger(__name__)
 
@@ -1103,30 +1108,48 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     @detail_route()
     @renderer_classes((JSONRenderer,))
     def word_cloud(self, request, pk=None):
+        jvm.init_jvm()
+        jpype.attachThreadToJVM()
+
+        _group = self.get_object()
         date = self.request.query_params.get('date', None)
         now = timezone.now()
 
-        if date:
+        if date is None:
+            from_date = timezone.datetime(year=now.year, month=now.month, day=1)
+            from_date = from_date.replace(tzinfo=tz('UTC'))
+        else:
             from_date = date_utils.get_date_from_str(date)
             from_date = timezone.datetime(year=from_date.year, month=from_date.month, day=1)
             from_date = from_date.replace(tzinfo=tz('UTC'))
-        else:
-            from_date = date_utils.get_today()
 
-        _group = self.get_object()
-
-        if from_date.month == now.month:
-            analysis_app.monthly_analyze_feed(_group)
-            _monthlywords = MonthlyWords.objects.filter(group=_group).values_list('word', 'weigh')
+        if from_date.year == now.year and from_date.month == now.month:
+            to_date = now
+            analysis_app.analyze_monthly_post(_group, from_date, to_date)
+            _monthlywords = MonthTrendWord.objects.filter(group=_group, datedtime__range=(from_date, to_date)) \
+                .values_list('word', 'weigh')
+        elif from_date.year == now.year and from_date.month > now.month:
+            _monthlywords = None
+        elif from_date.year > now.year:
+            _monthlywords = None
         else:
-            analysis_app.analyze_monthly_post(_group)
-            todate = from_date.replace(year=from_date.year, month=from_date.month, day=25)
-            _monthlywords = MonthTrendWord.objects.filter(group=_group, datedtime__range=(from_date, todate)) \
+            if from_date.month + 1 > 12:
+                to_date_year = from_date.year + 1
+                to_date_month = 1
+            else:
+                to_date_year = from_date.year
+                to_date_month = from_date.month + 1
+
+            to_date = timezone.datetime(year=to_date_year, month=to_date_month, day=1)
+            to_date = to_date.replace(tzinfo=tz('UTC'))
+            analysis_app.analyze_monthly_post(_group, from_date, to_date)
+            _monthlywords = MonthTrendWord.objects.filter(group=_group, datedtime__range=(from_date, to_date)) \
                 .values_list('word', 'weigh')
 
         words = []
-        for word in _monthlywords:
-            words.append({'text': word[0], 'weight': word[1]})
+        if _monthlywords is not None:
+            for word in _monthlywords:
+                words.append({'text': word[0], 'weight': word[1]})
 
         # Return json data after rearranging data
         return Response({

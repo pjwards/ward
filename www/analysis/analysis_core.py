@@ -23,7 +23,8 @@
 """ Provides analysis core class """
 
 from konlpy.tag import Twitter
-from konlpy.tag import Kkma
+from konlpy.tag import Hannanum
+from konlpy.tag import Mecab
 from urllib.parse import urlparse
 import re
 from collections import Counter
@@ -33,31 +34,52 @@ class AnalysisDiction:
     """
     This class is for analysis of korean texts using kkma and twitter dictionaries
     """
-    def __init__(self, on_kkma=False, on_twitter=False):    # maybe move to init of analysis_app
+    def __init__(self, on_han=False, on_twitter=False, on_mecab=False):    # maybe move to init of analysis_app
+
         """
         Allocate kkma or twitter diction instance
-        :param on_kkma: kkma instance
+        :param on_han: han instance
         :param on_twitter: twitter instance
+        :param on_mecab: mecab instance
         """
-        if on_kkma is True:
-            self.kkma = Kkma()
+        if on_han is True:
+            self.han = Hannanum()
         if on_twitter is True:
             self.twitter = Twitter()
+        if on_mecab is True:
+            self.mecab = Mecab()
 
-    def analyzer_kkma(self, string_data, mode):
+    def analyzer_hannaum(self, string_data, mode):
         """
-        This method is for kkma. It acts differently depends on its mode.
+        This method is for hannanum. It acts differently depends on its mode.
         :param string_data: String data for analysis
         :param mode: Analyze string data depending on its mode
         :return: Return its results. If have no mode in param , return false
-        ref: http://konlpy.org/ko/v0.4.4/api/konlpy.tag/#module-konlpy.tag._kkma
+        ref: http://konlpy.org/ko/v0.4.4/api/konlpy.tag/#module-konlpy.tag._hannanum
         """
         if mode is 'morphs':
-            return self.kkma.morphs(string_data)
+            return self.han.morphs(string_data)
         elif mode is 'nouns':
-            return self.kkma.nouns(string_data)
+            return self.han.nouns(string_data)
         elif mode is 'pos':
-            return self.kkma.pos(string_data)
+            return self.han.pos(string_data)
+        else:
+            return False
+
+    def analyzer_mecab(self, string_data, mode):
+        """
+        This method is for mecab. It acts differently depends on its mode.
+        :param string_data: String data for analysis
+        :param mode: Analyze string data depending on its mode
+        :return: Return its results. If have no mode in param , return false
+        ref: http://konlpy.org/ko/v0.4.4/api/konlpy.tag/#mecab-class
+        """
+        if mode is 'morphs':
+            return self.mecab.morphs(string_data)
+        elif mode is 'nouns':
+            return self.mecab.nouns(string_data)
+        elif mode is 'pos':
+            return self.mecab.pos(string_data)
         else:
             return False
 
@@ -163,38 +185,28 @@ def url_duplication_check(data_set, urls):
     return url_list
 
 
-def analyze_articles(message): # analyzer
+def analyze_articles(message):
     """
     analyze articles
     :param message: string data
     :return: refined words list
     """
-
-    analyzer = AnalysisDiction(True, True)
+    analyzer = AnalysisDiction(on_han=False, on_twitter=True, on_mecab=True)
 
     if message is None:
         return []
 
-    temp_twitter = []
-    temp_kkma = []
+    twitter_nouns = analyzer.analyzer_twitter(message, 'nouns')
+    mecab_nouns = analyzer.analyzer_mecab(message, 'nouns')
+    # han_nouns = analyzer.analyzer_hannaum(message, 'nouns')
 
-    twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
-    kkma_pos = analyzer.analyzer_kkma(message, 'pos')
+    # print(mecab_nouns)
+    # print(han_nouns)
+    # print(twitter_nouns)
 
-    twi_stemlist = ['Alpha']     # 'Adjective', 'Noun'
-    kkma_stemlist = ['NNG', 'NN', 'NNM', 'NNP']    # OL, NNB
-
-    for i in twitter_posmore:
-        if i[1] in twi_stemlist:
-            temp_twitter.append(i[0])
-
-    for i in kkma_pos:
-        if i[1] in kkma_stemlist:
-            temp_kkma.append(i[0])
-
-    tempword = temp_twitter + temp_kkma
+    tempword = mecab_nouns + twitter_nouns
     returnword = list(set(tempword))        # func = remove duplicates
-
+    # print(returnword)
     refineword = []
 
     for i in returnword:
@@ -202,39 +214,48 @@ def analyze_articles(message): # analyzer
             continue
         refineword.append(i)
 
+    # print(refineword)
     return refineword       # need better refine words
 
 
-def analyze_articles_up(message): # analyzer
+def analyze_articles_up(message):   # analyzer
     """
     analyze articles
     :param message: string data
     :return: refined words list
     """
 
-    analyzer = AnalysisDiction(True, True)
+    analyzer = AnalysisDiction(on_han=True, on_twitter=True, on_mecab=True)
 
     if message is None:
         return []
 
     temp_twitter = []
-    temp_kkma = []
+    temp_mecab = []
+    temp_han = []
 
     twitter_posmore = analyzer.analyzer_twitter(message, 'posmore')
-    kkma_pos = analyzer.analyzer_kkma(message, 'pos')
+    mecab_posmore = analyzer.analyzer_mecab(message, 'pos')
+    han_posmore = analyzer.analyzer_hannaum(message, 'pos')
 
     twi_stemlist = ['Alpha', 'URL']     # 'Adjective', 'Noun'
-    kkma_stemlist = ['NNG', 'NN', 'NNM', 'NNP']    # OL, NNB
 
     for i in twitter_posmore:
         if i[1] in twi_stemlist:
             temp_twitter.append(i)
 
-    for i in kkma_pos:
-        if i[1] in kkma_stemlist:
-            temp_kkma.append(i)
+    for i in mecab_posmore:
+        temp_mecab.append(i)
 
-    tempword = temp_twitter + temp_kkma
+    for i in han_posmore:
+        temp_han.append(i)
+
+    print(temp_twitter)
+    print(temp_mecab)
+    print(temp_han)
+
+    tempword = temp_twitter + temp_mecab + temp_han
+
     returnword = list(set(tempword))        # func = remove duplicates
 
     refineword = []
