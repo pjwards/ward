@@ -24,7 +24,7 @@
 
 from konlpy.tag import Twitter
 from konlpy.tag import Hannanum
-from konlpy.tag import Mecab
+# from konlpy.tag import Mecab
 from urllib.parse import urlparse
 import re
 from collections import Counter
@@ -46,8 +46,8 @@ class AnalysisDiction:
             self.han = Hannanum()
         if on_twitter is True:
             self.twitter = Twitter()
-        if on_mecab is True:
-            self.mecab = Mecab()
+        # if on_mecab is True:
+        #     self.mecab = Mecab()
 
     def analyzer_hannaum(self, string_data, mode):
         """
@@ -197,9 +197,10 @@ def analyze_articles(message):
         return []
 
     twitter_nouns = analyzer.analyzer_twitter(message, 'nouns')
-    mecab_nouns = analyzer.analyzer_mecab(message, 'nouns')
+    # mecab_nouns = analyzer.analyzer_mecab(message, 'nouns')
 
-    tempword = mecab_nouns + twitter_nouns
+    # tempword = mecab_nouns + twitter_nouns
+    tempword = twitter_nouns
 
     returnword = list(set(tempword))        # func = remove duplicates
 
