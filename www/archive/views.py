@@ -51,6 +51,15 @@ from .rest.serializer import *
 from .utils import date_utils
 from archive.models import *
 from analysis.models import *
+from analysis.views import SpamListSerializer, SpamWordListSerializer, AnticipateArchiveSerializer, \
+    MonthlyWordsSerializer, MonthTrendWordSerializer
+from analysis import analysis_app
+from pytz import timezone as tz
+import jpype
+from konlpy import jvm
+from django.utils import timezone
+from dateutil import relativedelta as rdelta
+
 
 logger = logging.getLogger(__name__)
 
@@ -356,95 +365,6 @@ def group_management(request, group_id):
                     'error': list(error)
                 })
 
-
-'''
-@login_required
-def group_spam(request, group_id):
-    """
-    Display spam page for group owner
-
-    :param request: request
-    :param group_id: group_id
-    :return: searched data
-    """
-    _group = get_object_or_404(Group, pk=group_id)
-    if not request.user.is_superuser:
-        social_account = SocialAccount.objects.filter(user=request.user)
-        if not social_account or _group.owner.id != SocialAccount.objects.filter(user=request.user)[0].uid:
-            return HttpResponseForbidden()
-
-    if request.method == "GET":
-        _groups = Group.objects.all()
-        spams = SpamList.objects.filter(group=_group, last_updated_time__range=date_utils.week_delta())
-        return render(
-            request,
-            'archive/group/spam.html',
-            {
-                'groups': _groups,
-                'group': _group,
-                'posts': spams,
-            }
-        )
-    elif request.method == "POST":
-        # Get a model and validate a model
-        model = request.POST.get("model", None)
-        if model is None:
-            error = 'Did not exist this model.'
-            return JsonResponse({'error': error})
-
-        # Get a access token and validate the access token
-        access_token = request.POST.get("access_token", None)
-        if not access_token:
-            error = 'Did not exist this access token.'
-            return JsonResponse({'error': error})
-
-        # Get a check box by using model
-        if model == 'spam':
-            check_box = request.POST.getlist('del_spam')
-        elif model == 'comment':
-            check_box = request.POST.getlist('del_comment')
-        else:
-            error = 'This model did not validate.'
-            return JsonResponse({'success': error})
-
-        # Validate the check box
-        if not check_box:
-            error = 'Did not check any check box.'
-            return JsonResponse({'error': error})
-
-        # Generate fb request by using the access token
-        fb_request_del = FBRequest(access_token=access_token)
-
-        # Validate access token
-        res, e = fb_request_del.validate_token()
-        if not res:
-            return JsonResponse({'error': e})
-
-        # Delete object in check box
-        total = len(check_box)
-        error = set()
-        success = 0
-        fail = 0
-        for object_id in check_box:
-            # res, e = tasks.delete_group_content(object_id, model)
-            res, e = tasks.delete_group_content_by_fb(object_id, model, fb_request_del)
-            if res:
-                success += 1
-            else:
-                fail += 1
-                error.add(e)
-
-        # Post and comment count in group size change
-        tasks.check_cp_cnt_group(_group)
-
-        # Return result json
-        return JsonResponse(
-            {
-                'model': model,
-                'result': {'total': total, 'success': success, 'fail': fail},
-                'error': list(error)
-            })
-'''
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -1319,6 +1239,63 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
             return _models.exclude(is_show=False)
 
     @detail_route()
+    def anticipate_archive(self, request, pk=None):
+        _group = self.get_object()
+        _anticips = AnticipateArchive.objects.filter(group=_group)
+        return self.response_models(_anticips, request, AnticipateArchiveSerializer)
+
+    @detail_route()
+    @renderer_classes((JSONRenderer,))
+    def word_cloud(self, request, pk=None):
+        jvm.init_jvm()
+        jpype.attachThreadToJVM()
+
+        _group = self.get_object()
+        date = self.request.query_params.get('date', None)
+        now = timezone.now()
+
+        if date is None:
+            from_date = timezone.datetime(year=now.year, month=now.month, day=1)
+            from_date = from_date.replace(tzinfo=tz('UTC'))
+        else:
+            from_date = date_utils.get_date_from_str(date)
+            from_date = timezone.datetime(year=from_date.year, month=from_date.month, day=1)
+            from_date = from_date.replace(tzinfo=tz('UTC'))
+
+        if from_date.year == now.year and from_date.month == now.month:
+            to_date = now
+            analysis_app.analyze_monthly_post(_group, from_date, to_date)
+            _monthlywords = MonthTrendWord.objects.filter(group=_group, datedtime__range=(from_date, to_date)) \
+                .values_list('word', 'weigh')
+        elif from_date.year == now.year and from_date.month > now.month:
+            _monthlywords = None
+        elif from_date.year > now.year:
+            _monthlywords = None
+        else:
+            if from_date.month + 1 > 12:
+                to_date_year = from_date.year + 1
+                to_date_month = 1
+            else:
+                to_date_year = from_date.year
+                to_date_month = from_date.month + 1
+
+            to_date = timezone.datetime(year=to_date_year, month=to_date_month, day=1)
+            to_date = to_date.replace(tzinfo=tz('UTC'))
+            analysis_app.analyze_monthly_post(_group, from_date, to_date)
+            _monthlywords = MonthTrendWord.objects.filter(group=_group, datedtime__range=(from_date, to_date)) \
+                .values_list('word', 'weigh')
+
+        words = []
+        if _monthlywords is not None:
+            for word in _monthlywords:
+                words.append({'text': word[0], 'weight': word[1]})
+
+        # Return json data after rearranging data
+        return Response({
+            'words': words,
+        })
+
+    @detail_route()
     def post_archive(self, request, pk=None):
         """
         Return Post archive for group
@@ -1691,6 +1668,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         _user = get_object_or_404(DjangoUser, id=user_id)
         _wards = Ward.objects.filter(group=_group, user=_user).exclude(comment=None).order_by('-created_time')
         return self.response_models(_wards, request, WardSerializer)
+
+    @detail_route()
+    def spam(self, request, pk=None):
+        _group = self.get_object()
+        _spam = SpamList.objects.filter(group=_group).exclude(status='deleted')
+        return self.response_models(_spam, request, SpamListSerializer)
 
     def response_models(self, models, request, model_serializer):
         """

@@ -22,8 +22,9 @@
 # ==================================================================================
 """ Sets views """
 from django.http import HttpResponse
+from rest_framework import viewsets
 from analysis.tools import network
-from archive.models import *
+from analysis.rest.serializer import *
 
 
 def analysis_network(request):
@@ -41,3 +42,43 @@ def analysis_network(request):
             network_json = network.network()
 
         return HttpResponse(network_json, content_type="application/json")
+
+
+class SpamListViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Spam list View Set for django restful framework
+    """
+    queryset = SpamList.objects.all()
+    serializer_class = SpamListSerializer
+
+
+class SpamWordListViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Spam word list View Set for django restful framework
+    """
+    queryset = SpamWordList.objects.all()
+    serializer_class = SpamWordListSerializer
+
+
+class AnticipateArchiveViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Spam word list View Set for django restful framework
+    """
+    queryset = AnticipateArchive.objects.all()
+    serializer_class = AnticipateArchiveSerializer
+
+
+class MonthTrendWordViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Month trend word list View Set for django restful framework
+    """
+    queryset = MonthTrendWord.objects.all()
+    serializer_class = MonthTrendWordSerializer
+
+
+class MonthlyWordsViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Monthly words list View Set for django restful framework
+    """
+    queryset = MonthlyWords.objects.all()
+    serializer_class = MonthlyWordsSerializer

@@ -33,7 +33,8 @@
     "FitText.js": ">= 1.2.0",
     "jquery-backstretch": ">= 2.0.4",
     "html2canvas": ">= 0.4.1",
-    "vis": ">= 4.15.0"
+    "vis": ">= 4.15.0",
+    "jqcloud2": ">= 2.0.1"
   },
   "devDependencies": {
   },

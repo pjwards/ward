@@ -95,6 +95,12 @@ router.register(r'blacklists', archive_views.BlacklistViewSet)
 router.register(r'reports', archive_views.ReportViewSet)
 router.register(r'wards', archive_views.WardViewSet)
 router.register(r'user_activities', archive_views.UserActivityViewSet)
+router.register(r'spam_list', analysis_views.SpamListViewSet)
+router.register(r'spam_word_list', analysis_views.SpamWordListViewSet)
+router.register(r'anticipate_archive', analysis_views.AnticipateArchiveViewSet)
+router.register(r'month_trend_word', analysis_views.MonthTrendWordViewSet)
+router.register(r'monthly_words', analysis_views.MonthlyWordsViewSet)
+
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

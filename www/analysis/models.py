@@ -22,13 +22,13 @@
 # ==================================================================================
 """ Sets models """
 
-from django.db import models
-from django.utils import timezone
-
 from archive.models import *
 
 
 class SpamList(models.Model):
+    """
+    List of Spams
+    """
     id = models.CharField(max_length=50, primary_key=True)
     group = models.ForeignKey(Group, related_name='spamlist')
     user = models.ForeignKey(FBUser, related_name='spamlist')
@@ -41,6 +41,9 @@ class SpamList(models.Model):
 
 
 class SpamWordList(models.Model):
+    """
+    Word list of spam
+    """
     group = models.ForeignKey(Group, related_name='spamwords')
     word = models.CharField(max_length=255)
     count = models.IntegerField(default=1)
@@ -48,27 +51,34 @@ class SpamWordList(models.Model):
 
 
 class ArchiveAnalysisWord(models.Model):
+    """
+    Word list of analyzed posts
+    """
+    group = models.ForeignKey(Group, related_name='archivewords')
     word = models.CharField(max_length=255)
     count = models.IntegerField(default=1)
-    status = models.CharField(max_length=10, default='temp')
-    group = models.ForeignKey(Group, related_name='archivewords')
     likenum = models.IntegerField(default=0)
     commentnum = models.IntegerField(default=0)
     weigh = models.IntegerField(default=0)
-    # word weight with likes and comments
+    status = models.CharField(max_length=10, default='temp')        # url
 
 
 class AnticipateArchive(models.Model):
+    """
+    List of anticipated posts
+    """
     id = models.CharField(max_length=50, primary_key=True)
     group = models.ForeignKey(Group, related_name='antiArchives')
     user = models.ForeignKey(FBUser, related_name='antiArchives')
     message = models.TextField(null=True, blank=True)
     time = models.DateTimeField()
     status = models.CharField(max_length=10, default='temp')
-    # type
 
 
 class AnalysisDBSchema(models.Model):
+    """
+    average data of groups
+    """
     group = models.ForeignKey(Group, related_name='analysisSchema')
     avgpostlike = models.IntegerField(default=0)
     avgpostcomment = models.IntegerField(default=0)
@@ -117,3 +127,43 @@ class UpdateList(models.Model):
             if diff.days >= 1:
                 return True
             return False
+
+
+class MonthlyWords(models.Model):
+    """
+    Memoization about month words
+    """
+    group = models.ForeignKey(Group)
+    word = models.CharField(max_length=255)
+    weigh = models.IntegerField(default=0)
+    lastfeeddate = models.DateTimeField()
+
+
+class WeeklyWords(models.Model):
+    """
+    Memoization about week words
+    """
+    group = models.ForeignKey(Group)
+    word = models.CharField(max_length=255)
+    weigh = models.IntegerField(default=0)
+    lastfeeddate = models.DateTimeField()
+
+
+class WordsDiction(models.Model):
+    """
+    Temporary words for calculating
+    """
+    group = models.ForeignKey(Group)
+    word = models.CharField(max_length=255)
+    count = models.IntegerField(default=0)
+
+
+class MonthTrendWord(models.Model):
+    """
+    Trend words on every month
+    """
+    datedtime = models.DateTimeField()
+    group = models.ForeignKey(Group)
+    word = models.CharField(max_length=255)
+    weigh = models.IntegerField(default=1)
+    lastfeeddate = models.DateTimeField()
