@@ -762,7 +762,11 @@ def future_analysis_post(group, data_object, typed):
 
 def run_app():
     print('hello')
-    message = '넘나 영롱한것..... 2016 마이애미 umf 티켓...X 2 팔아여 미국현지여도 전달가능'
+    message = '초보자들 헷갈리라고 넣는 겁니다 (웃음). 지금의 단계에서는 굳이 이해하려고 하실 필요가 없습니다. 꼭 알고 싶으시다면 "변수는 정보와 실체의 합으로서 존재하는데, test는 변수에 담긴 정보를 의미하고 &test는 변수의 실체를 의미한다" 정도로 생각해 두시면 되겠습니다. 더 쉽게 말하면, int b = 72; 이렇게 값이 72인 변수 b가 있을 때, 우리는 이것을 b라는 상자에 72라는 정보가 담겨 있는 것으로 이해할 수 있습니다. b라고 지정하면 72라는 값을 꺼내 주는 것이고, &b라고 지정하면 72가 담긴 상자를 통째로 건네주는 것입니다. 내용물을 꺼내서 주면 받는 쪽에서는 상자에 접근할 수 없으므로 상자의 내용물을 바꿀 수는 없습니다. 상자를 통째로 주면 받는 쪽에서 상자에 다른 물건을 담아놓을 수 있겠죠.'
+    core.analyze_articles(message)
+    message = '우려했던 K-알파고가 곧 나올듯 합니다.... :('
+    core.analyze_articles(message)
+    message = '역시 ..LG'
     core.analyze_articles(message)
     # core.analyze_articles_up(message)
     # print(analyze_feed(analyzer, data_object, group))

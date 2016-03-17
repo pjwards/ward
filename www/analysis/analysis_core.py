@@ -198,15 +198,11 @@ def analyze_articles(message):
 
     twitter_nouns = analyzer.analyzer_twitter(message, 'nouns')
     mecab_nouns = analyzer.analyzer_mecab(message, 'nouns')
-    # han_nouns = analyzer.analyzer_hannaum(message, 'nouns')
-
-    # print(mecab_nouns)
-    # print(han_nouns)
-    # print(twitter_nouns)
 
     tempword = mecab_nouns + twitter_nouns
+
     returnword = list(set(tempword))        # func = remove duplicates
-    # print(returnword)
+
     refineword = []
 
     for i in returnword:
@@ -214,7 +210,6 @@ def analyze_articles(message):
             continue
         refineword.append(i)
 
-    # print(refineword)
     return refineword       # need better refine words
 
 

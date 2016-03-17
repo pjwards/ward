@@ -65,7 +65,6 @@ class Group(models.Model):
     post_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
     owner = models.ForeignKey('FBUser', null=True, related_name='group_owner')
-    oldest_date = models.DateTimeField(null=True, blank=True)
 
     # Enroll field in Mezzanine Search Engine
     objects = SearchableManager()
@@ -120,19 +119,6 @@ class Group(models.Model):
         :return: comment count unit number
         """
         return Group.get_unit(self.comment_count)
-
-    def get_date_from_oldest_post(self):
-        """
-        Get date from oldest_post
-
-        :return: date time from post
-        """
-        if not self.oldest_date:
-            post = Post.objects.filter(group=self).order_by('created_time')[0]
-            self.oldest_date = post.created_time
-            self.save()
-
-        return self.oldest_date
 
 
 class FBUser(models.Model):

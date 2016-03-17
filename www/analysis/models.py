@@ -127,17 +127,6 @@ class UpdateList(models.Model):
             return False
 
 
-class GroupDurations(models.Model):
-    """
-    Total years and months from creation of group to now
-    """
-    group = models.ForeignKey(Group)
-    yeared = models.IntegerField(default=0)
-    monthed = models.IntegerField(default=0)
-    lastupdatetime = models.DateTimeField()
-    oldtimed = models.DateTimeField()
-
-
 class MonthlyWords(models.Model):
     """
     Memoization about month words
