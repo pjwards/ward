@@ -77,6 +77,7 @@ pip install -r requirements.txt
 brew install redis
 brew install node
 npm install bower
+bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
 
 cd [product_forder]
 bower install
@@ -119,6 +120,10 @@ sudo npm install -g bower
 
 # redis
 sudo apt-get install redis-server
+
+# Mecab
+sudo apt-get install curl
+bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
 
 cd workspace
 sudo chown www-data:www-data -R *

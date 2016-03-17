@@ -91,6 +91,10 @@ RUN apt-get install -y libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
 # Memcached
 RUN apt-get install -y libmemcached-dev
 
+# Mecab
+RUN apt-get install curl
+RUN bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh)
+
 # Project
 ENV PROJECT_DIR /home/ubuntu/workspace/ward
 ADD . ${PROJECT_DIR}
