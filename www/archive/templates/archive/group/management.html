@@ -479,22 +479,27 @@
     <script src="{% static 'js/archive/management.js' %}" type="text/javascript"></script>
     <script>
         var group_id = "{{ group.id }}";
+
         var post_limit = 10;
         var comment_limit = 10;
         var user_limit = 10;
         var search_limit = 10;
+
         var post_search = $('#post_search');
         var comment_search = $('#comment_search');
         var user_search = $('#user_search');
         var blacklist_search = $('#blacklist_search');
         var user_search_helper_search = $('#user_search_helper_search');
+
         var post_search_url = "/api/groups/{{ group.id }}/post_search/";
         var comment_search_url = "/api/groups/{{ group.id }}/comment_search/";
         var user_search_url = "/api/groups/{{ group.id }}/user_archive/";
         var blacklist_search_url = "/api/groups/{{ group.id }}/blacklist_search/";
+
         var post_search_check = 'text';
         var comment_search_check = 'text';
         var user_search_helper_check = 'post';
+
         /**
          * Generate JUI Init
          */
@@ -514,6 +519,7 @@
                     pages: $("#tpl_pages").html(),
                 }
             });
+
             post_table = table("#post_table", {
                 fields: ["", "", "from", "message", "like_count", "comment_count"],
                 scroll: true,
@@ -524,6 +530,7 @@
                     none: $("#tpl_none").html()
                 }
             });
+
             comment_paging = paging("#comment_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
@@ -536,6 +543,7 @@
                     pages: $("#tpl_pages").html()
                 }
             });
+
             comment_table = table("#comment_table", {
                 fields: ["", "", "from", "message", "like_count", "comment_count"],
                 scroll: true,
@@ -546,6 +554,7 @@
                     none: $("#tpl_none").html()
                 }
             });
+
             user_paging = paging("#user_paging", {
                 pageCount: 10,
                 screenCount: detectWidthToScreenCount(),
@@ -558,6 +567,7 @@
                     pages: $("#tpl_pages").html()
                 }
             });
+
             user_table = table("#user_table", {
                 fields: ["", "from", "post_count", "comment_count"],
                 scroll: true,
@@ -568,6 +578,7 @@
                     none: $("#tpl_none2").html()
                 }
             });
+
             /**
              * Generate Blacklist
              */
@@ -583,6 +594,7 @@
                     pages: $("#tpl_pages").html()
                 }
             });
+
             blacklist_table = table("#blacklist_table", {
                 fields: ["", "from", "count", "post_count", "comment_count", "updated_time"],
                 scroll: true,
@@ -593,6 +605,7 @@
                     none: $("#tpl_none3").html()
                 }
             });
+
             /**
              * Generate User Search Helper
              */
@@ -608,6 +621,7 @@
                     pages: $("#tpl_pages").html()
                 }
             });
+
             user_search_helper_table = table("#user_search_helper_table", {
                 fields: ["", "from"],
                 scroll: true,
@@ -618,6 +632,7 @@
                     none: $("#tpl_none4").html()
                 }
             });
+
             /**
              * Loading message
              */
@@ -627,35 +642,41 @@
                 color: 'white',
                 autoHide: false,
             });
+
             loading_comment = modal("#loading_comment_msg", {
                 target: "#comment_table",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
             });
+
             loading_user = modal("#loading_user_msg", {
                 target: "#user_table",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
             });
+
             loading_blacklist = modal("#loading_blacklist_msg", {
                 target: "#blacklist_table",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
             });
+
             loading_user_search_helper = modal("#loading_user_search_helper_msg", {
                 target: "#user_search_helper_table",
                 opacity: 0.5,
                 color: 'white',
                 autoHide: false,
             });
+
             /**
              * Generate Button
              */
             function user_clicked(model) {
                 user_search_helper_check = model;
+
                 modal_1.show();
                 changeSearchUM(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), loading_user_search_helper, 1, user_search_helper_paging);
             }
@@ -670,6 +691,7 @@
                     }
                 }
             });
+
             comment_radio = button("#comment_radio", {
                 type: "radio",
                 index: 0,
@@ -680,13 +702,16 @@
                     }
                 }
             });
+
             /**
              * Generate Helper
              */
             $("#modal_1").appendTo("body");
+
             modal_1 = modal("#modal_1", {
                 color: "black"
             });
+
             /**
              * Load list
              */
@@ -695,6 +720,7 @@
             changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
             changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
         });
+
         /**
          * Init analysis.html
          */
@@ -708,6 +734,7 @@
                 reLoadPaging(user_paging);
                 reLoadPaging(blacklist_paging);
             }
+
             /**
              * Mobile Rotate
              */
@@ -717,52 +744,63 @@
                 changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
                 changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
             });
+
             $("#post_limit").on("input", function () {
                 post_limit = $("#post_limit").val();
                 changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
+
             });
+
             $("#comment_limit").on("input", function () {
                 comment_limit = $("#comment_limit").val();
                 changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
             });
+
             $("#user_limit").on("input", function () {
                 user_limit = $("#user_limit").val();
                 changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
             });
+
             $("#blacklist_limit").on("input", function () {
                 user_limit = $("#blacklist_limit").val();
                 changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
             });
+
             $("#post_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
                 }
             });
+
             $("#comment_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
                 }
             });
+
             $("#user_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     changeUserArchive(user_search_url, group_id, user_table, user_limit, user_search.val(), loading_user, 1, user_paging);
                 }
             });
+
             $("#blacklist_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     changeSearchBM(blacklist_search_url, group_id, blacklist_table, search_limit, blacklist_search.val(), loading_blacklist, 1, blacklist_paging);
                 }
             });
+
             $("#user_search_helper_search").keypress(function (event) {
                 var key_code = event.keyCode || window.event.keyCode;
                 if (key_code == 13) {
                     changeSearchUM(user_search_url, user_search_helper_table, 5, user_search_helper_search.val(), loading_user_search_helper, 1, user_search_helper_paging);
                 }
             });
+
             /**
              * check all
              */
@@ -773,6 +811,7 @@
                     $("input[name=del_post]").prop("checked", false);
                 }
             });
+
             $("#check_all_comment").click(function () {
                 if ($("#check_all_comment").prop("checked")) {
                     $("input[name=del_comment]").prop("checked", true);
@@ -780,6 +819,7 @@
                     $("input[name=del_comment]").prop("checked", false);
                 }
             });
+
             /**
              * delete checked objects
              */
@@ -792,7 +832,9 @@
                     changeSearchPCM(post_search_url, post_table, post_limit, 'post', post_search.val(), post_search_check, loading_post, 1, post_paging);
                     changeSearchPCM(comment_search_url, comment_table, comment_limit, 'comment', comment_search.val(), comment_search_check, loading_comment, 1, comment_paging);
                 }
+
             });
+
             $("#comment_del_btn").on("click", function () {
                 var data = $("#comment_del_form").serialize();
                 data += "&access_token=" + encodeURIComponent($("#access_token").val());    // add access token in from
@@ -803,6 +845,7 @@
                 }
             });
         });
+
         /**
          * Delete checked objects
          *
@@ -819,6 +862,7 @@
                         var title = '';
                         var error_text = '<br>';
                         var color = 'success';
+
                         var result = json["result"];
                         var error = json["error"];
                         if (result["success"] > 0) {
@@ -837,6 +881,7 @@
                             title += total;
                             color = 'danger';
                         }
+
                         if (error.length > 0) {
                             for (var i in error) {
                                 error_text += error[i];
@@ -869,6 +914,7 @@
                 }
             });
         }
+
         /**
          * Reset posts and comments by selected user.
          *

@@ -323,28 +323,31 @@ def check_cp_cnt_group(group):
     group.save()
 
 
-def store_group_feed(group, query):
+def store_group_feed(group, query, is_date=False):
     """
     This method is storing group's feeds by using facebook group api.
 
     :param group: group for getting feeds
     :param query: query for facebook graph api
+    :param is_date: for specific date?
     :return:
     """
     logger.info('=== Start saving %s feed ===', group.id)
 
     is_check = False
-    if not GroupStoreList.objects.filter(group=group).exists():
-        group_store_list = GroupStoreList(group=group, query=query)
-        group_store_list.save()
-    else:
-        group_store_list = GroupStoreList.objects.filter(group=group)[0]
 
-        if group_store_list.query:
-            query = group_store_list.query
+    if not is_date:
+        if not GroupStoreList.objects.filter(group=group).exists():
+            group_store_list = GroupStoreList(group=group, query=query)
+            group_store_list.save()
+        else:
+            group_store_list = GroupStoreList.objects.filter(group=group)[0]
 
-            if group_store_list.status != 'finish':
-                is_check = True
+            if group_store_list.query:
+                query = group_store_list.query
+
+                if group_store_list.status != 'finish':
+                    is_check = True
 
     if group.privacy == "CLOSED":
         logger.info('=== Fail to save %s feed (Group is closed) ===', group.id)
@@ -377,15 +380,17 @@ def store_group_feed(group, query):
                 logger.error('Fail to store by exception : %s', e)
 
         # save query for continue saving
-        group_store_list.query = query
-        group_store_list.save()
+        if not is_date:
+            group_store_list.query = query
+            group_store_list.save()
         check_cp_cnt_group(group)
 
     # finish save
-    group_store_list.query = ''
-    group_store_list.end_time = timezone.now()
-    group_store_list.status = 'finish'
-    group_store_list.save()
+    if not is_date:
+        group_store_list.query = ''
+        group_store_list.end_time = timezone.now()
+        group_store_list.status = 'finish'
+        group_store_list.save()
 
     logger.info('=== End saving %s feed ===', group.id)
 

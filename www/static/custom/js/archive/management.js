@@ -42,7 +42,7 @@ var pcDisplayM = function (rows, row, name) {
     }
     rows.push({
         "checkbox": '<input type="checkbox" name="del_' + name + '" value="' + row["id"] + '">',
-        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px;">',
+        "picture": '<img src="' + row["user"].picture + '" style="border-radius: 10px; width: 50px;" onerror="' + window.no_image_error + '">',
         "from": '<div class="more-link"><a href="' + user_url + '"><div class="h5">' + row["user"].name + '</div></a><div class="h5"><small><i class="icon-realtime"></i> ' + timeSince(row["created_time"]) + '</small></div></div>',
         "message": fb_link(message),
         "like_count": '<div class="h5">' + row["like_count"] + '</div>',
@@ -146,7 +146,7 @@ var getSearchBM = function (url, group_id, table, limit, search, loading, page, 
             var activity = getAsyncAjaxResult(activity_url, async_data)["results"][0];
 
             rows.push({
-                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px;">',
+                "picture": '<img src="' + row["picture"] + '" style="border-radius: 10px; width: 50px;" onerror="' + window.no_image_error + '">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h4">' + row["name"] + '</div></a></div>',
                 "count": '<div class="h4">' + blacklist["count"] + '</div>',
                 "post_count": '<div class="h4">' + activity["post_count"] + '</div>',
@@ -218,7 +218,7 @@ var getSearchUM = function (url, table, limit, search, loading, page, paging) {
 
             var from = '<div class=" more-link"><a onclick="searchUMSelect(' + row["user"]["id"] + ')"><div class="h4">' + row["user"]["name"] + '<br>' + row["user"]["id"] + '</div></a></div>';
             rows.push({
-                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px;">',
+                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px; width: 50px;" onerror="' + window.no_image_error + '">',
                 "from": from,
             });
         }

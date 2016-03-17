@@ -21,6 +21,7 @@
 # SOFTWARE.
 # ==================================================================================
 """ Views for default pages and for django rest framework """
+import csv
 import json
 import urllib.parse
 import urllib.request
@@ -29,7 +30,7 @@ from django.db import connection
 import logging
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Q, F
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden, HttpResponse, StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.models import User as DjangoUser
@@ -154,7 +155,8 @@ def groups_admin(request):
     :return: render
     """
     if request.method == "GET":
-        return render(request, 'archive/group/list_admin.html', {})
+        _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
+        return render(request, 'archive/group/list_admin.html', {'groups': _groups})
 
 
 def is_interest_group(request, group_id):
@@ -185,7 +187,7 @@ def group_analysis(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -209,7 +211,7 @@ def group_user(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -233,7 +235,7 @@ def group_archive(request, group_id):
     :param group_id: group id
     :return: render
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
     posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
 
@@ -257,7 +259,7 @@ def group_search(request, group_id):
     :param group_id: group_id
     :return: searched data
     """
-    _groups = Group.objects.all().order_by('name')
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
     _group = get_object_or_404(Group, pk=group_id)
 
     search = request.GET['q']
@@ -292,7 +294,7 @@ def group_management(request, group_id):
             return HttpResponseForbidden()
 
     if request.method == "GET":
-        _groups = Group.objects.all()
+        _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
         posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
         return render(
                 request,
@@ -364,6 +366,7 @@ def group_management(request, group_id):
                 })
 
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def group_store(request, group_id):
     """
@@ -391,6 +394,39 @@ def group_store(request, group_id):
                       {'latest_group_list': latest_group_list, 'error': error})
 
     tasks.store_group_feed_task.delay(group_id, get_feed_query(p_limit), get_comment_query(c_limit, c_c_limit))
+    return HttpResponseRedirect(reverse('archive:groups_admin'))
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def group_store_date(request, group_id):
+    """
+    Store group method for super user by specific date
+
+    :param request: request
+    :param group_id: group id
+    :return: if you succeed, redirect groups page
+    """
+    p_limit = int(request.GET.get("post_limit", '100'))
+    c_limit = int(request.GET.get("comment_limit", '100'))
+    c_c_limit = int(request.GET.get("child_comment_limit", '100'))
+    since = request.GET.get('since', '')
+    until = request.GET.get('until', '')
+
+    # Check this server is archive server
+    if not settings.ARCHIVE_SERVER:
+        latest_group_list = Group.objects.order_by('name')
+        error = 'This is wrong connection.'
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
+
+    if not Group.objects.filter(id=group_id).exists():
+        latest_group_list = Group.objects.order_by('name')
+        error = 'Does not exist group.'
+        return render(request, 'archive/group/list_admin.html',
+                      {'latest_group_list': latest_group_list, 'error': error})
+
+    tasks.store_group_feed_by_date_task.delay(group_id, get_feed_query(p_limit, since, until),
+                                              get_comment_query(c_limit, c_c_limit))
     return HttpResponseRedirect(reverse('archive:groups_admin'))
 
 
@@ -476,8 +512,111 @@ def group_post_check(request, post_id):
         return render(request, 'archive/group/list_admin.html',
                       {'latest_group_list': latest_group_list, 'error': error})
 
-    tasks.check_group_post.delay(post_id, get_comment_query(c_limit, c_c_limit))
+    tasks.check_group_post_task.delay(post_id, get_comment_query(c_limit, c_c_limit))
     return HttpResponseRedirect(reverse('archive:groups_admin'))
+
+
+def group_download(request, group_id):
+    """
+    Download page
+
+    :param request: request
+    :param group_id: group id
+    :return: render or csv
+    """
+    _groups = Group.objects.all().exclude(privacy='CLOSED').order_by('name')
+    _group = get_object_or_404(Group, pk=group_id)
+    posts = Post.objects.filter(group=_group, created_time__range=date_utils.week_delta())
+
+    if request.method == "GET":
+        return render(
+                request,
+                'archive/group/download.html',
+                {
+                    'groups': _groups,
+                    'group': _group,
+                    'posts': posts,
+                    'interest_group': is_interest_group(request, group_id),
+                }
+        )
+    elif request.method == "POST":
+        model = request.POST.get("model", None)
+        from_date = request.POST.get('from', None)
+        to_date = request.POST.get('to', None)
+        filename = model
+
+        # check model
+        if model == 'post':
+            model = Post
+        elif model == 'comment':
+            model = Comment
+        else:
+            return render(
+                    request,
+                    'archive/group/download.html',
+                    {
+                        'groups': _groups,
+                        'group': _group,
+                        'posts': posts,
+                        'interest_group': is_interest_group(request, group_id),
+                    }
+            )
+
+        # check date
+        if from_date:
+            filename = filename + '_from_' + from_date
+            from_date = date_utils.get_date_from_str(from_date)
+            from_date = date_utils.combine_min_time(from_date)
+        if to_date:
+            filename = filename + '_to_' + to_date
+            to_date = date_utils.get_date_from_str(to_date)
+            to_date = date_utils.combine_max_time(to_date)
+
+        # get data
+        if from_date:
+            if to_date:
+                if from_date == to_date:
+                    data = model.objects.filter(group=_group, created_time__range=[from_date, to_date])
+                else:
+                    data = model.objects.filter(group=_group, created_time__range=[from_date, to_date])
+            else:
+                data = model.objects.filter(group=_group, created_time__gte=from_date)
+        elif to_date:
+            data = model.objects.filter(group=_group, created_time__lte=to_date)
+        else:
+            data = model.objects.filter(group=_group)
+
+        # get db_column name
+        model_field = []
+        for field in model._meta.fields:
+            if field.get_attname_column()[0] != 'is_show':
+                model_field.append(field.get_attname_column()[0])
+
+        # get data for cvs
+        data = list(data.order_by('-created_time').values_list(*model_field))
+        data.insert(0, model_field)
+
+        # make response for cvs
+        pseudo_buffer = Echo()
+        writer = csv.writer(pseudo_buffer)
+        response = StreamingHttpResponse((writer.writerow(row) for row in data), content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+
+        return response
+
+
+class Echo(object):
+    """
+    An object that implements just the write method of the file-like interface.
+    """
+
+    def write(self, value):
+        """
+        Write the value by returning it, instead of storing in a buffer.
+
+        :param value: value
+        """
+        return value
 
 
 def user(request, user_id):
@@ -1196,7 +1335,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         if from_date:
             from_date = date_utils.get_date_from_str(from_date)
             to_date = from_date
-        else:
+        elif not user_id:
             from_date = date_utils.get_today().date()
             to_date = from_date
 
@@ -1215,6 +1354,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         if user_id:
             _user = get_object_or_404(FBUser, id=user_id)
+            print(_models)
             return _models.filter(user=_user).order_by('-created_time')
         else:
             return _models.order_by('-created_time')
@@ -1248,7 +1388,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
         :param request: request
         :param pk: pk
-        :return: json respomse
+        :return: json response
         """
         cursor = connection.cursor()
         _group = self.get_object()

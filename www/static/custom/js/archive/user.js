@@ -50,7 +50,7 @@ var getActivity = function (url, limit, model, table, loading) {
                 count = row["comment_count"];
             }
             rows.push({
-                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px;">',
+                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px; width: 50px;" onerror="' + window.no_image_error + '">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h4">' + row["user"]["name"] + '</div></a></div>',
                 "count": '<div class="h4">' + count + '</div>',
             });
@@ -206,7 +206,7 @@ var getUserArchive = function (url, group_id, table, limit, search, loading, pag
             var user_url = '/archive/user/' + row["user"]["id"] + '/';
 
             rows.push({
-                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px;">',
+                "picture": '<img src="' + row["user"]["picture"] + '" style="border-radius: 10px; width: 50px;" onerror="' + window.no_image_error + '">',
                 "from": '<div class=" more-link"><a href="' + user_url + '"><div class="h4">' + row["user"]["name"] + '</div></a></div>',
                 "post_count": '<div class="h4">' + row["post_count"] + '</div>',
                 "comment_count": '<div class="h4">' + row["comment_count"] + '</div>',

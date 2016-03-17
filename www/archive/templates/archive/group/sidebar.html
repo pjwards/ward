@@ -56,6 +56,9 @@
                 <a href="{% url 'archive:group_archive' group.id %}"><i class="fa fa-hdd-o fa-fw"></i>Archive</a>
             </li>
             <li>
+                <a href="{% url 'archive:group_download' group.id %}"><i class="fa fa-table fa-fw"></i>Download</a>
+            </li>
+            <li>
                 {% if group.owner.id == user.socialaccount_set.all.0.uid or user.is_superuser %}
                     <a href="{% url 'archive:group_management' group.id %}"><i class="fa fa-sitemap fa-fw"></i>Management</a>
                 {% endif %}

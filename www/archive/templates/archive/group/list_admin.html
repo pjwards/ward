@@ -70,6 +70,45 @@
             <!-- /Groups -->
         </div>
         <!-- /.row -->
+
+        <!-- /.row -->
+        <div class="row">
+            <!-- Download -->
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-hdd-o fa-fw"></i> Store by date
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <form id="store_date" action="" role="form" method="get">
+                            {% csrf_token %}
+                            <div class="form-group  col-md-6 col-lg-6">
+                                <label>Groups</label>
+                                <select id="store_date_select" multiple="" class="form-control">
+                                    {% for grp in groups %}
+                                        <option value="{% url 'archive:group_store_date' grp.id %}"
+                                                {% if grp.id == group.id %}selected{% endif %}>{{ grp.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6 col-lg-6">
+                                <label>Date</label>
+                                <input class="form-control" placeholder="Since" name="since" id="since">
+                                <input class="form-control" placeholder="Until" name="until" id="until">
+                            </div>
+                            <div class="col-md-12 col-lg-12" style="text-align: center;">
+                                <button type="submit" class="btn btn-primary" style="width: 30%;">Store</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+            <!-- /Post Archive -->
+        </div>
+        <!-- /.row -->
+
         <br>
 
         <!-- Modal -->
@@ -219,6 +258,45 @@
         });
 
         /**
+         * Generate Date Picker
+         */
+        $(function () {
+            $("#since").datepicker({
+                dateFormat: 'yy-mm-dd',
+                showMonthAfterYear: true,
+                autoSize: true,
+
+                showOtherMonths: true,
+                selectOtherMonths: true,
+
+                maxDate: 0,
+
+                changeMonth: true,
+                changeYear: true,
+                onClose: function (selectedDate) {
+                    $("#until").datepicker("option", "minDate", selectedDate);
+                }
+            });
+
+            $("#until").datepicker({
+                dateFormat: "yy-mm-dd",
+                showMonthAfterYear: true,
+                autoSize: true,
+
+                showOtherMonths: true,
+                selectOtherMonths: true,
+
+                maxDate: 0,
+
+                changeMonth: true,
+                changeYear: true,
+                onClose: function (selectedDate) {
+                    $("#since").datepicker("option", "maxDate", selectedDate);
+                }
+            });
+        });
+
+        /**
          * Init user.html
          */
         $(function () {
@@ -261,6 +339,13 @@
                     changeGroupsAdmin(groups_url, groups_table, groups_limit, groups_search.val(), loading_groups, 1, groups_paging);
                     $("#group_enroll_input").val('');
                 }
+            });
+
+            /**
+             * Store date
+             */
+            $("#store_date_select").change(function () {
+                $('#store_date').attr('action', $(this).val());
             });
         });
     </script>

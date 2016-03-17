@@ -25,6 +25,9 @@
 from __future__ import absolute_import
 from celery import shared_task
 from archive.fb.fb_tasks import *
+from archive.models import *
+from analysis.tools import network
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +48,21 @@ def store_group_feed_task(group_id, post_query, comment_query):
 
     group.is_stored = True
     group.save()
+
+
+@shared_task
+def store_group_feed_by_date_task(group_id, post_query, comment_query):
+    """
+    This method is storing group's feeds for specific date by using facebook group api.
+
+    :param group_id: param group_id: group id for getting feeds
+    :param post_query: post query for facebook graph api
+    :param comment_query: comment query for facebook graph api
+    :return:
+    """
+    group = Group.objects.filter(id=group_id)[0]
+    store_group_feed(group, post_query, True)
+    check_group_task(group, comment_query)
 
 
 @shared_task
@@ -107,3 +125,13 @@ def check_group_post_task(post_id, query):
     """
     post = Post.objects.filter(id=post_id)[0]
     check_post_comment(post, query)
+
+
+@shared_task
+def memoization_task():
+    """
+    This method for memoization per day
+
+    :return:
+    """
+    network.network()

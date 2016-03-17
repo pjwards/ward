@@ -36,13 +36,13 @@ Ward는 Facebook의 Group에 대한 정보 및 분석을 제공하는 사이트�
 * lxml (tested with version 3.5.0) ([lxml](http://lxml.de), [BSD License](./NOTICE/LICENSE.lxml))
 * django-registration (tested with version 2.0.2) ([django-registration](https://github.com/macropin/django-registration), [BSD License](./NOTICE/LICENSE.django-registration))
 * JPype1-py3 (tested with version 0.5.5.2) ([JPype1-py3](https://pypi.python.org/pypi/JPype1-py3), [Apache License 2.0](./NOTICE/LICENSE.jpype1-py3))
-* konlpy (tested with version 0.4.4) ([konlpy](http://konlpy.org/ko/v0.4.3/), [GPL v3](./NOTICE/LICENSE.konlpy))
+* konlpy (tested with version 0.4.4) ([konlpy](http://konlpy.org/ko/v0.4.3/), [GPL v3+](./NOTICE/LICENSE.konlpy))
 * django-allauth (tested with version 0.24.1) ([django-allauth](https://github.com/pennersr/django-allauth), [MIT License](./NOTICE/LICENSE.django-allauth))
 * redis (tested with version 2.10.3) ([redis](http://redis.io), [BSD License](./NOTICE/LICENSE.redis))
 * uwsgi (tested with version 2.0.11.2) ([uwsgi](https://github.com/unbit/uwsgi), [GPL v2](./NOTICE/LICENSE.uwsgi))
 * pylibmc (tested with version 1.5.0) ([pylibmc](https://pypi.python.org/pypi/pylibmc), [BSD License](./NOTICE/LICENSE.pylibmc))
 * psycopg2 (tested with version 2.6.1) ([psycopg2](http://initd.org/psycopg/), [LGPL with exceptions or ZPL](./NOTICE/LICENSE.psycopg2))
-
+* python-dateutil (tested with version 2.5.0) ([dateutil](https://dateutil.readthedocs.org/en/latest/), [Simplified BSD](./NOTICE/LICENSE.dateutil))
 
 #### Front-End
 
@@ -57,8 +57,9 @@ Ward는 Facebook의 Group에 대한 정보 및 분석을 제공하는 사이트�
 * Start Bootstrap SB Admin 2 ([Start Bootstrap](http://www.startbootstrap.com), [Apache License 2.0](./NOTICE/LICENSE.startbootstrap))
 * Bootstrap Login Form ([AZMIND](http://azmind.com/2015/04/19/bootstrap-login-forms/), [MIT License](./NOTICE/LICENSE.azmind))
 * html2canvas ([html2canvas](https://html2canvas.hertzen.com), [MIT License](./NOTICE/LICENSE.html2canvas))
-* jqPlot ([jqPlot](http://www.jqplot.com), [GPL v2, MIT License](./NOTICE/LICENSE.jqplot))
-
+* jqPlot ([jqPlot](http://www.jqplot.com), [GPL v2 or MIT License](./NOTICE/LICENSE.jqplot))
+* vis.js ([vis](http://visjs.org/#), [Apache License 2.0, MIT License](./NOTICE/LICENSE.vis))
+* jqcloud ([jqcloud](http://mistic100.github.io/jQCloud/index.html), [MIT License](./NOTICE/LICENSE.jqcloud))
 
 #### Etc
 
@@ -178,134 +179,12 @@ python manage.py createsuperuser
 
 
 ## 라이센스
-Ward는 [MIT 라이센스](./LICENSE)하에 배포 됩니다.
+Ward는 [GPL v3+](./LICENSE)하에 배포됩니다.
 
 
-## 주요화면
-
-### 그룹 목록 화면
-![group list](./www/static/images/readme/list.png)
+## 컨트리뷰션 가이드
+[Contribution Guide 문서](./CONTRIBUTING.md)를 읽어주세요.
 
 
-### analysis 화면
-![group analysis](./www/static/images/readme/analysis1.png)
-![group analysis](./www/static/images/readme/analysis2.png)
-![group analysis](./www/static/images/readme/analysis3.png)
-
-
-### user 화면
-![group user](./www/static/images/readme/user1.png)
-![group user](./www/static/images/readme/user2.png)
-
-
-### management 화면
-![group management](./www/static/images/readme/management1.png)
-![group management](./www/static/images/readme/management2.png)
-![group management](./www/static/images/readme/management3.png)
-
-
-### ward 화면
-![group ward](./www/static/images/readme/ward.png)
-
-
-## 파일 및 폴더
-
-    .
-    ├── Dockerfile                                  : Docker 파일
-    ├── LICENSE                                     : 라이센스
-    ├── NOTICE                                      : 사용한 라이브러리들에 대한 라이센스
-    ├── README.md                                   : README 파일
-    ├── bower.json                                  : Bower 파일
-    ├── conf                                        : 배포시에 사용되는 설정 파일
-    ├── requirements.txt                            : 필요한 라이브러리 목록
-    └── www                                         : 프로젝트 루트 폴더
-        ├── analysis                                : 분석 앱 폴더
-        │   ├── __init__.py
-        │   ├── admin.py
-        │   ├── analysis_core.py                    : 분석 관련 핵심 코드
-        │   ├── migrations
-        │   ├── models.py
-        │   ├── spam_app.py                         : 스팸 관련 코드
-        │   ├── tests.py
-        │   ├── texts                               : 분석에 사용되는 문서
-        │   ├── urls.py
-        │   └── views.py
-        ├── archive                                 : Facebook 그룹 기록 앱 폴더
-        │   ├── __init__.py
-        │   ├── admin.py
-        │   ├── fb                                  : Facebook과 관련된 기능
-        │   │   ├── __init__.py
-        │   │   ├── fb_lookup.py                    : Facebook의 그룹 아이디 찾기 코드
-        │   │   ├── fb_query.py                     : Facebook Graph API 쿼리 코드
-        │   │   ├── fb_request.py                   : Facebook Graph API 요청 클래스 코드
-        │   │   └── fb_tasks.py                     : Facebook 그룹 데이터 수집 코드
-        │   ├── migrations
-        │   ├── models.py
-        │   ├── rest                                : Djang Rest Framework를 위한 설정 파일
-        │   │   ├── __init__.py
-        │   │   ├── pagination.py                   : Pagination을 위한 설정 파일
-        │   │   └── serializer.py                   : Serializer를 위한 설정 파일
-        │   ├── sql                                 : Raw SQL를 생성하기 위해 테스트해본 SQL
-        │   ├── tasks.py                            : Facebook 그룹 데이터 수집 코드를 이용하는 Celery 작업들
-        │   ├── templates
-        │   │   └── archive                         : Facebook 그룹 기록 앱 Templates
-        │   │       ├── alert.html                  : 알림 Template
-        │   │       ├── group                       : 그룹과 관련된 Templates
-        │   │       │   ├── analysis.html           : 그룹 분석 Template
-        │   │       │   ├── archive_header.html     : 그룹과 관련된 Templates의 Header 
-        │   │       │   ├── list.html               : 그룹 리스트 Template
-        │   │       │   ├── list_admin.html         : 그룹 리스트 관리자용 Template
-        │   │       │   ├── management.html         : 그룹 관리 Template
-        │   │       │   ├── search.html             : 그룹 검색 Template
-        │   │       │   ├── sidebar.html            : 그룹과 관련된 Templates의 Sidebar
-        │   │       │   └── user.html               : 그룹 사용자 Template
-        │   │       ├── reports.html                : 스팸 신고 리스트 Template
-        │   │       ├── user                        : 사용자와 관련된 Templates
-        │   │       │   ├── user.html               : 사용자 Template
-        │   │       │   └── user_header.html        : 사용자와 관련된 Templates의 Header
-        │   │       └── wards.html                  : 와드 리스트 Template
-        │   ├── tests.py
-        │   ├── urls.py
-        │   ├── utils                               : 도구 모음
-        │   │   ├── __init__.py
-        │   │   ├── data_utils.py                   : 데이터 관련된 유틸들
-        │   │   ├── date_utils.py                   : 날짜와 관련된 유틸들
-        │   │   └── utils.py                        : 기타 유틸들
-        │   └── views.py                            : views (Django Rest Framework의 View들도 포함
-        ├── deploy
-        ├── fabfile.py
-        ├── fb_archive                              : 프로젝트 기본 폴더
-        │   ├── __init__.py
-        │   ├── celery.py                           : Celery 설정
-        │   ├── local_settings.py                   : 프로젝트 개인 설정
-        │   ├── settings.py                         : 프로젝트 설정
-        │   ├── urls.py 
-        │   └── wsgi.py                             : wgsi 설정
-        ├── manage.py
-        ├── run_celery.sh                           : Celery 실행 쉘 파일
-        ├── static
-        │   ├── custom                              : 프로젝트 정적 파일 폴더
-        │   │   ├── css                             : CSS 파일들
-        │   │   │   ├── base.css                    : 공통 CSS 파일
-        │   │   │   └── timeline.css                : Start Bootstrap의 Timeline CSS 파일
-        │   │   └── js                              : Javascript 폴더
-        │   │       ├── ajax.js                     : Ajax 관련 자바스크립트 파일
-        │   │       ├── archive                     : Facebook 그룹 기록 앱에 관련된 자바스크립트 파일
-        │   │       │   └── js
-        │   │       │       ├── analysis.js         : 분석 자바스크립트 파일
-        │   │       │       ├── archive.js          : Facebook 그룹 기록 공통 파일
-        │   │       │       ├── group.js            : 그룹 자바스크립트 파일
-        │   │       │       ├── management.js       : 관리 자바스크립트 파일
-        │   │       │       ├── report.js           : 스팸 신고 자바스크립트 파일
-        │   │       │       ├── search.js           : 검색 자바스크립트 파일
-        │   │       │       ├── user.js             : 사용자 자바스크립트 파일
-        │   │       │       └── ward.js             : 와드 자바스크립트 파일
-        │   │       └── base.js                     : 기본 자바스크립트 파일
-        │   ├── images                              : 이미지 폴더
-        │   └── libraries                           : Bower로 설치하지 못하는 라이브러리들
-        └── templates                               : 공통 Templates
-            ├── about.html                          : 소개 Template
-            ├── base.html                           : 공통 Template
-            ├── errors                              : 오류 관련 Templates
-            ├── registration                        : 회원가입 관련 Templates
-            └── socialaccount                       : Oauth 관련 Templates
+## Wiki
+더 많은 정보의 제공을 위해 [Wiki](https://github.com/egaoneko/ward/wiki)를 사용하고 있습니다.

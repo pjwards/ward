@@ -27,7 +27,7 @@ from .models import *
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'picture')
+    list_display = ('id', 'name', 'picture', 'updated_time')
     list_filter = ['name']
     search_fields = ['name']
 
