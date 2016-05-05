@@ -15,8 +15,8 @@ Ward는 Facebook의 Group에 대한 정보 및 분석을 제공하는 사이트�
 
 ## 소개
 
-* [Youtube Link](https://youtu.be/ViPfu0FLGmw)
-* [SlideShare Link](http://www.slideshare.net/DonghyunSeo3/ward-56702911)
+* [Youtube Link](https://www.youtube.com/watch?v=FiSkuwiYakw)
+* [SlideShare Link](http://www.slideshare.net/DonghyunSeo3/ward-59752661)
 
 
 ## 필요한 도구들
